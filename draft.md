@@ -9,5 +9,5 @@ Caching, by it's nature, already becomes a sub-system of RDBMS in which complica
 
 Being the best nature of RDBMS, [ACID](https://en.wikipedia.org/wiki/ACID) was groundbreaking concepts and state-of-the-art technology advocated in 1980s, ere computer systems were file based using index and sequential access. RDBMS quickly became popular and became more and more complicated and monolithic. At that time, no idea of cooperation between databases was suggested, although distributed database are discussed later on. Therefore, clustering in RDBMS is not always easy even in today. However, an easier approach is *master/slave replication* and can be used to implement *Read-Write Splitting* to increase system throughput. 
 
-So, we are at a crossroads... Definitely we can't do without RDBMS for we have used it so long and so many important applications and data there... The expedient way is equipped a more powerful cache system and let RDBMS work along side with it, I think. 
+So, we are at a crossroads... Definitely we can't do without RDBMS for we have used it so long and so many important applications and data there... The expedient way is equipped a more powerful cache system and let it work along side with RDBMS, I think. 
 
