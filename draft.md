@@ -1,5 +1,5 @@
 
-Relational database has unparalleled power in querying and aggregating data. But there is a catch... performance. That's why modern RDBMS has equppped with sophisticated caching mechanism.  
+Relational database has unparalleled power in querying and aggregating data. But there is a catch... performance. That's why modern RDBMS has equipped with sophisticated caching mechanism.  
 
 - a cache to hold frequently accessed data blocks from disk, allowing faster access to frequently accessed data. The cache is managed using a least recently used (LRU) algorithm, data blocks to keep in the cache based on their frequency of access.
 - a cache that stores parsed SQL statements, execution plans to save need for repetitive parsing and optimization, improving performance. 
