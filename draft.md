@@ -11,3 +11,5 @@ Being the best nature of RDBMS, [ACID](https://en.wikipedia.org/wiki/ACID) was g
 
 So, we are at a crossroads... Definitely we can't do without RDBMS for we have used it so long and so many important applications and data there... The expedient way is equipped a more powerful cache system and let it work along side with RDBMS, I think. 
 
+Relational database is a good thing but is not always the best for everythng. That's why the idea of [modernize database](https://redis.io/blog/3-reasons-your-mysql-db-needs-redis/) emerges. It simply means to incorporate Redis, or something like that, to boost performance in order to meet new challenging requirements of modern applications.
+
