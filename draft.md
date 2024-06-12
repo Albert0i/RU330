@@ -17,7 +17,7 @@ So, we are at a crossroads... Definitely we can't do without RDBMS for we have u
 
 Relational database is a good thing but is not always the best for everythng. That's why the idea of [modernize database](https://redis.io/blog/3-reasons-your-mysql-db-needs-redis/) emerges. It simply means to incorporate Redis, or something like that, to boost performance in order to meet new challenging requirements of modern applications.
 
-If the goal of RDBMS is to persist data first and then use them to serve us, 
+If the goal of RDBMS is to persist data and then use them to serve us, 
 If the bottleneck is disk I/O, even though intricated caching mechanism is employed, 
 even though SSD is employed in the stead of physical disk... 
 What if... what if we hold the database in RAM, which is by far the fastest, and persist data to disk on schedule or base on certain events? 
