@@ -13,3 +13,23 @@ So, we are at a crossroads... Definitely we can't do without RDBMS for we have u
 
 Relational database is a good thing but is not always the best for everythng. That's why the idea of [modernize database](https://redis.io/blog/3-reasons-your-mysql-db-needs-redis/) emerges. It simply means to incorporate Redis, or something like that, to boost performance in order to meet new challenging requirements of modern applications.
 
+If the goal of RDBMS is to persist data first and then use them to serve us, 
+If the bottleneck is disk I/O, even though intricated caching mechanism is employed, 
+even though SSD is employed in the stead of physical disk... 
+What if... what if we hold the database in RAM, which is by far the fastest, and persist data to disk on schedule or base on certain events? 
+Does it simplify our server design? 
+Does it mitigate the plight of performance? 
+
+By default, every time a "save" is made, a database shapshot is written to disk. And in between of "save", a kind of [Redo Log](https://dev.mysql.com/doc/refman/8.4/en/innodb-redo-log.html) is created and written to disk every second. That means within a second, if server crashes, you will lose data of the second... Which is acceptable in most situations and low-latency is maintained. 
+
+RAM is an expensive asset. Most of us can't afford to purchase humungous amount of RAM comparing to disk. That's why the database in RAM won't get excessively large and so does time to "save" won't get excessively long. 
+Does it solve our persistence requirement? 
+Does it solve our performance demand? 
+
+It's compromise between performance and flexibility. We can't manage data with SQL, se lose fhe freedom of joining table and power of aggregation and as yet. All we gain is SPEED. 
+
+> Long story short, REDIS allows you to store key-value pairs on your RAM. Since accessing RAM is 150,000 times faster than accessing a disk, and 500 times faster than accessing SSD, it means speed.
+
+[What is Redis?](https://adevait.com/redis/what-is-redis)
+
+2024/06/14
