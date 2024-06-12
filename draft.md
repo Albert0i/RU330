@@ -26,7 +26,7 @@ Does it mitigate the plight of performance?
 
 By default, every time a "save" is made, a database shapshot is written to disk. And in between of "save", a kind of [Redo Log](https://dev.mysql.com/doc/refman/8.4/en/innodb-redo-log.html) is created and written to disk every second. That means within a second, if server crashes, you will lose data of the second... Which is acceptable in most situations and low-latency is maintained. 
 
-RAM is an expensive asset. Most of us can't afford to purchase humungous amount of RAM comparing to disk. That's why the database in RAM won't get excessively large and so does time to "save" won't get excessively long. 
+RAM is an expensive asset. Most of us can't afford to purchase humungous amount of RAM comparing to disk. That's why the database in RAM won't get excessively large and so does the time to "save" won't get excessively long. 
 Does it solve our persistence requirement? 
 Does it solve our performance demand? 
 
