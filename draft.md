@@ -11,6 +11,8 @@ Caching, by it's nature, already becomes a sub-system of RDBMS in which complica
 
 Being the best nature of RDBMS, [ACID](https://en.wikipedia.org/wiki/ACID) was groundbreaking concepts and state-of-the-art technology advocated in 1980s, ere computer systems were file based using index and sequential access. RDBMS quickly became popular and became more and more complicated and monolithic. At that time, no idea of cooperation between databases was suggested, although distributed database are discussed later on. Therefore, clustering in RDBMS is not always easy even in today. However, an easier approach is *master/slave replication* and can be used to implement *Read-Write Splitting* to increase system throughput. 
 
+[MySQL 8.2 – transparent read/write splitting](https://dev.mysql.com/blog-archive/mysql-8-2-transparent-read-write-splitting/)
+
 So, we are at a crossroads... Definitely we can't do without RDBMS for we have used it so long and so many important applications and data there... The expedient way is equipped a more powerful cache system and let it work along side with RDBMS, I think. 
 
 Relational database is a good thing but is not always the best for everythng. That's why the idea of [modernize database](https://redis.io/blog/3-reasons-your-mysql-db-needs-redis/) emerges. It simply means to incorporate Redis, or something like that, to boost performance in order to meet new challenging requirements of modern applications.
