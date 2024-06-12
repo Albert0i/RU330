@@ -1,4 +1,6 @@
 
+### Always see from the other end of our solutions when tackling problems 
+
 Relational database has unparalleled power in querying and aggregating data. But there is a catch... performance. That's why modern RDBMS has equipped with sophisticated caching mechanism.  
 
 - a cache to hold frequently accessed data blocks from disk, allowing faster access to frequently accessed data. The cache is managed using a least recently used (LRU) algorithm, data blocks to keep in the cache based on their frequency of access.
