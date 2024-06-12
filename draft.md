@@ -26,7 +26,7 @@ RAM is an expensive asset. Most of us can't afford to purchase humungous amount 
 Does it solve our persistence requirement? 
 Does it solve our performance demand? 
 
-It's compromise between performance and flexibility. We can't manage data with SQL, se lose fhe freedom of joining table and power of aggregation and as yet. All we gain is SPEED. 
+It's compromise between performance and flexibility. We can't manage data with SQL, se lose fhe freedom of joining table and power of aggregation and as yet. What we gain is SPEED. 
 
 > Long story short, REDIS allows you to store key-value pairs on your RAM. Since accessing RAM is 150,000 times faster than accessing a disk, and 500 times faster than accessing SSD, it means speed.
 
