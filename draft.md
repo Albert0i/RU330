@@ -34,7 +34,7 @@ Pursuing every CRUD operations in RDBMS, some invisible *domestic* workload is p
 
 It's compromise between performance and flexibility. We can't manage data with SQL, we lose fhe freedom of joining table and power of aggregation and as yet. What we gain is SPEED. 
 
-[Case study: A self declaration system](https://github.com/Albert0i/RU301/blob/main/cluster-case-1.md)
+[Case study: A self-declaration system](https://github.com/Albert0i/RU301/blob/main/cluster-case-1.md)
 
 > Long story short, REDIS allows you to store key-value pairs on your RAM. Since accessing RAM is 150,000 times faster than accessing a disk, and 500 times faster than accessing SSD, it means speed.
 
