@@ -48,4 +48,8 @@ It's compromise between performance and flexibility. We can't manage data with S
 
 [Chapter 20 Group Replication](https://dev.mysql.com/doc/refman/8.4/en/group-replication.html)
 
+[Mysql 8.x Group Replication (Master-Slave) with Docker Compose](https://medium.com/@wendigooor/mysql-8-x-group-replication-master-slave-with-docker-compose-9cb3fb0a75d0)
+
+[How to create Master-Slave MySQL 8 with docker-compose.yml](https://pierreabreu.medium.com/how-to-create-master-slave-mysql-8-with-docker-compose-yml-c137f45e28c7)
+
 2024/06/14
