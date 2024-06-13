@@ -40,4 +40,6 @@ It's compromise between performance and flexibility. We can't manage data with S
 
 [What is Redis?](https://adevait.com/redis/what-is-redis)
 
+[MySQL 8.2 – transparent read/write splitting](https://dev.mysql.com/blog-archive/mysql-8-2-transparent-read-write-splitting/)
+
 2024/06/14
