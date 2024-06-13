@@ -42,4 +42,10 @@ It's compromise between performance and flexibility. We can't manage data with S
 
 [MySQL 8.2 – transparent read/write splitting](https://dev.mysql.com/blog-archive/mysql-8-2-transparent-read-write-splitting/)
 
+> MySQL 8 itself does not have built-in automatic failover capabilities for master/slave replication. 
+
+> MySQL Group Replication is a native high-availability solution provided by MySQL that offers automatic failover. It requires configuring a group of servers in a single replication group, where each server acts as a master and slave simultaneously. If the current master fails, one of the other servers will automatically take over as the new master. This feature is available starting from MySQL 5.7 and is also supported in MySQL 8.
+
+[Chapter 20 Group Replication](https://dev.mysql.com/doc/refman/8.4/en/group-replication.html)
+
 2024/06/14
