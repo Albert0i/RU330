@@ -30,7 +30,7 @@ RAM is an expensive asset. Most of us can't afford to purchase humungous amount 
 Does it solve our persistence requirement? 
 Does it solve our performance demand? 
 
-Pursuing every CRUD operations in RDBMS, some invisible *domestic* workload is performed. Typically, if you use VARCHAR or TEXT type in table, a re-allocation of space may involve moving of data block, modifying pointer address, rebuilding index etc, all happens behind the scene. Database holding in memory also subjects to similar issues but time to take are significantly shorter. 
+Pursuing every CRUD operations in RDBMS, some invisible *domestic* workload is performed. Typically, if you use VARCHAR or TEXT type in table, a re-allocation of space may involve moving of data block, modifying pointer address, rebuilding indexes etc, all happens behind the scene on disk. Database holding in memory also subjects to similar issues but time to take are significantly shorter. 
 
 It's compromise between performance and flexibility. We can't manage data with SQL, we lose fhe freedom of joining table and power of aggregation and as yet. What we gain is SPEED. 
 
