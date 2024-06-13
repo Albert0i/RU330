@@ -1,5 +1,5 @@
 
-### Always see from the other end of our solutions when tackling problems 
+### Always view from the other end of our solutions 
 
 Relational database has unparalleled power in querying and aggregating data. But there is a catch... performance. That's why modern RDBMS has equipped with sophisticated caching mechanism.  
 
@@ -33,6 +33,8 @@ Does it solve our performance demand?
 Pursuing every CRUD operations in RDBMS, some invisible *domestic* workload is performed. Typically, if you use VARCHAR or TEXT type in table, a re-allocation of space may involve moving of data block, modifying pointer address, rebuilding index etc, all happens behind the scene. Database holding in memory also subjects to similar issues but time to take are significantly shorter. 
 
 It's compromise between performance and flexibility. We can't manage data with SQL, we lose fhe freedom of joining table and power of aggregation and as yet. What we gain is SPEED. 
+
+[Case study: A self declaration system](https://github.com/Albert0i/RU301/blob/main/cluster-case-1.md)
 
 > Long story short, REDIS allows you to store key-value pairs on your RAM. Since accessing RAM is 150,000 times faster than accessing a disk, and 500 times faster than accessing SSD, it means speed.
 
