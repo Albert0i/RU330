@@ -1,6 +1,8 @@
 ### On Security 
 
+
 ### Prologue 
+
 
 ### I. Redis Horror Story #1
 All seasoned security professionals have their fair share of security horror stories. Some of those stories involve Redis. To show you just what's possible in the real world, I'm going to share a different Redis security horror story at the beginning of each week. This week's story is [Redis Wannamine](https://www.imperva.com/blog/archive/new-research-shows-75-of-open-redis-servers-infected/).
@@ -125,6 +127,90 @@ The bottom line is that risk assessments and decisions are business-driven. When
 
 
 ### IV. Defense in Depth
+A common quote among security professionals is, "Attackers only have to be right once, but we have to be right every time." You may have heard this, and this hyper-paranoid position may make you overly fearful.
+
+This assertion, it turns out, is an oversimplification, and it's absolutely incorrect in any reasonably modern security architecture.
+
+Defense-in-Depth Architecture is the concept of information security that takes a layered approach to data protection. Database security is one of the last lines of defense in this architecture.
+
+Data security is typically deployed in layers, like an onion. Each layer represents a barrier for an attacker and an opportunity for you to prevent that attacker from getting to your data.
+
+The first layer is the firewall. You want to ensure that no one can directly access your database or the servers your database is hosted on from the outside world.
+
+The second layer is frequently your application-level defenses. A consistent patch management process for your application dependencies and secure development practices can go a long way in ensuring that apps can’t be used to get to your database. In our RedisWannamine example, a vulnerability in ApacheStruts was used to get direct access to Redis. Your application and operating system should be tested and regularly updated to reduce the likelihood of known exploits being used against your systems.
+
+Hardening your database server is the next layer of defense.
+
+There are a few ways of going about hardening a database.
+
+First, you want to ensure that you're running the most recent version of your database to prevent attackers from exploiting known vulnerabilities. For instance, with Redis, there are several exploits affecting old versions of the software.
+
+Next, you'll want to employ database authentication and authorization. For a long time, Redis has supported a basic authentication model in which a single password grants complete access to the database. But this represents a bare minimum.
+
+In addition, you'll want fine-grained authorization controls. Later in this course, we'll discuss access control lists, which became available in Redis 6, and role-based access control, which is a feature of Redis Enterprise 6.
+
+Finally, you should consider the various types of database encryption, such as client side encryption, disk encryption and transport layer security. These can help prevent attackers from obtaining unauthorized access to your data.
+
+Your final layers of defense are detective controls and Data Loss Prevention controls, better known as DLP. If an attacker is moving throughout your network, you may be able to catch them.
+
+Standing up infrastructure to detect attackers in your environment may alert you to this to help stop the attacker in their tracks.
+
+In the event that an attacker gets access to your data, DLP controls may prevent them from removing that data.
+
+What's important to remember is that the database itself does not have the sole responsibility of ensuring the safety of your data. A defense-in-depth security architecture ensures that an attacker will have to cross multiple layers to get to your database.
+
+If one of these layers fails, there is another that can help protect you.
+
+
+### V. Installing Redis Securely
+In this unit, we'll look at some Redis installation best practices. I want to start with my top three recommendations for securely installing Redis on a server.
+
+First, always run Redis as a dedicated non-privileged user. In other words, don't run Redis as a sudoer or as root. Second, always restrict permissions on your Redis installation path. Third, always restrict Redis log and configuration files. In other words, ensure the Redis log and config are only accessible by a dedicated non-privileged Redis user plus a small group of trusted admin. This is all basic operating system-level configuration. This OS-level config limits the risk of unauthorized access to Redis. Let's review an example configuration in action. And by the way, if you want to run this on your own, we've provided a Dockerfile in the course [GitHub repo](https://github.com/redislabs-training/ru330). Here I am in the terminal. I'm going to show you how I'd set up a secure Redis installation for the first time and what I'm thinking along the way.
+
+We're using Ubuntu for this example. First, we'll update the operating system-level dependencies and install the dependencies required to run Redis securely. 
+
+![alt ](img)
+
+We'll also install tcl-tls and libssl-dev. These are the OpenSSL development libraries that TLS requires. We don't want Redis to run as a root user. 
+
+![alt ](img)
+
+Instead, we're going to install Redis as a dedicated non-privileged user and group. Here, I'm creating a user and group called Redis for this purpose. In some distributions, this user will be pre-created by previous package installations. 
+
+![alt ](img)
+
+Now that we have a user, let's create a working directory for Redis. This is where we will install Redis later.
+
+![alt ](img)
+
+Next, I'll chown to ensure that the Redis user owns its directory. 
+
+![alt ](img)
+
+Finally, I want to restrict this directory's permissions so that only Redis can access it. Now I will create a file and directory for the Redis logs.
+
+![alt ](img)
+
+First, I'll create the directory `/var/log/redis`. Next, I'll pre-create the Redis log file so that it has the appropriate permissions. 
+
+![alt ](img)
+
+We modify these permissions to ensure that only the Redis user, the root user, or a user added to the Redis group can access these log files.
+
+![alt ](img)
+
+Next, we'll install Redis. You'll want the latest version of Redis from the redis.io downloads website.
+You should always check the Redis website to ensure you're running the latest version of Redis.
+
+![alt ](img)
+
+First, let's download the package. Before we do anything else, we need to verify the integrity of the download. This will give us a pretty good assurance that the code we've downloaded is official. The Redis GitHub page contains an integrity check for each downloadable tarball file. To verify the integrity of the file, we'll want to check its SHA-256 hash using the SHA-256 hash sum utility. We'll compare this output with the output of the Redis
+repository.
+
+We see here that both files start with 4 and 2 and end with 596. On further comparison, we know that they are a match, so it's safe to install Redis using this file. Now let's build Redis from source. First, we'll untar the archive we just downloaded. We need to set the `BUILD_TLS` environment variable when we compile so that `TLS` will be available for us. Now, this might take some time. So through the magic of video editing, we'll fast forward through it. Now that Redis is installed, we can set the appropriate permissions for the Redis conf configuration file. Let's create a directory to store the config file. We'll use `/etc/redis`. Now we'll copy over the Redis conf file. And now, we'll change the files, user, and group to Redis. We also need to set the proper user permissions. We don't want just anyone to be able to write to our Redis conf file. With this basic OS configuration out of the way, we can start Redis. Usually, you'll daemonize Redis in whatever OS-specific way your organization prefers. For our purposes here, it's enough to start Redis as a simple background process using the ampersand. Now we should be able to access Redis via the redis-cli. I'll run the ping command, and I get back pong.
+So I've successfully connected.
+
+There are a ton of ways to install Redis. The way we showed you here might not be right for everyone. What's important here is that we've restricted the files on the operating system and run Redis as a non-privileged user. This approach will allow us to limit the damage that could take place if our server or Redis instance were ever compromised.
 
 
 ### Biblipgraphy 
