@@ -210,7 +210,16 @@ First, I'll create the directory `/var/log/redis`. Next, I'll pre-create the Red
 
 ![alt install 1](img/install_1.png)
 
-Next, we'll install Redis. You'll want the latest version of Redis from the redis.io downloads website.
+Next, we'll install Redis. You'll want the latest version of Redis from the [redis.io downloads](https://redis.io/downloads/) website.
+
+---
+
+Scroll down to the **Redis Community Edition & Stack** section and you will see **Redis Stack downloads** for various platforms. 
+
+![alt redis stack download](img/redis_stack_download.JPG)
+
+---
+
 You should always check the Redis website to ensure you're running the latest version of Redis.
 
 ![alt ](img)
