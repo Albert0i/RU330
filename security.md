@@ -74,7 +74,7 @@ So you consider the context of a security risk by measuring the impact of an ide
 We can all probably agree that the impact of a hospital data breach is much more serious that a meme generating website breach.
 
 #### Assess Risk
-Once you establish context, you perform a risk assessment. To cite the Wikipedia definition, a risk assessment is "an assessment of the possible mishaps, their likelihood and consequences and your tolerances for such events."
+Once you establish context, you perform a risk assessment. To cite the Wikipedia definition, a [risk assessment](https://en.wikipedia.org/wiki/Risk_assessment) is "an assessment of the possible mishaps, their likelihood and consequences and your tolerances for such events."
 
 First you must identify the mishaps.
 
