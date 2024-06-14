@@ -94,7 +94,7 @@ In our meme generator example, a dropped database might prevent users from visit
 #### Evaluate the Risk
 Once we've analyzed the potential impact of each risk, the next step is to evaluate the cost of the impact if a risk materializes.
 
-Suppose we're storing 5000 records in our healthcare application. According to a research study by IBM ("The 2019 Cost of a Data Breach"), the average cost of a breached healthcare record is $429. This means that a compromise of all records could cost us over 2 million dollars.
+Suppose we're storing 5000 records in our healthcare application. According to a research study by IBM [("The 2019 Cost of a Data Breach")](https://securityintelligence.com/posts/whats-new-in-the-2019-cost-of-a-data-breach-report/), the average cost of a breached healthcare record is $429. This means that a compromise of all records could cost us over 2 million dollars.
 
 Now, we believe that the probability of someone exploiting our application is 25%. We can use the technique of mathematical expectation to estimate that the cost of failing to mitigate this risk is about half a million dollars. This does not include potential damage to our reputation, which is harder to define.
 
