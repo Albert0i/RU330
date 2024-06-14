@@ -109,10 +109,10 @@ Once we’ve evaluated each risk, it's time to make a decision about what we wan
 
 Risks can either be accepted, mitigated, transfered or avoided.
 
-1. *Accepting* means the organization will do nothing.
-2. *Mitigating* means that the organization will take action to reduce the likelihood of the risk.
-3. *Transferring* means moving the cost of the risk to a third party, such as an insurance provider.
-4. *Avoiding* means disbanding the project or resolving the issue entirely.
+1. **Accepting** means the organization will do nothing.
+2. **Mitigating** means that the organization will take action to reduce the likelihood of the risk.
+3. **Transferring** means moving the cost of the risk to a third party, such as an insurance provider.
+4. **Avoiding** means disbanding the project or resolving the issue entirely.
 
 The hospital provider will likely choose to mitigate or avoid the risk due to the high cost. The cost of the risk is probably greater than the cost of writing the code to fix the application.
 
