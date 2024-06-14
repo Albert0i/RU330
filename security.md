@@ -67,6 +67,8 @@ The first and most critical part of the risk assessment process is establishing 
 
 Suppose you're a hospital processing health records and making them available online. Your security decisions will be completely different from those of a website that generates memes.
 
+> A meme is an idea, behavior, or style that spreads rapidly within a culture. In the context of the internet, a meme refers to a humorous or entertaining piece of content, typically in the form of an image, video, or text, that spreads rapidly across various online platforms.
+
 So you consider the context of a security risk by measuring the impact of an identified security issue and the likelihood of a risk being exploited.
 
 We can all probably agree that the impact of a hospital data breach is much more serious that a meme generating website breach.
