@@ -263,103 +263,18 @@ Usually, you'll daemonize Redis in whatever OS-specific way your organization pr
 There are a ton of ways to install Redis. The way we showed you here might not be right for everyone. What's important here is that we've restricted the files on the operating system and run Redis as a non-privileged user. This approach will allow us to limit the damage that could take place if our server or Redis instance were ever compromised.
 
 
-### VI. Basic Redis Security
-Video transcript
-Start of transcript. Skip to the end.
-Now that we've installed Redis securely,
-it's time to learn about the most basic Redis security
-settings.
-In this unit, we'll be discussing firewalling Redis,
-Redis' protected mode, and the default bind
-interface in the Redis configuration file.
-In the next unit, we'll discuss authentication.
-These are the most basic Redis security controls
-typically used with Redis.
-I strongly recommend that you run
-Redis behind a firewall and use authentication
-at all times in production.
-If you don't, you'll greatly increase
-the risk of a data compromise.
-Let's start with firewalling.
-Firewalling is the process of subdividing your network
-for improved security.
-Remember Redis Wannamine?
-This isn't the only attack targeting Redis.
-Here is an article about another crypto mining campaign
-targeting Redis instances that happened
-to be open on the public internet.
-The number one rule for Redis, or any database
-for that matter, is to never allow
-a production deployment to be open on the public internet.
-This means setting up a firewall and ensuring
-that your database is behind it with no exposed Redis ports.
-You should always deploy your database in a private network
-and connect to it using private IP addresses.
-If you're hosting Redis on your favorite public cloud,
-you typically deploy Redis in a virtual private network,
-which is better known as a VPC or VNet.
-If you're hosting Redis on-premises in a data center,
-you need to make sure that Redis is not
-hosted inside your demilitarized zone, that is your DMZ,
-and that you use a firewall to block access to Redis.
-This advice might seem obvious, but in reality, there
-are a lot of folks that still expose their database
-to the public internet.
-We can see some of these at Shodan.io,
-which is basically a search engine for public internet
-servers.
-Companies often use Shodan to monitor their networks,
-but the bad guys can use this tool just as easily.
-Let's type Redis into the search bar.
-Here, you can see a list of Redis servers
-open to the entire internet.
-It would be trivial to connect to any of these servers.
-And yes, we've blurred the IP addresses for their protection.
-But you can see a full listing of information
-for each Redis server, everything from the server
-version to the compiler version.
-We can also see that some servers
-have no authentication enabled.
-If I wanted to hack this server, I've just hit the jackpot.
-If you scroll down in Shodan a bit,
-you'll see that other Redis servers
-don't share this information.
-That's because they're running in protected mode.
-So what is protected mode?
-Protected mode helps us prevent new Redis deployments
-from being exposed to the world or even
-to your internal network.
-When Redis starts with the default configuration,
-it's automatically started in protected mode.
-In this mode, Redis will only reply
-to clients located on the same server
-that Redis is running on.
-If you connect from a remote host and try to run a command,
-you'll get an error message as you see here.
-So you have to disable protected mode to access Redis
-outside of the local host.
-So how do you disable protected mode?
-Typically, through the Redis conf file.
-You simply have to set protected mode to no here.
-The Redis conf file also comes with a default directive
-to bind exclusively to the local network interface.
-This means that Redis will only listen to connections coming
-to this specific IP address, which
-is, by default, the local loopback interface.
-To have Redis listen on all network interfaces,
-just comment out the bind directive.
-Or if you want to bind to a specific interface,
-provide that interface's IP address to the bind directive.
-To review, don't ever expose your Redis server
-to the public internet.
-Ensure that you're firewalling and binding
-to the correct network interface,
-and be sure to disable protected mode
-only when you've secured your server with the network
-and, ideally, after you've enabled authentication.
-In the next unit, we'll get a basic introduction
-to authentication in Redis.
-End of transcript. Skip to the start.
+### VI. [Basic Redis Security](https://youtu.be/BoZOZhDnxtI)
+Now that we've installed Redis securely, it's time to learn about the most basic Redis security settings. In this unit, we'll be discussing firewalling Redis, Redis' protected mode, and the default bind interface in the Redis configuration file. In the next unit, we'll discuss authentication. 
+
+These are the most basic Redis security controls typically used with Redis. I strongly recommend that you run Redis behind a firewall and use authentication at all times in production. If you don't, you'll greatly increase the risk of a data compromise. Let's start with firewalling. Firewalling is the process of subdividing your network for improved security. Remember Redis Wannamine? This isn't the only attack targeting Redis. Here is an article about another crypto mining campaign targeting Redis instances that happened to be open on the public internet. 
+
+The number one rule for Redis, or any database for that matter, is to never allow a production deployment to be open on the public internet. This means setting up a firewall and ensuring that your database is behind it with no exposed Redis ports. You should always deploy your database in a private network and connect to it using private IP addresses. If you're hosting Redis on your favorite public cloud, you typically deploy Redis in a virtual private network, which is better known as a VPC or VNet. If you're hosting Redis on-premises in a data center, you need to make sure that Redis is not hosted inside your demilitarized zone, that is your DMZ, and that you use a firewall to block access to Redis.
+
+This advice might seem obvious, but in reality, there are a lot of folks that still expose their database to the public internet. We can see some of these at [Shodan.io](https://www.shodan.io/), which is basically a search engine for public internet servers. Companies often use Shodan to monitor their networks, but the bad guys can use this tool just as easily. Let's type Redis into the search bar. Here, you can see a list of Redis servers open to the entire internet.
+
+It would be trivial to connect to any of these servers. And yes, we've blurred the IP addresses for their protection. But you can see a full listing of information for each Redis server, everything from the server version to the compiler version. We can also see that some servers have no authentication enabled. If I wanted to hack this server, I've just hit the jackpot. If you scroll down in Shodan a bit, you'll see that other Redis servers don't share this information. That's because they're running in protected mode. So what is protected mode? Protected mode helps us prevent new Redis deployments from being exposed to the world or even to your internal network. When Redis starts with the default configuration, it's automatically started in protected mode. In this mode, Redis will only reply to clients located on the same server that Redis is running on. If you connect from a remote host and try to run a command, you'll get an error message as you see here. So you have to disable protected mode to access Redis outside of the local host.
+
+So how do you disable protected mode? Typically, through the Redis conf file. You simply have to set protected mode to no here. The Redis conf file also comes with a default directive to bind exclusively to the local network interface. This means that Redis will only listen to connections coming to this specific IP address, which is, by default, the local loopback interface. To have Redis listen on all network interfaces, just comment out the bind directive. Or if you want to bind to a specific interface, provide that interface's IP address to the bind directive. To review, don't ever expose your Redis server to the public internet. Ensure that you're firewalling and binding to the correct network interface, and be sure to disable protected mode only when you've secured your server with the network and, ideally, after you've enabled authentication. In the next unit, we'll get a basic introduction to authentication in Redis.
 
 
 ### Biblipgraphy 
