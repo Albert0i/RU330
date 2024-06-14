@@ -221,11 +221,44 @@ Scroll down to the **Redis Community Edition & Stack** section and you will see 
 ---
 You should always check the Redis website to ensure you're running the latest version of Redis.
 
+```
+cd /tmp
+
+wget http://download.redis.io/release/redis-6.0.5.tar.gz 
+
+sha256sum redis-6.0.5.tar.gz
+
+tar -xzvf redis-6.0.5.tar.gz
+
+cd ./redis-6.0.5
+
+sudo make BUILD_TLS=yes install 
+
+sudo mkdir /etc/redis
+
+sudo cp redis.conf /etc/redis
+
+sudo chown -R redis:redis /etc/redis 
+
+sudo chmod 640 /etc/redis/redis.conf 
+```
+
 First, let's download the package. Before we do anything else, we need to verify the integrity of the download. This will give us a pretty good assurance that the code we've downloaded is official. The Redis GitHub page contains an integrity check for each downloadable tarball file. To verify the integrity of the file, we'll want to check its SHA-256 hash using the SHA-256 hash sum utility. We'll compare this output with the output of the Redis
 repository.
 
-We see here that both files start with 4 and 2 and end with 596. On further comparison, we know that they are a match, so it's safe to install Redis using this file. Now let's build Redis from source. First, we'll untar the archive we just downloaded. We need to set the `BUILD_TLS` environment variable when we compile so that `TLS` will be available for us. Now, this might take some time. So through the magic of video editing, we'll fast forward through it. Now that Redis is installed, we can set the appropriate permissions for the Redis conf configuration file. Let's create a directory to store the config file. We'll use `/etc/redis`. Now we'll copy over the Redis conf file. And now, we'll change the files, user, and group to Redis. We also need to set the proper user permissions. We don't want just anyone to be able to write to our Redis conf file. With this basic OS configuration out of the way, we can start Redis. Usually, you'll daemonize Redis in whatever OS-specific way your organization prefers. For our purposes here, it's enough to start Redis as a simple background process using the ampersand. Now we should be able to access Redis via the redis-cli. I'll run the ping command, and I get back pong.
-So I've successfully connected.
+We see here that both files start with 4 and 2 and end with 596. On further comparison, we know that they are a match, so it's safe to install Redis using this file. Now let's build Redis from source. First, we'll untar the archive we just downloaded. We need to set the `BUILD_TLS` environment variable when we compile so that `TLS` will be available for us. Now, this might take some time. So through the magic of video editing, we'll fast forward through it. Now that Redis is installed, we can set the appropriate permissions for the Redis conf configuration file. Let's create a directory to store the config file. We'll use `/etc/redis`. Now we'll copy over the Redis conf file. And now, we'll change the files, user, and group to Redis. We also need to set the proper user permissions. We don't want just anyone to be able to write to our Redis conf file. With this basic OS configuration out of the way, we can start Redis. 
+
+```
+sudo runuser -u redis /usr/local/bin/redis-server /etc/redis/redis.conf & 
+
+sudo apt install redis-tools -y
+```
+
+![alt install 2](img/install_2.png)
+
+Usually, you'll daemonize Redis in whatever OS-specific way your organization prefers. For our purposes here, it's enough to start Redis as a simple background process using the ampersand. Now we should be able to access Redis via the `redis-cli`. I'll run the ping command, and I get back pong. So I've successfully connected.
+
+![alt install 3](img/install_3.png)
 
 There are a ton of ways to install Redis. The way we showed you here might not be right for everyone. What's important here is that we've restricted the files on the operating system and run Redis as a non-privileged user. This approach will allow us to limit the damage that could take place if our server or Redis instance were ever compromised.
 
