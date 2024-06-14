@@ -219,10 +219,7 @@ Scroll down to the **Redis Community Edition & Stack** section and you will see 
 ![alt redis stack download](img/redis_stack_download.JPG)
 
 ---
-
 You should always check the Redis website to ensure you're running the latest version of Redis.
-
-![alt ](img)
 
 First, let's download the package. Before we do anything else, we need to verify the integrity of the download. This will give us a pretty good assurance that the code we've downloaded is official. The Redis GitHub page contains an integrity check for each downloadable tarball file. To verify the integrity of the file, we'll want to check its SHA-256 hash using the SHA-256 hash sum utility. We'll compare this output with the output of the Redis
 repository.
