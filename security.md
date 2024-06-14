@@ -155,7 +155,7 @@ In addition, you'll want fine-grained authorization controls. Later in this cour
 
 Finally, you should consider the various types of database encryption, such as client side encryption, disk encryption and transport layer security. These can help prevent attackers from obtaining unauthorized access to your data.
 
-Your final layers of defense are detective controls and Data Loss Prevention controls, better known as DLP. If an attacker is moving throughout your network, you may be able to catch them.
+Your final layers of defense are detective controls and *Data Loss Prevention* controls, better known as DLP. If an attacker is moving throughout your network, you may be able to catch them.
 
 Standing up infrastructure to detect attackers in your environment may alert you to this to help stop the attacker in their tracks.
 
