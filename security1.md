@@ -366,8 +366,129 @@ Replication through a Redis cluster is also a great recovery strategy. By deploy
 Your security tip of the week is to remember that availability is part of the CIA triad, and to always consider persistence, availability, and disaster recovery in any security strategy.
 
 
+### X. Configuring Redis
+When it comes to RDB files there are two important concepts to know: save types and save frequencies.
+
+There are two save types within Redis: `BGSAVE` and `SAVE`.
+
+The `BGSAVE` command can be executed in the background and does not disrupt the processing of data within Redis.
+
+On the other hand, The `SAVE` command, will block any other command from executing within Redis. Typically `BGSAVE` should be used and is the default within Redis configuration.
+
+You can also set a save policy within Redis. Save policies are defined by the number of changes that occur within a given timeframe. If this threshold is met then Redis will automatically perform a backup.
+
+To define a save policy you need to define the number of changes that can occur within Redis within any given timeframe. If this threshold is met, you will automatically perform a background save.
+
+#### Save Configurations
+Let's demonstrate some save configurations.
+
+As we’ve said before, every Redis configuration should use the `redis.conf` file in production. All of these configurations are available within the `redis.conf` with the exact same directive names. Modern devops practices configure these with code.
+
+However, to demonstrate these configurations we’ll be using the config command throughout this course.
+
+Let's get started in the terminal.
+
+You can set the filename by setting the `dbfilename`.
+```
+> config set dbfilename rdb.rdb
+```
+And then the directory by setting the `dir`.
+```
+> config set dir /var/lib/redis
+```
+Lastly, we need to define a save policy.
+```
+> config set save "900 1 300 10 60 1000"
+```
+
+You can have multiple save policies. Simply define the thresholds for time and changes that meet your data loss tolerance. You can define multiple thresholds to meet your requirements. In this example, a snapshot will be taken if one key is changed every 900 seconds, if 10 keys are changed within 300 seconds or if 1000 keys are changed within 60 seconds.
+
+Your persistence file will load from the locations that you have defined here, or within your `redis.conf` file using the same directive.
+
+#### Append-only Files
+With Append only files there are two important concepts to understand, setting your `fsync` policy and setting your rewrite policy.
+
+Lets first discuss `fsync`.
+
+The function, `fsync` is the function responsible for writing data from memory to disk within Redis. You can configure how redis writes to disk in order to most effectively make tradeoffs between performance and durability for your use case. Redis supports three `fsync` policies, `always`, `everysec` and `no`.
+
+With the policy **appendfsync always** Redis will wait for the write and the fsync to complete prior to sending an acknowledgement to the client that the data has written. This introduces the performance overhead of the fsync in addition to the execution of the command. The fsync policy always favors durability over performance and should be used when there is a high cost for data loss.
+
+With the policy **appendfsync everysec** Redis will fsync any newly written data every second. This policy balances performance and durability and should be used when minimal data loss is acceptable in the event of a failure. This is the default Redis policy. This policy could result in between 1 and 2 seconds worth of data loss but on average this will be closer to one second.
+
+Finally the policy **appendfsync no** is the last supported fsync policy. This policy favors performance over durability and will provide some, although minimal performance enhancements over fsync everysec at the cost of additional durability. You should only use this when everysec is too detrimental to performance for your taste, and you can afford the cost of additional data loss.
+
+**An important exception to this policy is for clients using pipelining. When you pipeline with writes, you accept the potential for data loss for a maximum performance benefit because your client will not wait for a reply when pipelining.**
+
+**You shouldn’t use an `fsync always` policy while pipelining writes because this will decrease your database performance without guaranteeing the durability you expect.**
+
+You can also set how frequently you want this file to be re-written. This can help prevent the append only file from becoming too big, and improve the speed at which you can recover from a failure. A rewrite is achieved by reading data in memory to create a new file so that the shortest AOF file is able to always be used. You can set the percentage increase in size or the size increase of your AOF files as the trigger for a rewrite.
+
+This is important to set to prevent your AOF file from filling your entire disk and to prevent startups from being too cumbersome.
+
+The append only file can be found in the same working directory that we set earlier for our RDB file.
+
+Like RDB, AOF files can be configured using the config command or the `redis.conf`.
+
+It's always best to configure these in the `redis.conf` file since some configurations are not supported using the config command.
+
+Lets turn on appendonly files using config in the command line.
+
+First turn on `appendonly` mode by setting it to `yes`. **Append-only is turned off by default**.
+```
+> config set appendonly yes
+```
+Then you set the policy for `fsync`. We’re going to set this one to `always` because our application has a low data loss tolerance.
+```
+> config set appendfsync always
+```
+
+Next, we’ll define our rewrite policy.
+
+The rewrite policy here will rewrite after the aof file is 100 percent larger than it was during the last rewrite:
+```
+> config set auto-aof-rewrite-percentage 100
+```
+
+This could be an issue if our database is already huge though. What if it has massive turnover for a small subset of its keys. To fix this, we’ll also set a minimum size for the rewrite.
+
+We’ll set ours here to 64 megabytes:
+```
+> config set auto-aof-rewrite-min-size 64mb
+```
+
+There are two important options you should be aware of when it comes to configuration of durability for AOF. Rewrite `fsync` handling and persistence with both the AOF and the RDB files.
+
+First let's look at how to handle fsync on AOF file rewrites.
+
+If you have extreme latency sensitivity and can accept some data loss, a configuration you may want to consider is `no-appendfsync-on-rewrite`.
+
+This will block Redis from calling `fsync` while performing a save, which will enhance performance. This generally is not recommended unless you are able to accept the risk of some data loss during this time and have extreme performance requirements.
+
+Finally, you need to consider that recovery speeds can be improved by using both aof and RDB files to recover data. You can set aof files to use the rdb file as a preamble to improve recovery speed:
+
+#### Log Rotation
+Log rotation helps you to ensure that the logs on your operating system don’t fill up disk space, which could result in an application issue if the disks are not partitioned separately. Also, it helps you to ensure that your Redis logs do not grow unnecessarily large.
+
+While it depends on your distribution, log rotation is typically found in `/etc/logrotate.conf`. If you configure your Redis logs to be archived or sent to an external log server, log rotation is a prudent way to protect availability while ensuring that your server logs are still auditable. Consider log rotation and external logging strategies for all Redis logs. An example of Redis log rotation can be found at [Stack Overflow](https://stackoverflow.com/questions/5496014/redis-logrotate-config#5564481).
+
+This will probably suffice:
+```
+/var/log/redis/*.log {
+       weekly
+       rotate 10
+       copytruncate
+       delaycompress
+       compress
+       notifempty
+       missingok
+```
+
+
 ### Biblipgraphy 
+
 
 ### Epilogue 
 
-### EOF (2024/06/28)
+
+### EOF (2024/06/14)
