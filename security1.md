@@ -324,6 +324,94 @@ A password like imadolphin is probably too short for production. I recommend tha
 So what I've just described is the most basic form of Redis authentication. In this case, there's only a single user and password for all people and services accessing Redis. It's a much better practice to use finer-grained per-user access control. Redis supports these with ACLs or Access Control Lists, and we'll discuss these next week.
 
 
+### VIII. [Securing Redis Client Code](https://youtu.be/JquRVRKYTxk)
+In this unit, we're going to cover common techniques
+for securing the client-side code that interacts with Redis.
+But first, some good news.
+One of the most well-known security
+exploits in the database world is SQL injection.
+Because Redis doesn't use a query language,
+malicious injection isn't a real concern with Redis,
+so don't worry about SQL injection.
+What you do need to worry about is
+validating any input that's used to run commands against Redis.
+This is relevant when constructing Redis key names
+and running Lua scripts.
+Let's first look at key names.
+It's quite common in Redis to dynamically generate key names.
+Usually, you have a key naming pattern
+where you separate a different part of a key with a colon.
+For instance, if I'm storing user sessions in Redis,
+my keys might look like this.
+I'd start with a session to indicate the type of key,
+plus a colon, plus user to indicate the type of session,
+plus an ID representing that user.
+If I had separate session keys for, say, an API,
+those keys might look like this.
+Now let's look at a real-world example
+where unvalidated input might result
+in a user getting access to a key
+they shouldn't have access to.
+Suppose you run an e-commerce site
+that offers discounts for special promotions
+on your products.
+You have two API endpoints, one that
+gets the full product price and one that
+gets the value of the discount.
+The key for the price on the product you're purchasing
+is product colon 1234 while the key for the discount
+is product 1234 discount.
+The full price of the product is $200
+while the discount gives you $100 off.
+Now, suppose your price API takes a product ID
+as one of its parameters.
+So a normal input would be 1234, and that
+would resolve internally to the key product 1234.
+See where I'm going with this?
+What if the attacker provided an ID of 1234 colon discount?
+Without any validation, this will resolve to the key product
+1234 discount.
+That's a big problem because the value stored in that key
+is negative 100.
+Great deal, right?
+The company owes you $100 just for ordering their product.
+While it may be great as a customer,
+it's terrible if you're an e-commerce company.
+That's why, when you design applications
+that will be constructing keys with untrusted data,
+you need to validate the input data.
+In this case, we need to make sure that the input consists
+of a series of digits and nothing more,
+no colons or other characters allowed.
+If the input doesn't validate, we'll send the user a 404
+instead of giving them a $100 refund.
+OK.
+So in addition to validating any input that's
+used to construct keys, you also need
+to be a little careful with Lua scripts.
+You may remember that Redis embeds a Lua interpreter so
+that you can write scripts in Redis for more complex business
+logic.
+If you're not familiar with Lua scripting in Redis,
+see RU101 intro course.
+Anyway, it should go without saying
+that you should never accept a Redis Lua script as a user
+input.
+Similarly, you should never dynamically construct a Redis
+Lua script from user input.
+As long as you're never constructing Lua scripts
+from your user input, you should be
+safe from any kind of Lua script injection.
+So to recap, SQL injection is not a problem in Redis
+because Redis doesn't use a query language, let alone SQL.
+If you're dynamically constructing keys
+based on user input, then validate that input.
+And finally, Lua scripts can provide an injection attack
+vector if you construct them based on user input, so
+just don't do that.
+Lua scripts should always be written by your own developers.
+
+
 ### Biblipgraphy 
 
 ### Epilogue 
