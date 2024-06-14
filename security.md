@@ -135,7 +135,7 @@ A common quote among security professionals is, "Attackers only have to be right
 
 This assertion, it turns out, is an oversimplification, and it's absolutely incorrect in any reasonably modern security architecture.
 
-Defense-in-Depth Architecture is the concept of information security that takes a layered approach to data protection. Database security is one of the last lines of defense in this architecture.
+*Defense-in-Depth Architecture is the concept of information security that takes a layered approach to data protection. Database security is one of the last lines of defense in this architecture.*
 
 Data security is typically deployed in layers, like an onion. Each layer represents a barrier for an attacker and an opportunity for you to prevent that attacker from getting to your data.
 
