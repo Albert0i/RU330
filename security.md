@@ -166,46 +166,49 @@ What's important to remember is that the database itself does not have the sole 
 If one of these layers fails, there is another that can help protect you.
 
 
-### V. Installing Redis Securely
+### V. [Installing Redis Securely](https://youtu.be/Qj5shmkyUDc)
 In this unit, we'll look at some Redis installation best practices. I want to start with my top three recommendations for securely installing Redis on a server.
 
 First, always run Redis as a dedicated non-privileged user. In other words, don't run Redis as a sudoer or as root. Second, always restrict permissions on your Redis installation path. Third, always restrict Redis log and configuration files. 
 
 ![alt ](img/3_tips.png)
 
-In other words, ensure the Redis log and config are only accessible by a dedicated non-privileged Redis user plus a small group of trusted admin. This is all basic operating system-level configuration. This OS-level config limits the risk of unauthorized access to Redis. Let's review an example configuration in action. And by the way, if you want to run this on your own, we've provided a Dockerfile in the course [GitHub repo](https://github.com/redislabs-training/ru330). Here I am in the terminal. I'm going to show you how I'd set up a secure Redis installation for the first time and what I'm thinking along the way.
+In other words, ensure the Redis log and config are only accessible by a dedicated non-privileged Redis user plus a small group of trusted admin. This is all basic operating system-level configuration. This OS-level config limits the risk of unauthorized access to Redis. Let's review an example configuration in action. And by the way, if you want to run this on your own, we've provided a Dockerfile in the course [GitHub repo](https://github.com/redislabs-training/ru330). 
 
-We're using Ubuntu for this example. First, we'll update the operating system-level dependencies and install the dependencies required to run Redis securely. 
+Here I am in the terminal. I'm going to show you how I'd set up a secure Redis installation for the first time and what I'm thinking along the way.
+```
+sudo apt update -y
 
-![alt ](img)
+sudo apt install build-essential tcl -y 
 
-We'll also install tcl-tls and libssl-dev. These are the OpenSSL development libraries that TLS requires. We don't want Redis to run as a root user. 
+sudo apt install tcl-tls libssl-dev -y 
 
-![alt ](img)
+sudo adduser --system --group --no-create-home redis 
 
-Instead, we're going to install Redis as a dedicated non-privileged user and group. Here, I'm creating a user and group called Redis for this purpose. In some distributions, this user will be pre-created by previous package installations. 
+sudo mkdir /var/lib/redis 
 
-![alt ](img)
+sudo chown redis:redis /var/lib/redis 
 
-Now that we have a user, let's create a working directory for Redis. This is where we will install Redis later.
+sudo chmod 770 /var/lib/redis 
 
-![alt ](img)
+sudo mkdir /var/log/redis 
 
-Next, I'll chown to ensure that the Redis user owns its directory. 
+sudo touch /var/log/redis/redis.log 
 
-![alt ](img)
+sudo chmod 660 /var/log/redis/
 
-Finally, I want to restrict this directory's permissions so that only Redis can access it. Now I will create a file and directory for the Redis logs.
+sudo chmod 640 /var/log/redis/redis.log
+```
 
-![alt ](img)
+We're using Ubuntu for this example. First, we'll update the operating system-level dependencies and install the dependencies required to run Redis securely. We'll also install `tcl-tls` and `libssl-dev`. These are the OpenSSL development libraries that TLS requires. 
 
-First, I'll create the directory `/var/log/redis`. Next, I'll pre-create the Redis log file so that it has the appropriate permissions. 
+We don't want Redis to run as a root user. Instead, we're going to install Redis as a dedicated non-privileged user and group. Here, I'm creating a user and group called `Redis` for this purpose. In some distributions, this user will be pre-created by previous package installations. 
 
-![alt ](img)
+Now that we have a user, let's create a working directory for Redis. This is where we will install Redis later.Next, I'll chown to ensure that the Redis user owns its directory. Finally, I want to restrict this directory's permissions so that only Redis can access it. Now I will create a file and directory for the Redis logs.
 
-We modify these permissions to ensure that only the Redis user, the root user, or a user added to the Redis group can access these log files.
+First, I'll create the directory `/var/log/redis`. Next, I'll pre-create the Redis log file so that it has the appropriate permissions. We modify these permissions to ensure that only the Redis user, the root user, or a user added to the Redis group can access these log files.
 
-![alt ](img)
+![alt install 1](img/install_1.png)
 
 Next, we'll install Redis. You'll want the latest version of Redis from the redis.io downloads website.
 You should always check the Redis website to ensure you're running the latest version of Redis.
