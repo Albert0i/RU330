@@ -54,8 +54,6 @@ As security engineers or administrators, it's our responsibility to ensure that 
 
 
 ### III. Risk Assessment
-**Objective**: By the end of the text exercise, the learner will understand basic security concepts that will help them establish a foundation for making informed risk management decisions.
-
 Risks are everywhere. But it's rarely practical to secure against every conceivable risk. What this means is that security is not always about securing "all the things."
 
 Rather, security is about making informed risk management decisions. A good security plan makes clear what risks it's prioritizing.
