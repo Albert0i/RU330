@@ -297,18 +297,31 @@ To review, don't ever expose your Redis server to the public internet. Ensure th
 
 
 ### VII. [Basic Authentication](https://youtu.be/B4jxDMxVvYM)
-Now, let's talk about basic authentication. Using Redis without authentication is one of the worst Redis deployment practices we see in the wild. To run Redis securely, you really need to enable auth. There are two ways to do this. Prior to Redis 6, there was no concept of users. You simply set a single global password that controlled all access to the Redis server. In the Redis conf file, you can set this global password with the requirepass directive. Here, I'm setting the password to imadolphin. Now I'll restart Redis with the new config. Now, when I connect to Redis, I can't run any commands until I authenticate with this password. See?
+Now, let's talk about basic authentication. Using Redis without authentication is one of the worst Redis deployment practices we see in the wild. To run Redis securely, you really need to enable auth. There are two ways to do this. Prior to Redis 6, there was no concept of users. You simply set a single global password that controlled all access to the Redis server. In the Redis conf file, you can set this global password with the `requirepass` directive. Here, I'm setting the password to imadolphin. 
 
-Here, I'm trying to run the info command, but I get a noauth authentication error. Now I'm going to authenticate by running the auth command and providing the configured password. If you're using a version of Redis before Redis 6, then this is your only option for enabling authentication. This requirepass directive still works in Redis 6 for backwards compatibility. But if you're running Redis 6 or later, then you should definitely use the ACL user directive instead. In Redis 6, there's now a default user called default. You need to make sure that this default user has a password since it won't have one to begin with. So I'm going to open up the Redis conf file and comment out the requirepass directive.
+![alt requirepass](img/requirepass.png)
 
-Now, I'm setting the default user's password to imadolphin. I'm also giving this user all permissions to the database. This configuration is now equivalent to what we had with the requirepass directive before.
+Now I'll restart Redis with the new config. Now, when I connect to Redis, I can't run any commands until I authenticate with this password. See? Here, I'm trying to run the `info` command, but I get a noauth authentication error. Now I'm going to authenticate by running the `auth` command and providing the configured password. If you're using a version of Redis before Redis 6, then this is your only option for enabling authentication. This `requirepass` directive still works in Redis 6 for backwards compatibility. But if you're running Redis 6 or later, then you should definitely use the `ACL` user directive instead. In Redis 6, there's now a default user called `default`. You need to make sure that this default user has a password since it won't have one to begin with. So I'm going to open up the Redis conf file and comment out the `requirepass` directive. Now, I'm setting the default user's password to imadolphin. I'm also giving this user all permissions to the database. This configuration is now equivalent to what we had with the `requirepass` directive before.
+
+![alt user default](img/user_default.png)
+
 Now I'll restart Redis with this new config. Now, when I log in, I need to authenticate as this default
-user before I can do anything. I use the same auth command to authenticate, but I also provide the user name, as you see here. Now I can run commands.
+user before I can do anything. I use the same `auth` command to authenticate, but I also provide the user name, as you see here. Now I can run commands.
+```
+AUTH default imadolphin
 
-A couple notes on passwords-- first, you probably don't want to store plaintext passwords in the Redis conf file. We'll see how to store hash passwords here later in the course. Second, you want to make sure that passwords can't be cracked through brute force. A password like imadolphin is probably too short for production. I recommend that you use a long, 128-character password, which would be practically impossible for an attacker to crack. How can you create such a long password? You can do this with Linux's shasum command. Here, I'm piping the password, imadolphin, to the shasum utility that comes with OS X. By specifying a 512-bit hash, I can create a password that's exactly 128 characters long. So what I've just described is the most basic form of Redis authentication.
+INFO
+```
 
-In this case, there's only a single user and password for all people and services accessing Redis.
-It's a much better practice to use finer-grained per-user access control. Redis supports these with ACLs or Access Control Lists, and we'll discuss these next week.
+A couple notes on passwords-- 
+- first, you probably don't want to store plaintext passwords in the Redis conf file. We'll see how to store hash passwords here later in the course. 
+- Second, you want to make sure that passwords can't be cracked through brute force. 
+
+A password like imadolphin is probably too short for production. I recommend that you use a long, 128-character password, which would be practically impossible for an attacker to crack. How can you create such a long password? You can do this with Linux's shasum command. Here, I'm piping the password, imadolphin, to the shasum utility that comes with OS X. By specifying a 512-bit hash, I can create a password that's exactly 128 characters long. 
+
+![alt shasum](img/shasum.png)
+
+So what I've just described is the most basic form of Redis authentication. In this case, there's only a single user and password for all people and services accessing Redis. It's a much better practice to use finer-grained per-user access control. Redis supports these with ACLs or Access Control Lists, and we'll discuss these next week.
 
 
 ### Biblipgraphy 
