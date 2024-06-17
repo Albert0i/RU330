@@ -514,6 +514,7 @@ This will probably suffice:
 
 
 ### Epilogue 
+> a man may work towards a certain object, may labour and toil to attain a certain kind of leisure and occupation, and then find that, after all, he yearns for the old busy days, and the old occupations that he thought himself so glad to leave?
 
 
 ### EOF (2024/06/17)
