@@ -422,7 +422,7 @@ Finally the policy **appendfsync no** is the last supported fsync policy. This p
 
 **You shouldn’t use an `fsync always` policy while pipelining writes because this will decrease your database performance without guaranteeing the durability you expect.**
 
-You can also set how frequently you want this file to be re-written. This can help prevent the append only file from becoming too big, and improve the speed at which you can recover from a failure. A rewrite is achieved by reading data in memory to create a new file so that the shortest AOF file is able to always be used. You can set the percentage increase in size or the size increase of your AOF files as the trigger for a rewrite.
+You can also set how frequently you want this file to be re-written. This can help prevent the append only file from becoming too big, and improve the speed at which you can recover from a failure. *A rewrite is achieved by reading data in memory to create a new file so that the shortest AOF file is able to always be used.* You can set the percentage increase in size or the size increase of your AOF files as the trigger for a rewrite.
 
 This is important to set to prevent your AOF file from filling your entire disk and to prevent startups from being too cumbersome.
 
@@ -461,6 +461,9 @@ Next, we’ll define our rewrite policy.
 #
 # Specify a percentage of zero in order to disable the automatic AOF
 # rewrite feature.
+
+auto-aof-rewrite-percentage 100
+auto-aof-rewrite-min-size 64mb
 ```
 
 The rewrite policy here will rewrite after the aof file is 100 percent larger than it was during the last rewrite:
@@ -513,4 +516,4 @@ This will probably suffice:
 ### Epilogue 
 
 
-### EOF (2024/06/14)
+### EOF (2024/06/17)
