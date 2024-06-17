@@ -43,6 +43,9 @@ See how they delete web servers and data files? This attack easily could have be
 ![alt prior redis 6](img/prior-redis-6.png)
 
 Redis ACLs changed all of that. Now you can create multiple Redis users, each with their own password. And you can control each user's permissions. This is important because you can now effectively implement the *principle of least privilege*. Using ACLs to implement the principle of least privilege prevents a number of bad outcomes. For example, you wouldn't want a new administrator to accidentally drop your database. In this case, you create an ACL that prevents your new administrator from running the `FLUSHDB` or `FLUSHALL` commands.
+```
+ACL SETUSER newadminuser on >password -FLUSHDB -FLUSHALL 
+```
 
 Similarly, you wouldn't want an attacker with compromised credentials to be able to probe or steal data from your Redis database. If I were an attacker with compromised credentials, one of the first things I would do is run the `SCAN` or `KEYS` command to find out what keys were in the database. I'd then run the `TYPE` command to see which Redis commands I could run on each key. If I couldn't run the `SCAN` or `KEYS` commands, I'd be left guessing what key names to attack this database with. So as an administrator, I'd want to prevent most service account users from running the `SCAN`, `KEYS`, or `TYPE` commands, unless they're part of the application design, just in case those account credentials
 ever got into the wrong hands. It could also help you to reduce the impact of careless user
