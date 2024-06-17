@@ -153,40 +153,115 @@ Let's log in as the cache service. If we try to set the key, data:123, we get a 
 You should now have a basic idea about how to create users and ACLs. And you're probably already thinking about how you might assign your own administrative users, developers, and service accounts their respective ACLs. To learn more about Redis ACLs and get all of the details on the ACL rule syntax, we encourage you to check the Redis docs. 
 
 
-### IV. Defense in Depth
-A common quote among security professionals is, "Attackers only have to be right once, but we have to be right every time." You may have heard this, and this hyper-paranoid position may make you overly fearful.
-
-This assertion, it turns out, is an oversimplification, and it's absolutely incorrect in any reasonably modern security architecture.
-
-*Defense-in-Depth Architecture is the concept of information security that takes a layered approach to data protection. Database security is one of the last lines of defense in this architecture.*
-
-Data security is typically deployed in layers, like an onion. Each layer represents a barrier for an attacker and an opportunity for you to prevent that attacker from getting to your data.
-
-The first layer is the firewall. You want to ensure that no one can directly access your database or the servers your database is hosted on from the outside world.
-
-The second layer is frequently your application-level defenses. A consistent patch management process for your application dependencies and secure development practices can go a long way in ensuring that apps can’t be used to get to your database. In our RedisWannamine example, a vulnerability in ApacheStruts was used to get direct access to Redis. Your application and operating system should be tested and regularly updated to reduce the likelihood of known exploits being used against your systems.
-
-Hardening your database server is the next layer of defense.
-
-There are a few ways of going about hardening a database.
-
-First, you want to ensure that you're running the most recent version of your database to prevent attackers from exploiting known vulnerabilities. For instance, with Redis, there are several exploits affecting old versions of the software.
-
-Next, you'll want to employ database authentication and authorization. For a long time, Redis has supported a basic authentication model in which a single password grants complete access to the database. But this represents a bare minimum.
-
-In addition, you'll want fine-grained authorization controls. Later in this course, we'll discuss access control lists, which became available in Redis 6, and role-based access control, which is a feature of Redis Enterprise 6.
-
-Finally, you should consider the various types of database encryption, such as client side encryption, disk encryption and transport layer security. These can help prevent attackers from obtaining unauthorized access to your data.
-
-Your final layers of defense are detective controls and *Data Loss Prevention* controls, better known as DLP. If an attacker is moving throughout your network, you may be able to catch them.
-
-Standing up infrastructure to detect attackers in your environment may alert you to this to help stop the attacker in their tracks.
-
-In the event that an attacker gets access to your data, DLP controls may prevent them from removing that data.
-
-What's important to remember is that the database itself does not have the sole responsibility of ensuring the safety of your data. A defense-in-depth security architecture ensures that an attacker will have to cross multiple layers to get to your database.
-
-If one of these layers fails, there is another that can help protect you.
+### IV. [Administering Redis ACLs](https://youtu.be/Q1rPFw6Iz64)
+The best way to manage ACL users in Redis
+is to specify them in an ACL configuration file.
+If you have just a few users, you can configure them directly
+in the Redis conf config file.
+But for more complex ACL setups, you
+can and should write them to a separate configuration file.
+In this unit, we're going to show you just how to do that.
+But before we move on, let me just
+do a quick shameless plug and say
+that if you have dozens of users and complex roles to configure,
+then you might want to check out Redis Enterprise Software
+or Redis Enterprise Cloud.
+Both of these products feature role
+based access control or RBAC for short.
+And that means that you can define generic roles
+and then assign those roles to your users.
+And all of this is done using a user friendly UI.
+So this will likely be more convenient if you're
+a bigger organization.
+OK, back to our open source Redis.
+when you're configuring access control lists in a file,
+you want to start with the user directive, followed
+by the syntax used with the ACL SETUSER command.
+Let's see how we'd store the three users
+we created in the last unit.
+We're going to store this configuration
+in a file called acl.conf.
+We're referencing the file from a redis.conf file,
+as you can see here.
+So let's now open up acf.conf.
+First, we disable the default user.
+Next, we specify our three users: Falco, Rick,
+and cacheservice.
+Notice that each user declarative
+starts with the user directive.
+You'll also notice a long, encoded string
+beginning with a pound sign.
+This is the user's password hashed with the sha256 hash
+function.
+If you're going to store ACL configuration in a file,
+it's really important never to store the passwords
+as plain text.
+So here, we've hashed the passwords.
+The pound sign tells Redis that these passwords
+have been hashed with the sha256 hash algorithm.
+So how do you hash your passwords?
+You can run them through the Linux shasum utility like this.
+Here, I'm getting the shasum for the password: pickle.
+But it's probably easier to start up a Redis instance,
+configure your ACLs from the command line,
+and then call ACL SAVE so that Redis
+will write out the configurations
+to a file for you.
+To do this, all you need is a user
+who has access to the @admin cat command category or permissions
+the ACL command.
+Let's use the command line to add a new user named Claude
+with the password: blueberry.
+Next, we'll call ACL SAVE.
+Now, if we open up our acl.conf file,
+we can see that Redis has written our ACL
+users alphabetically and in a fully normalized form.
+Here's the line with the user we just added.
+And notice that Redis writes out the hashed password for us.
+Once we've updated our ACL file locally,
+we need to get it into our Redis servers.
+We'll assume that you have a way of syncing configuration files
+to your production deployment.
+Once you've done that, issue an ACL LOAD command
+to each Redis server in your deployment.
+This will ensure a zero downtime update.
+Now, let's look at some commands you
+might run when you're administering ACLs
+from the Redis CLI.
+First, I'll run an ACL WHOAMI.
+This command will show me which user I'm currently
+logged in as.
+Here you can see, I'm logged in as Rick.
+To see a list of all Redis database users,
+run the ACL LIST command.
+Notice the default user is off and has access to no commands.
+You'll also see other users we've provisioned.
+We can also use the ACL CAT command
+to explore command categories.
+So here are all the categories.
+And as I said in the last unit, you
+can also use the ACL CAT command to see which commands
+each category includes.
+So here's what's included in the scripting commands category.
+OK, finally to delete a user, run the ACL DELUSER command.
+This is the sort of ACL modification
+you might need to make in production in the event
+of some kind of emergency.
+Just be sure that any change you make here also
+gets written back to your ACL configuration files.
+At this point, you should have all the basic knowledge
+needed to start using ACLs with your own Redis deployments.
+There are a few more details in the Redis ACL docs, which you
+should explore at your leisure.
+We'll link to those docs in the course handout.
+Finally, for complex ACL setups that
+require role based access control,
+you should check out Redis Enterprise Cloud
+or Redis Enterprise Software.
+These products can really simplify the management
+of users and rules.
+OK, end of shameless plug.
+See you after the security tips.
 
 
 ### V. [Installing Redis Securely](https://youtu.be/Qj5shmkyUDc)
