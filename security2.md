@@ -73,122 +73,82 @@ so stay tuned.
 
 
 ### III. [Practical ACLs with Redis](https://youtu.be/Va95q2SXGPA)
- of this unit, you'll understand
-what these commands are doing and how
-you might use them as part of a database caching service.
-We've specified three users here:
-Falco, who's our software developer, Rick,
-our administrator, and cacheservice, which
-is for the application itself.
-We'll see what these commands do in a moment.
-But first, before we do anything,
-we need to disable the default user and set an admin user.
-The default user exists in every Redis deployment
-and has full permissions.
-Here's the command to disable the default user.
-Remember, always disable the default user
-when you're not using ACLs, but only
-after you add the administrative user of your own.
-You should only use the default user
-when it's required for backwards compatibility with Redis 5
-or below.
-So now, let's look at Falco.
-Falco is our development user.
-She needs database access to create and test
-her applications.
-We start with the ACL SETUSER command,
-followed by the user name, which in this case is Falco.
-We next specify "on" to indicate that the user can log in.
-After that, we specify the user's password: butterscotch.
-The greater than sign here indicates
-that this is a password.
-Next, we'll specify three rules that
-give Falco access to the full suite of Redis commands,
-except those that are in the dangerous category.
-By default, ACL users have no permissions.
-So we start by giving Falco permission for all commands,
-using the allcommands flag here.
-We then subtract the dangerous commands
-with the -@dangerous rule.
-We next explicitly grant access to the ACL WHOAMI command
-with the plus ACL pipe whoami.
-And finally, we specify allkeys,
-which allows Falco to access any key in the database.
-If we authenticate as Falco, you'll
-see that she has access to the ACL WHOAMI command,
-but not the ACL LIST command.
-Falco also can't run the KEYS command,
-because this is in the dangerous command category.
-And Falco can't run the CONFIG command,
-because this is an admin command.
-Falco can, however, SET and GET the key foo
-and run any other data structure commands.
-So Falco can do her job as a developer.
-Notice that in configuring Falco,
-we followed the principle of least privilege.
-She has access to the exact commands she needs and none
-that she doesn't.
-You might be wondering what commands the Redis ACL
-system considers dangerous.
-To check this or any ACL category rule,
-run the ACL CAT command.
-For example, here we'll run ACL CAT DANGEROUS.
-You'll see a list of commands that include KEYS and FLUSHDB
-to take a couple of examples.
-To see a list of all command categories,
-run ACL CAT with no arguments like this.
-OK, so now let's configure our admin user, Rick.
-In this case, the ACL settings are pretty simple.
-We set our user, Rick, to on so that he can log in.
-We set his password to pickle, as indicated by the greater
-than sign.
-And finally, we specify +@admin, which gives Rick access
-to the admin commands.
-Now, let's log in as Rick.
-You can see, unlike Falco, Rick can run the CONFIG command
-to see how this Redis instance is configured.
-Rick can also run the ACL LIST command to see the users
-for this Redis database.
-Here again is the principle of least privilege.
-Rick's primary duty is to administer Redis.
-This includes adding users, using the ACL command,
-configuring Redis, and setting up the deployment model.
-It may also include helping to troubleshoot issues.
-Rick only has the access needed to do his job,
-to perform administrative functions.
-Our last user is for the application itself.
-It's also important to create specific users
-for your applications and to apply privileges accordingly.
-Here, we create the cacheservice user.
-We set the user to on.
-Then, we provide a password.
-Now comes the permissions.
-The cache service can run two commands, SET and GET.
-We indicate that with the +SET and +GET rules,
-we also limit the queues that the cache service can touch.
-The rule ~cache:* restricts this user to the keys beginning with
-cache: .
-Let's log in as the cache service.
-If we try to set the key, data:123, we
-get a NOPERM error, saying that we don't
-have access to the given key.
-That's because we're limited to certain keys in the Redis
-key space.
-Let's try again with the key, cache:123
-In this case, the command succeeds.
-We also get the same key.
-Notice that we can't run any other commands as the cache
-user.
-If we do, we'll get a no permissions error.
-You should now have a basic idea about how
-to create users and ACLs.
-And you're probably already thinking
-about how you might assign your own administrative users,
-developers, and service accounts their respective ACLs.
-To learn more about Redis ACLs and get all of the details
-on the ACL rule syntax, we encourage
-you to check the Redis docs.
-End of transcript. Skip to the start.
+Onscreen, you can see three ACL commands.
+
+FALCO
+```
+acl setuser falco on >butterscotch +@all -@dngerous -@admin +acl|whoami allkeys 
+```
+
+RICK
+```
+acl setuser rick on >pickle +@admin 
+```
+
+CACHESERVICE 
+```
+acl setuser cacheservice on >cacheme +set +get ~cache:*
+```
+
+By the end of this unit, you'll understand what these commands are doing and how you might use them as part of a database caching service. 
+
+We've specified three users here: `Falco`, who's our software developer, `Rick`, our administrator, and `cacheservice`, which is for the application itself. We'll see what these commands do in a moment. 
+
+But first, before we do anything, we need to disable the default user and set an admin user. The default user exists in every Redis deployment and has full permissions. Here's the command to disable the default user. 
+```
+acl setuser default off
+```
+
+Remember, always disable the default user when you're not using ACLs, but only after you add the administrative user of your own. *You should only use the default user when it's required for backwards compatibility with Redis 5 or below*. 
+
+So now, let's look at `Falco`. 
+```
+acl setuser falco on >butterscotch allcommands -@dngerous -@admin +acl|whoami allkeys 
+```
+
+`Falco` is our development user. She needs database access to create and test her applications. We start with the ACL [SETUSER](https://redis.io/docs/latest/commands/acl-setuser/) command, followed by the user name, which in this case is `Falco`. We next specify "on" to indicate that the user can log in. After that, we specify the user's password: butterscotch. The greater than sign here indicates that this is a password. Next, we'll specify three rules that give `Falco` access to the full suite of Redis commands, except those that are in the dangerous category. By default, ACL users have no permissions. So we start by giving `Falco` permission for all commands, using the allcommands flag here. We then subtract the dangerous commands with the -@dangerous rule. We next explicitly grant access to the ACL WHOAMI command with the plus ACL pipe whoami. And finally, we specify allkeys, which allows `Falco` to access any key in the database. If we authenticate as `Falco`, you'll see that she has access to the ACL WHOAMI command, but not the ACL LIST command. `Falco` also can't run the KEYS command, because this is in the dangerous command category. And `Falco` can't run the CONFIG command, because this is an admin command. `Falco` can, however, SET and GET the key foo and run any other data structure commands. So `Falco` can do her job as a developer. Notice that in configuring `Falco`, we followed the principle of least privilege. She has access to the exact commands she needs and none that she doesn't. 
+
+You might be wondering what commands the Redis ACL system considers dangerous. To check this or any ACL category rule, run the `ACL CAT` command. For example, here we'll run `ACL CAT DANGEROUS`. You'll see a list of commands that include KEYS and FLUSHDB to take a couple of examples. To see a list of all command categories, run `ACL CAT` with no arguments like this. 
+```
+> ACL CAT
+1) "keyspace"
+2) "read"
+3) "write"
+4) "set"
+5) "sortedset"
+6) "list"
+7) "hash"
+8) "string"
+9) "bitmap"
+10) "hyperloglog"
+11) "geo"
+12) "stream"
+13) "pubsub"
+14) "admin"
+15) "fast"
+16) "slow"
+17) "blocking"
+18) "dangerous"
+19) "connection"
+20) "transaction"
+21) "scripting"
+```
+
+OK, so now let's configure our admin user, Rick. 
+```
+acl setuser rick on >pickle +@admin 
+```
+
+In this case, the ACL settings are pretty simple. We set our user, Rick, to on so that he can log in. We set his password to pickle, as indicated by the greater than sign. And finally, we specify +@admin, which gives Rick access to the admin commands. Now, let's log in as Rick. You can see, unlike `Falco`, Rick can run the CONFIG command to see how this Redis instance is configured. Rick can also run the ACL LIST command to see the users for this Redis database. Here again is the principle of least privilege. Rick's primary duty is to administer Redis. This includes adding users, using the ACL command, configuring Redis, and setting up the deployment model. It may also include helping to troubleshoot issues. Rick only has the access needed to do his job, to perform administrative functions. 
+
+Our last user is for the application itself. It's also important to create specific users for your applications and to apply privileges accordingly. 
+```
+acl setuser cacheservice on >cacheme +set +get ~cache:*
+```
+
+Here, we create the cacheservice user. We set the user to on. Then, we provide a password. Now comes the permissions. The cache service can run two commands, SET and GET. We indicate that with the +SET and +GET rules, we also limit the queues that the cache service can touch. The rule ~cache:* restricts this user to the keys beginning with cache: . 
+
+Let's log in as the cache service. If we try to set the key, data:123, we get a NOPERM error, saying that we don't have access to the given key. That's because we're limited to certain keys in the Redis key space. Let's try again with the key, cache:123 In this case, the command succeeds. We also get the same key. Notice that we can't run any other commands as the cache user. If we do, we'll get a no permissions error. You should now have a basic idea about how to create users and ACLs. And you're probably already thinking about how you might assign your own administrative users, developers, and service accounts their respective ACLs. To learn more about Redis ACLs and get all of the details on the ACL rule syntax, we encourage you to check the Redis docs. End of transcript. Skip to the start.
 
 
 ### IV. Defense in Depth
