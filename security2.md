@@ -72,81 +72,123 @@ In the next unit, we'll see how ACLs work in practice,
 so stay tuned.
 
 
-### III. Risk Assessment
-Risks are everywhere. But it's rarely practical to secure against every conceivable risk. What this means is that security is not always about securing "all the things."
-
-Rather, security is about making informed risk management decisions. A good security plan makes clear what risks it's prioritizing.
-
-Accepting risk is okay; which risks you choose to accept are entirely dependent on your unique situation. This is the art of risk assessment. The risk assessment process follows the steps outlined in the diagram below.
-
-![alt risk assessment process](img/risk_assessment_process.png)
-
-#### Establish Context
-The first and most critical part of the risk assessment process is establishing context. What do we mean by context? Let's take an example.
-
-Suppose you're a hospital processing health records and making them available online. Your security decisions will be completely different from those of a website that generates memes.
-
-> A meme is an idea, behavior, or style that spreads rapidly within a culture. In the context of the internet, a meme refers to a humorous or entertaining piece of content, typically in the form of an image, video, or text, that spreads rapidly across various online platforms.
-
-So you consider the context of a security risk by measuring the impact of an identified security issue and the likelihood of a risk being exploited.
-
-We can all probably agree that the impact of a hospital data breach is much more serious that a meme generating website breach.
-
-#### Assess Risk
-Once you establish context, you perform a risk assessment. To cite the Wikipedia definition, a [risk assessment](https://en.wikipedia.org/wiki/Risk_assessment) is "an assessment of the possible mishaps, their likelihood and consequences and your tolerances for such events."
-
-First you must identify the mishaps.
-
-For this example, let's suppose our hospital has discovered that unauthorized users can access other users' health records using a public API. This may occur if the API doesn’t have access controls built into it. would allow unauthorized users to access other users' data.
-
-Our meme website may have found that all employees have full database access, allowing anyone to drop all the tables. This might occur if the database is protected by a corporate network. In this case, an administrator might not bother to enable authentication.
-
-So, here we've established a couple of risks for our hospital and meme generator website.
-
-#### Analyze the Situation
-Once we understand the possible risks, we need to analyze them. Analysis is an assessment of the impact the identified risk would have on a business if the risk were exploited.
-
-In our healthcare example, a data breach may be reportable to the government. Such a breach might also make the news, damaging the hospital's reputation and opening it to litigation by the patients whose data has been exposed.
-
-In our meme generator example, a dropped database might prevent users from visiting the site, causing anything from minor annoyance to an exodus of users to a competing website.
-
-#### Evaluate the Risk
-Once we've analyzed the potential impact of each risk, the next step is to evaluate the cost of the impact if a risk materializes.
-
-Suppose we're storing 5000 records in our healthcare application. According to a research study by IBM [("The 2019 Cost of a Data Breach")](https://securityintelligence.com/posts/whats-new-in-the-2019-cost-of-a-data-breach-report/), the average cost of a breached healthcare record is $429. This means that a compromise of all records could cost us over 2 million dollars.
-
-Now, we believe that the probability of someone exploiting our application is 25%. We can use the technique of mathematical expectation to estimate that the cost of failing to mitigate this risk is about half a million dollars. This does not include potential damage to our reputation, which is harder to define.
-
-Now let's apply the same thinking to our meme generator.
-
-The cost of a dropped database for our meme website is significantly less than half a million dollars. The meme website makes a few cents in advertising revenue every time a user visits the site.
-
-What we don’t know with 100% certainty is how many times a user will come back and at what point issues will cause our user to abandon our site altogether. Sometimes risks are hard to quantify, so we have to take our best guess.
-
-#### Risk Decision
-Once we’ve evaluated each risk, it's time to make a decision about what we want to do about the risk. We need to base this decision on an analysis of cost to mitigate it compared to the potential cost of the risk.
-
-Risks can either be accepted, mitigated, transfered or avoided.
-
-1. **Accepting** means the organization will do nothing.
-2. **Mitigating** means that the organization will take action to reduce the likelihood of the risk.
-3. **Transferring** means moving the cost of the risk to a third party, such as an insurance provider.
-4. **Avoiding** means disbanding the project or resolving the issue entirely.
-
-The hospital provider will likely choose to mitigate or avoid the risk due to the high cost. The cost of the risk is probably greater than the cost of writing the code to fix the application.
-
-Mitigating the risk may involve putting the public API behind a firewall and adding authentication and access controls.
-
-The meme provider will likely accept or mitigate their issue. The risk to the meme provider is lower because the cost is not high; however, adding authentication to the database is relatively simple. They may choose to mitigate the risk by adding authentication.
-
-No matter what we decide, we'll always want to continue monitoring the decision to see if the risk materializes and decide whether a different action needs to be taken.
-
-#### In Summary
-For those of you who aren’t security engineers, know that what we've described above is what occurs in the course of any standard risk assessment.
-
-It's important to remember that no risk management strategy is appropriate for every situation. While the term "secure all the things" is catchy, many have learned the hard way that it's not always the most expedient or most cost-effective approach.
-
-The bottom line is that risk assessments and decisions are business-driven. When deploying and configuring Redis, like any database, you should keep this in mind to ensure that your approach to deploying Redis aligns with your organization's risk management policies.
+### III. [Practical ACLs with Redis](https://youtu.be/Va95q2SXGPA)
+ of this unit, you'll understand
+what these commands are doing and how
+you might use them as part of a database caching service.
+We've specified three users here:
+Falco, who's our software developer, Rick,
+our administrator, and cacheservice, which
+is for the application itself.
+We'll see what these commands do in a moment.
+But first, before we do anything,
+we need to disable the default user and set an admin user.
+The default user exists in every Redis deployment
+and has full permissions.
+Here's the command to disable the default user.
+Remember, always disable the default user
+when you're not using ACLs, but only
+after you add the administrative user of your own.
+You should only use the default user
+when it's required for backwards compatibility with Redis 5
+or below.
+So now, let's look at Falco.
+Falco is our development user.
+She needs database access to create and test
+her applications.
+We start with the ACL SETUSER command,
+followed by the user name, which in this case is Falco.
+We next specify "on" to indicate that the user can log in.
+After that, we specify the user's password: butterscotch.
+The greater than sign here indicates
+that this is a password.
+Next, we'll specify three rules that
+give Falco access to the full suite of Redis commands,
+except those that are in the dangerous category.
+By default, ACL users have no permissions.
+So we start by giving Falco permission for all commands,
+using the allcommands flag here.
+We then subtract the dangerous commands
+with the -@dangerous rule.
+We next explicitly grant access to the ACL WHOAMI command
+with the plus ACL pipe whoami.
+And finally, we specify allkeys,
+which allows Falco to access any key in the database.
+If we authenticate as Falco, you'll
+see that she has access to the ACL WHOAMI command,
+but not the ACL LIST command.
+Falco also can't run the KEYS command,
+because this is in the dangerous command category.
+And Falco can't run the CONFIG command,
+because this is an admin command.
+Falco can, however, SET and GET the key foo
+and run any other data structure commands.
+So Falco can do her job as a developer.
+Notice that in configuring Falco,
+we followed the principle of least privilege.
+She has access to the exact commands she needs and none
+that she doesn't.
+You might be wondering what commands the Redis ACL
+system considers dangerous.
+To check this or any ACL category rule,
+run the ACL CAT command.
+For example, here we'll run ACL CAT DANGEROUS.
+You'll see a list of commands that include KEYS and FLUSHDB
+to take a couple of examples.
+To see a list of all command categories,
+run ACL CAT with no arguments like this.
+OK, so now let's configure our admin user, Rick.
+In this case, the ACL settings are pretty simple.
+We set our user, Rick, to on so that he can log in.
+We set his password to pickle, as indicated by the greater
+than sign.
+And finally, we specify +@admin, which gives Rick access
+to the admin commands.
+Now, let's log in as Rick.
+You can see, unlike Falco, Rick can run the CONFIG command
+to see how this Redis instance is configured.
+Rick can also run the ACL LIST command to see the users
+for this Redis database.
+Here again is the principle of least privilege.
+Rick's primary duty is to administer Redis.
+This includes adding users, using the ACL command,
+configuring Redis, and setting up the deployment model.
+It may also include helping to troubleshoot issues.
+Rick only has the access needed to do his job,
+to perform administrative functions.
+Our last user is for the application itself.
+It's also important to create specific users
+for your applications and to apply privileges accordingly.
+Here, we create the cacheservice user.
+We set the user to on.
+Then, we provide a password.
+Now comes the permissions.
+The cache service can run two commands, SET and GET.
+We indicate that with the +SET and +GET rules,
+we also limit the queues that the cache service can touch.
+The rule ~cache:* restricts this user to the keys beginning with
+cache: .
+Let's log in as the cache service.
+If we try to set the key, data:123, we
+get a NOPERM error, saying that we don't
+have access to the given key.
+That's because we're limited to certain keys in the Redis
+key space.
+Let's try again with the key, cache:123
+In this case, the command succeeds.
+We also get the same key.
+Notice that we can't run any other commands as the cache
+user.
+If we do, we'll get a no permissions error.
+You should now have a basic idea about how
+to create users and ACLs.
+And you're probably already thinking
+about how you might assign your own administrative users,
+developers, and service accounts their respective ACLs.
+To learn more about Redis ACLs and get all of the details
+on the ACL rule syntax, we encourage
+you to check the Redis docs.
+End of transcript. Skip to the start.
 
 
 ### IV. Defense in Depth
