@@ -37,35 +37,36 @@ See how they delete web servers and data files? This attack easily could have be
 > Be sure to disable dangerous commands when they aren't needed, you never know how they will be used. 
 
 
-### II. The CIA Triad
-The CIA triad describes the three most basic goals of information security: Confidentiality, Integrity, and Availability.
+### II. [ACL Concepts](https://youtu.be/GuWWmR4od-A)
+[Access Control Lists](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/), or ACLs for short, fundamentally change how Redis's authentication model works. Before Redis 6, Redis authentication was primitive. A single password secured your Redis deployment. There was no support for multiple users and passwords. And there was no support for per-user permissions either, what you might call authorization. 
 
-![alt The CIA Triad](img/cia_triad.png)
+![alt prior redis 6](img/prior-redis-6.png)
 
-#### Confidentiality
-Confidentiality is the property, that information is not made available or disclosed to unauthorized individuals, entities, or processes.
+Redis ACLs changed all of that. Now you can create multiple Redis users, each with their own password. And you can control each user's permissions. This is important because you can now effectively implement the *principle of least privilege*. Using ACLs to implement the principle of least privilege prevents a number of bad outcomes. For example, you wouldn't want a new administrator to accidentally drop your database. In this case, you create an ACL that prevents your new administrator from running the `FLUSHDB` or `FLUSHALL` commands.
 
-Suppose you send a letter in the mail to your sibling on their birthday. You want to ensure that the letter is only accessible to your sibling. To help ensure the confidentiality of the letter, you seal it in an envelope.
+Similarly, you wouldn't want an attacker with compromised credentials to be able to probe or steal data from your Redis database. If I were an attacker with compromised credentials, one of the first things I would do is run the `SCAN` or `KEYS` command to find out what keys were in the database. I'd then run the `TYPE` command to see which Redis commands I could run on each key. If I couldn't run the `SCAN` or `KEYS` commands, I'd be left guessing what key names to attack this database with. So as an administrator, I'd want to prevent most service account users from running the `SCAN`, `KEYS`, or `TYPE` commands, unless they're part of the application design, just in case those account credentials
+ever got into the wrong hands. It could also help you to reduce the impact of careless user
+mistakes.
 
-The letter is confidential because it's sealed in an envelope so that no one can see its contents. This is certainly more secure than a postcard, where anyone who handles it can read it.
+In general, you should be giving users the least amount of privilege used to perform their job.You can do this by separating users by *role*. For example, a developer may only need read and write access, while an administrator may only need the ability to configure Redis. You may also want to separate applications by role. For example, some applications may only read from the database, and others may only write to the database. 
 
-#### Integrity
-Integrity is the assurance that a message is not modified in transit.
+![alt by role](img/by-role.png)
 
-A common technique for ensuring the integrity of a letter is signing the sealed flap and then comparing the signature on the flap to a known signature. A known signature over the flap of an envelope tells us two things: first, that the contents of the letter haven't been modified, and second, that the letter was sealed by a known sender.
+A good example of this is a Pub/Sub application. In a Pub/Sub pattern, you have a publisher and a subscriber. Your publishers will probably only need the ability to create data, while your subscribers will probably only need access to read from the channels they're subscribed to. Another way to implement the principle of least privilege is to restrict data based on key patterns using namespacing techniques.
 
-#### Availability
-Availability, which is the final concept in the CIA triad, is the property that the services you need are available for use when you need them.
+For example, if you do not want an administrator to be able to access sensitive data, you can prefix all of the keys that are sensitive with the secret namespace. Imagine that you had an accounts table that contained user names, user details, and password hashes. You can namespace the keys for each user to be secret:users and only give access to the secret namespace to the service account for your application. 
 
-For example, when you send a letter, you're relying on an operational postal service. You're making the assumptions that:
+![alt by name space](img/by_namespace.png)
 
-1. A mail carrier will pick up your letter.
-2. A sorting facility will reliably route your letter to another post office.
-3. A mail carrier at the other post office will deliver your letter to its intended recipient.
+Any restriction on keys should be considered carefully as they must be built into the design of your keys when implementing your applications.OK, so that's ACLs in a nutshell.
 
-While securing a letter and securing a Redis deployment differ wildly in practice, you can refer to the CIA triad in both cases to plan your security strategy.
+**Benefits of Access Control Lists**
+- Command and Key Restrictions 
+- Mitigate damge from a compromised username and password
+- Reduce impact of mistakes 
 
-As security engineers or administrators, it's our responsibility to ensure that we always take confidentiality, integrity, and availability into consideration when we're designing secure systems. We'll frequently revisit these concepts throughout the course, so make sure you understand them before moving on.
+In the next unit, we'll see how ACLs work in practice,
+so stay tuned.
 
 
 ### III. Risk Assessment
