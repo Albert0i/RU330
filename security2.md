@@ -30,7 +30,7 @@ As you can imagine, this is rather dangerous. For this reason, Redis Enterprise 
 
 ![alt ransomw-2](img/ransom-2.png)
 
-See how they delete web servers and data files? This attack easily could have been prevented with some of the basic security controls we learned last week: enabling authentication and not running Redis as root. But it turns out that you can do even better than this by using Access Control Lists and abiding by the principle of least privilege. For the rest of this week, we'll see just how that is done.
+See how they delete web servers and data files? This attack easily could have been prevented with some of the basic security controls we learned last week: enabling authentication and not running Redis as root. But it turns out that you can do even better than this by using [Access Control Lists](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/) and abiding by the principle of least privilege. For the rest of this week, we'll see just how that is done.
 
 ![alt reduce-risk](img/reduce-risk.png)
 
