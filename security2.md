@@ -57,7 +57,7 @@ In general, you should be giving users the least amount of privilege used to per
 
 A good example of this is a Pub/Sub application. In a Pub/Sub pattern, you have a publisher and a subscriber. Your publishers will probably only need the ability to create data, while your subscribers will probably only need access to read from the channels they're subscribed to. Another way to implement the principle of least privilege is to restrict data based on key patterns using namespacing techniques.
 
-For example, if you do not want an administrator to be able to access sensitive data, you can prefix all of the keys that are sensitive with the secret namespace. Imagine that you had an accounts table that contained user names, user details, and password hashes. You can namespace the keys for each user to be secret:users and only give access to the secret namespace to the service account for your application. 
+For example, if you do not want an administrator to be able to access sensitive data, you can prefix all of the keys that are sensitive with the secret namespace. Imagine that you had an accounts table that contained user names, user details, and password hashes. You can namespace the keys for each user to be `secret:users` and only give access to the secret namespace to the service account for your application. 
 
 ![alt by name space](img/by_namespace.png)
 
