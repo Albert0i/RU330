@@ -20,7 +20,7 @@ This note claims that all your data has been encrypted. To get to the private ke
 
 According to [Duo Security](https://duo.com/decipher/over-18000-redis-instances-targeted-by-fake-ransomware), a cloud security vendor now owned by Cisco, over 18,000 Redis servers were affected. And we can assume that some undeserving attacker got a nice payday. This exploit affected Redis servers that were open to the internet and that either had no password, or a very weak password. Once the attackers had access to the Redis server, they ran a clever series of Redis commands that gave them access to the hosting server itself. Here's how it worked.
 
-First they issued a FLUSHALL command to remove all the data from the Redis server. Next, they set a single Redis key to the value of an SSH key. 
+First they issued a `FLUSHALL` command to remove all the data from the Redis server. Next, they set a single Redis key to the value of an SSH key. 
 
 ![alt ransomw-1](img/ransom-1.png)
 
