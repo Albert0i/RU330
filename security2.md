@@ -61,7 +61,7 @@ For example, if you do not want an administrator to be able to access sensitive 
 
 ![alt by name space](img/by_namespace.png)
 
-Any restriction on keys should be considered carefully as they must be built into the design of your keys when implementing your applications.OK, so that's ACLs in a nutshell.
+Any restriction on keys should be considered carefully as they must be built into the design of your keys when implementing your applications. OK, so that's ACLs in a nutshell.
 
 **Benefits of Access Control Lists**
 - Command and Key Restrictions 
