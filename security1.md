@@ -504,6 +504,10 @@ This will probably suffice:
 
 
 ### XI. Biblipgraphy 
+1. [New research shows 75% of ‘open’ Redis servers infected](https://www.imperva.com/blog/archive/new-research-shows-75-of-open-redis-servers-infected/)
+2. [The 2019 Cost of a Data Breach](https://securityintelligence.com/posts/whats-new-in-the-2019-cost-of-a-data-breach-report/)
+3. [Redis configuration file example](https://redis.io/docs/latest/operate/oss_and_stack/management/config-file/)
+4. [The murder of Roger Ackroyd by Agatha Christie](https://www.gutenberg.org/ebooks/69087)
 
 
 ### Epilogue 
