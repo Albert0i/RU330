@@ -14,6 +14,7 @@ Here's a Redis horror story-- the Redis ransom. Imagine that you woke up and not
 named READ_TO_DECRYPT. In it was a link to the note that you see here.
 
 ![alt ransomware](img/ransomware.png)
+![alt ransomware-2](img/ransomware-2.png)
 
 This note claims that all your data has been encrypted. To get to the private key that will decrypt your files, you just need to send two Bitcoin to the provided Bitcoin wallet address. So you pay the ransom. What do you get in return? Nothing. Your data is lost forever, and you're two Bitcoin poorer which today is like $20,000. This is exactly what happened in the Crackit exploit of 2016.
 
