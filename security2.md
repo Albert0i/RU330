@@ -184,64 +184,17 @@ Notice that each user declarative starts with the user directive. You'll also no
 
 So here, we've hashed the passwords. The pound sign tells Redis that these passwords have been hashed with the sha256 hash algorithm. So how do you hash your passwords? You can run them through the Linux shasum utility like this. 
 ```
-
+echo -n "pickle" | shasum -a 256
 ```
-Here, I'm getting the shasum for the password: pickle. But it's probably easier to start up a Redis instance, configure your ACLs from the command line, and then call ACL SAVE so that Redis will write out the configurations to a file for you.
-To do this, all you need is a user
-who has access to the @admin cat command category or permissions
-the ACL command.
-Let's use the command line to add a new user named Claude
-with the password: blueberry.
-Next, we'll call ACL SAVE.
-Now, if we open up our acl.conf file,
-we can see that Redis has written our ACL
-users alphabetically and in a fully normalized form.
-Here's the line with the user we just added.
-And notice that Redis writes out the hashed password for us.
-Once we've updated our ACL file locally,
-we need to get it into our Redis servers.
-We'll assume that you have a way of syncing configuration files
-to your production deployment.
-Once you've done that, issue an ACL LOAD command
-to each Redis server in your deployment.
-This will ensure a zero downtime update.
-Now, let's look at some commands you
-might run when you're administering ACLs
-from the Redis CLI.
-First, I'll run an ACL WHOAMI.
-This command will show me which user I'm currently
-logged in as.
-Here you can see, I'm logged in as Rick.
-To see a list of all Redis database users,
-run the ACL LIST command.
-Notice the default user is off and has access to no commands.
-You'll also see other users we've provisioned.
-We can also use the ACL CAT command
-to explore command categories.
-So here are all the categories.
-And as I said in the last unit, you
-can also use the ACL CAT command to see which commands
-each category includes.
-So here's what's included in the scripting commands category.
-OK, finally to delete a user, run the ACL DELUSER command.
-This is the sort of ACL modification
-you might need to make in production in the event
-of some kind of emergency.
-Just be sure that any change you make here also
-gets written back to your ACL configuration files.
-At this point, you should have all the basic knowledge
-needed to start using ACLs with your own Redis deployments.
-There are a few more details in the Redis ACL docs, which you
-should explore at your leisure.
-We'll link to those docs in the course handout.
-Finally, for complex ACL setups that
-require role based access control,
-you should check out Redis Enterprise Cloud
-or Redis Enterprise Software.
-These products can really simplify the management
-of users and rules.
-OK, end of shameless plug.
-See you after the security tips.
+Here, I'm getting the shasum for the password: pickle. But it's probably easier to start up a Redis instance, configure your ACLs from the command line, and then call ACL SAVE so that Redis will write out the configurations to a file for you. To do this, all you need is a user who has access to the @admin cat command category or permissions the ACL command.
+
+Let's use the command line to add a new user named Claude with the password: blueberry. Next, we'll call ACL SAVE. Now, if we open up our acl.conf file, we can see that Redis has written our ACL users alphabetically and in a fully normalized form. Here's the line with the user we just added. And notice that Redis writes out the hashed password for us. Once we've updated our ACL file locally, we need to get it into our Redis servers. We'll assume that you have a way of syncing configuration files to your production deployment. Once you've done that, issue an ACL LOAD command to each Redis server in your deployment. This will ensure a zero downtime update. Now, let's look at some commands you might run when you're administering ACLs from the Redis CLI.
+
+First, I'll run an ACL WHOAMI. This command will show me which user I'm currently logged in as. Here you can see, I'm logged in as Rick. To see a list of all Redis database users, run the ACL LIST command. Notice the default user is off and has access to no commands. You'll also see other users we've provisioned. We can also use the ACL CAT command to explore command categories. So here are all the categories. And as I said in the last unit, you can also use the ACL CAT command to see which commands each category includes. So here's what's included in the scripting commands category. OK, finally to delete a user, run the ACL DELUSER command.
+
+This is the sort of ACL modification you might need to make in production in the event of some kind of emergency. Just be sure that any change you make here also gets written back to your ACL configuration files. At this point, you should have all the basic knowledge needed to start using ACLs with your own Redis deployments. There are a few more details in the Redis ACL docs, which you should explore at your leisure. We'll link to those docs in the course handout.
+
+Finally, for complex ACL setups that require role based access control, you should check out Redis Enterprise Cloud or Redis Enterprise Software. These products can really simplify the management of users and rules. OK, end of shameless plug. See you after the security tips.
 
 > The best way to manage ACL users in Redis is to specify them in an ACL configuration file. If you have just a few users, you can configure them directly in the redis.conf configuration file. For large and complex ACL setups, you can and should write them to a separate configuration file.
 
