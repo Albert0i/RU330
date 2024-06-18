@@ -323,6 +323,8 @@ A password like imadolphin is probably too short for production. I recommend tha
 
 So what I've just described is the most basic form of Redis authentication. In this case, there's only a single user and password for all people and services accessing Redis. It's a much better practice to use finer-grained per-user access control. Redis supports these with ACLs or Access Control Lists, and we'll discuss these next week.
 
+> Outside of securing external systems, setting a strong password on Redis and changing the default port would prevent common automated exploits.
+
 
 ### VIII. [Securing Redis Client Code](https://youtu.be/JquRVRKYTxk)
 In this unit, we're going to cover common techniques for securing the client-side code that interacts with Redis. But first, some good news. One of the most well-known security exploits in the database world is [SQL injection](https://en.wikipedia.org/wiki/SQL_injection). Because Redis doesn't use a query language, malicious injection isn't a real concern with Redis, so don't worry about SQL injection.
@@ -346,6 +348,8 @@ The company owes you $100 just for ordering their product. While it may be great
 OK. So in addition to validating any input that's used to construct keys, you also need to be a little careful with [Lua](https://redis.io/docs/latest/develop/interact/programmability/eval-intro/) scripts. You may remember that Redis embeds a Lua interpreter so that you can write scripts in Redis for more complex business logic. If you're not familiar with Lua scripting in Redis, see [RU101](https://redis.io/university/courses/ru101/) intro course. Anyway, it should go without saying that you should never accept a Redis Lua script as a user input. Similarly, you should never dynamically construct a Redis Lua script from user input. As long as you're never constructing Lua scripts from your user input, you should be safe from any kind of Lua script injection.
 
 So to recap, SQL injection is not a problem in Redis because Redis doesn't use a query language, let alone SQL. If you're dynamically constructing keys based on user input, then validate that input. And finally, Lua scripts can provide an injection attack vector if you construct them based on user input, so just don't do that. Lua scripts should always be written by your own developers.
+
+> It's quite common for Redis key names to be dynamically generated. A maliciously generated keyname could grant an attacker access to an unintended API endpoint.
 
 
 ### IX. [Disaster Recovery and Availability](https://youtu.be/n8YOQwUwq2g)
@@ -504,6 +508,8 @@ This will probably suffice:
        notifempty
        missingok
 ```
+
+> The fsync policy appendfsync always favors durability over performance and should be used when there is a high cost for data loss.
 
 
 ### XI. Biblipgraphy 
