@@ -148,65 +148,45 @@ acl setuser cacheservice on >cacheme +set +get ~cache:*
 
 Here, we create the cacheservice user. We set the user to on. Then, we provide a password. Now comes the permissions. The cache service can run two commands, SET and GET. We indicate that with the +SET and +GET rules, we also limit the queues that the cache service can touch. The rule ~cache:* restricts this user to the keys beginning with cache: . 
 
-Let's log in as the cache service. If we try to set the key, data:123, we get a NOPERM error, saying that we don't have access to the given key. That's because we're limited to certain keys in the Redis key space. Let's try again with the key, cache:123 In this case, the command succeeds. We also get the same key. Notice that we can't run any other commands as the cache user. If we do, we'll get a no permissions error. 
+Let's log in as the cache service. If we try to set the key, `data:123`, we get a NOPERM error, saying that we don't have access to the given key. That's because we're limited to certain keys in the Redis key space. Let's try again with the key, `cache:123` In this case, the command succeeds. We also get the same key. Notice that we can't run any other commands as the cache user. If we do, we'll get a no permissions error. 
 
 You should now have a basic idea about how to create users and ACLs. And you're probably already thinking about how you might assign your own administrative users, developers, and service accounts their respective ACLs. To learn more about Redis ACLs and get all of the details on the ACL rule syntax, we encourage you to check the Redis docs. 
 
+> Before deployment, disable the default user and set an admin user. The default user exists in every Redis deployment and has full permissions, which is considered dangerous as an attacker will expect its presence as a way to access your data.
+
 
 ### IV. [Administering Redis ACLs](https://youtu.be/Q1rPFw6Iz64)
-The best way to manage ACL users in Redis
-is to specify them in an ACL configuration file.
-If you have just a few users, you can configure them directly
-in the Redis conf config file.
-But for more complex ACL setups, you
-can and should write them to a separate configuration file.
-In this unit, we're going to show you just how to do that.
-But before we move on, let me just
-do a quick shameless plug and say
-that if you have dozens of users and complex roles to configure,
-then you might want to check out Redis Enterprise Software
-or Redis Enterprise Cloud.
-Both of these products feature role
-based access control or RBAC for short.
-And that means that you can define generic roles
-and then assign those roles to your users.
-And all of this is done using a user friendly UI.
-So this will likely be more convenient if you're
-a bigger organization.
-OK, back to our open source Redis.
-when you're configuring access control lists in a file,
-you want to start with the user directive, followed
-by the syntax used with the ACL SETUSER command.
-Let's see how we'd store the three users
-we created in the last unit.
-We're going to store this configuration
-in a file called acl.conf.
-We're referencing the file from a redis.conf file,
-as you can see here.
-So let's now open up acf.conf.
-First, we disable the default user.
-Next, we specify our three users: Falco, Rick,
-and cacheservice.
-Notice that each user declarative
-starts with the user directive.
-You'll also notice a long, encoded string
-beginning with a pound sign.
-This is the user's password hashed with the sha256 hash
-function.
-If you're going to store ACL configuration in a file,
-it's really important never to store the passwords
-as plain text.
-So here, we've hashed the passwords.
-The pound sign tells Redis that these passwords
-have been hashed with the sha256 hash algorithm.
-So how do you hash your passwords?
-You can run them through the Linux shasum utility like this.
-Here, I'm getting the shasum for the password: pickle.
-But it's probably easier to start up a Redis instance,
-configure your ACLs from the command line,
-and then call ACL SAVE so that Redis
-will write out the configurations
-to a file for you.
+The best way to manage ACL users in Redis is to specify them in an ACL configuration file. If you have just a few users, you can configure them directly in the Redis conf config file. But for more complex ACL setups, you can and should write them to a separate configuration file.
+
+> Use an external Redis ACL file to manage ACLs
+
+In this unit, we're going to show you just how to do that. But before we move on, let me just do a quick shameless plug and say that if you have dozens of users and complex roles to configure, then you might want to check out Redis Enterprise Software or Redis Enterprise Cloud. Both of these products feature role based access control or RBAC for short. And that means that you can define generic roles and then assign those roles to your users. And all of this is done using a user friendly UI. So this will likely be more convenient if you're a bigger organization.
+
+> Redis Enterprise & Redis Enterprise Clould come with role based access control to simplify provisioning ACLs. 
+
+OK, back to our open source Redis. when you're configuring access control lists in a file, you want to start with the user directive, followed by the syntax used with the ACL SETUSER command. Let's see how we'd store the three users we created in the last unit. We're going to store this configuration in a file called `acl.conf`. We're referencing the file from a `redis.conf` file, as you can see here. So let's now open up `acf.conf`.
+
+First, we disable the default user. 
+```
+user default off 
+```
+
+Next, we specify our three users: Falco, Rick, and cacheservice. 
+```
+user falco on #80e5b5a554cccea7aad01d910203bb6364d2ae4b4f321cd91841821913a8574a +@all -@dangerous -@admin +acl|whoami allkeys 
+
+user rick on #6d08a4e630e4aa0d5cd873e65aea0a23df42de61073ecb49ef17158fe6a9dcea +@admin 
+
+user cacheservice on #a9c5ed4cb5ff21ddf0d2125554aa94c5ab487803bb27eca081b925cde8473360 +set +get ~cache:*
+```
+
+Notice that each user declarative starts with the user directive. You'll also notice a long, encoded string beginning with a pound sign. This is the user's password hashed with the sha256 hash function. If you're going to store ACL configuration in a file, it's really important never to store the passwordsas plain text.
+
+So here, we've hashed the passwords. The pound sign tells Redis that these passwords have been hashed with the sha256 hash algorithm. So how do you hash your passwords? You can run them through the Linux shasum utility like this. 
+```
+
+```
+Here, I'm getting the shasum for the password: pickle. But it's probably easier to start up a Redis instance, configure your ACLs from the command line, and then call ACL SAVE so that Redis will write out the configurations to a file for you.
 To do this, all you need is a user
 who has access to the @admin cat command category or permissions
 the ACL command.
@@ -262,6 +242,8 @@ These products can really simplify the management
 of users and rules.
 OK, end of shameless plug.
 See you after the security tips.
+
+> The best way to manage ACL users in Redis is to specify them in an ACL configuration file. If you have just a few users, you can configure them directly in the redis.conf configuration file. For large and complex ACL setups, you can and should write them to a separate configuration file.
 
 
 ### V. [Installing Redis Securely](https://youtu.be/Qj5shmkyUDc)
