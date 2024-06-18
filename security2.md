@@ -77,7 +77,7 @@ Onscreen, you can see three ACL commands.
 
 FALCO
 ```
-acl setuser falco on >butterscotch +@all -@dngerous -@admin +acl|whoami allkeys 
+acl setuser falco on >butterscotch +@all -@dangerous -@admin +acl|whoami allkeys 
 ```
 
 RICK
