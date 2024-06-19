@@ -244,6 +244,26 @@ This will ensure a zero downtime update. Now, let's look at some commands you mi
 First, I'll run an `ACL WHOAMI`. This command will show me which user I'm currently logged in as. Here you can see, I'm logged in as Rick. To see a list of all Redis database users, run the `ACL LIST` command. Notice the default user is off and has access to no commands. You'll also see other users we've provisioned. We can also use the `ACL CAT` command to explore command categories. So here are all the categories. And as I said in the last unit, you can also use the ACL CAT command to see which commands each category includes. So here's what's included in the scripting commands category. 
 ```
 ACL CAT scripting 
+1) "script|flush"
+2) "script|help"
+3) "script|debug"
+4) "script|load"
+5) "script|exists"
+6) "script|kill"
+7) "eval"
+8) "fcall_ro"
+9) "function|load"
+10) "function|flush"
+11) "function|dump"
+12) "function|help"
+13) "function|delete"
+14) "function|kill"
+15) "function|restore"
+16) "function|list"
+17) "function|stats"
+18) "fcall"
+19) "evalsha"
+20) "evalsha_ro
 ```
 
 OK, finally to delete a user, run the` ACL DELUSER` command. This is the sort of ACL modification you might need to make in production in the event of some kind of emergency. Just be sure that any change you make here also gets written back to your ACL configuration files. At this point, you should have all the basic knowledge needed to start using ACLs with your own Redis deployments. There are a few more details in the Redis ACL docs, which you should explore at your leisure. We'll link to those docs in the course handout.
