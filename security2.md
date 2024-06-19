@@ -510,6 +510,10 @@ Now on the other hand, if the data on the system was not valuable to me, I'd jus
 | [MONITOR command](https://redis.io/docs/latest/commands/monitor/) | [HGETALL command](https://redis.io/commands/hgetall) | [MIGRATE command](https://redis.io/commands/migrate) |
 | [FLUSHALL command](https://redis.io/commands/flushall) | [ACL commands](https://redis.io/docs/latest/commands/?name=ACL) |  |
 
+[ACL USERS](https://redis.io/docs/latest/commands/acl-users/)
+[ACL GETUSER](https://redis.io/docs/latest/commands/acl-getuser/)
+[ACL DRYRUN](https://redis.io/docs/latest/commands/acl-dryrun/)
+
 
 ### VIII. Biblipgraphy 
 1. [OVER 18,000 REDIS INSTANCES TARGETED BY FAKE RANSOMWARE](https://duo.com/decipher/over-18000-redis-instances-targeted-by-fake-ransomware)
