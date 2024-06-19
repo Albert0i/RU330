@@ -420,7 +420,7 @@ The Redis log file is the other important log you need to be aware of. The Redis
 
 Redis has four logging levels, which you can configure directly in `redis.conf` file.
 
-Log Levels:`
+Log Levels:
 
 1. WARNING
 2. NOTICE
