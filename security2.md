@@ -304,259 +304,231 @@ Commands that may significantly impact performance are dangerous. If you're an e
 The final category of dangerous commands may impact the availability of your Redis database. For instance, the `FLUSHDB` and `FLUSHALL` commands will delete all of the data in your database. Likewise, the `SHUTDOWN` command will terminate the Redis process. Obviously, running this command on a production database will affect your applications negatively.
 
 
-### VI. [Basic Redis Security](https://youtu.be/BoZOZhDnxtI)
-Now that we've installed Redis securely, it's time to learn about the most basic Redis security settings. In this unit, we'll be discussing firewalling Redis, Redis' protected mode, and the default bind interface in the Redis configuration file. In the next unit, we'll discuss authentication. 
+### VI. Redis Logging
+Redis comes with two types of logs relevant to security: the ACL log and the Redis server log files.
 
-These are the most basic Redis security controls typically used with Redis. I strongly recommend that you run Redis behind a firewall and use authentication at all times in production. If you don't, you'll greatly increase the risk of a data compromise. Let's start with [firewalling](https://en.wikipedia.org/wiki/Firewall_(computing)). 
+**The ACL log allows you to see failed authentication attempts and failed access attempts when access to a key or command is blocked by an ACL.
+**
+The ACL log is stored in memory, in Redis itself. By default, the log stores 128 entries, but this is configurable.
 
-> In computing, a firewall is a network security system that monitors and controls incoming and outgoing network traffic based on predetermined security rules.
-
-Firewalling is the process of subdividing your network for improved security. Remember Redis Wannamine? This isn't the only attack targeting Redis. Here is an [article](https://www.imperva.com/blog/archive/new-research-shows-75-of-open-redis-servers-infected/) about another crypto mining campaign targeting Redis instances that happened to be open on the public internet. The number one rule for Redis, or any database for that matter, is to never allow a production deployment to be open on the public internet. 
-
-![alt Never Run Redis](img/Never_run_Redis.png)
-
-This means setting up a firewall and ensuring that your database is behind it with no exposed Redis ports. You should always deploy your database in a private network and connect to it using private IP addresses. If you're hosting Redis on your favorite public cloud, you typically deploy Redis in a virtual private network, which is better known as a VPC or VNet. If you're hosting Redis on-premises in a data center, you need to make sure that Redis is not hosted inside your demilitarized zone, that is your DMZ, and that you use a firewall to block access to Redis.
-
-This advice might seem obvious, but in reality, there are a lot of folks that still expose their database to the public internet. We can see some of these at [Shodan.io](https://www.shodan.io/), which is basically a search engine for public internet servers. Companies often use Shodan to monitor their networks, but the bad guys can use this tool just as easily. Let's type Redis into the search bar. Here, you can see a list of Redis servers open to the entire internet.
-
-![alt shodan.io](img/shodan.io.JPG)
-
-It would be trivial to connect to any of these servers. And yes, we've blurred the IP addresses for their protection. But you can see a full listing of information for each Redis server, everything from the server version to the compiler version. We can also see that some servers have no authentication enabled. If I wanted to hack this server, I've just hit the jackpot. If you scroll down in Shodan a bit, you'll see that other Redis servers don't share this information. That's because they're running in protected mode. 
-
-![alt protected mode](img/protected_mode.JPG)
-
-So what is protected mode? Protected mode helps us prevent new Redis deployments from being exposed to the world or even to your internal network. When Redis starts with the default configuration, it's automatically started in protected mode. In this mode, Redis will only reply to clients located on the same server that Redis is running on. If you connect from a remote host and try to run a command, you'll get an error message as you see here. So you have to disable protected mode to access Redis outside of the local host.So how do you disable protected mode? Typically, through the Redis conf file. You simply have to set protected mode to no here. 
-
-![alt protected mode no](img/protected_mode_no.png)
-
-The Redis conf file also comes with a default directive to bind exclusively to the local network interface. This means that Redis will only listen to connections coming to this specific IP address, which is, by default, the local loopback interface. To have Redis listen on all network interfaces, just comment out the bind directive. Or if you want to bind to a specific interface, provide that interface's IP address to the bind directive. 
-
-![alt bind loopback](img/bind_loopback.png)
-
-To review, don't ever expose your Redis server to the public internet. Ensure that you're firewalling and binding to the correct network interface, and be sure to disable protected mode only when you've secured your server with the network and, ideally, after you've enabled authentication. In the next unit, we'll get a basic introduction to authentication in Redis.
-
-
-### VII. [Basic Authentication](https://youtu.be/B4jxDMxVvYM)
-Now, let's talk about basic authentication. Using Redis without authentication is one of the worst Redis deployment practices we see in the wild. To run Redis securely, you really need to enable auth. There are two ways to do this. Prior to Redis 6, there was no concept of users. You simply set a single global password that controlled all access to the Redis server. In the Redis conf file, you can set this global password with the `requirepass` directive. Here, I'm setting the password to imadolphin. 
-
-![alt requirepass](img/requirepass.png)
-
-Now I'll restart Redis with the new config. Now, when I connect to Redis, I can't run any commands until I authenticate with this password. See? Here, I'm trying to run the `info` command, but I get a noauth authentication error. Now I'm going to authenticate by running the `auth` command and providing the configured password. If you're using a version of Redis before Redis 6, then this is your only option for enabling authentication. This `requirepass` directive still works in Redis 6 for backwards compatibility. But if you're running Redis 6 or later, then you should definitely use the `ACL` user directive instead. In Redis 6, there's now a default user called `default`. You need to make sure that this default user has a password since it won't have one to begin with. So I'm going to open up the Redis conf file and comment out the `requirepass` directive. Now, I'm setting the default user's password to imadolphin. I'm also giving this user all permissions to the database. This configuration is now equivalent to what we had with the `requirepass` directive before.
-
-![alt user default](img/user_default.png)
-
-Now I'll restart Redis with this new config. Now, when I log in, I need to authenticate as this default
-user before I can do anything. I use the same `auth` command to authenticate, but I also provide the user name, as you see here. Now I can run commands.
+#### Using ACL LOG
+To demonstrate, let's first create a new user 'john' with access to the key "foo" and the command GET.
 ```
-AUTH default imadolphin
-
-INFO
+> ACL SETUSER john on >password +get +acl ~foo*
 ```
 
-A couple notes on passwords-- 
-- first, you probably don't want to store plaintext passwords in the Redis conf file. We'll see how to store hash passwords here later in the course. 
-- Second, you want to make sure that passwords can't be cracked through brute force. 
-
-A password like imadolphin is probably too short for production. I recommend that you use a long, 128-character password, which would be practically impossible for an attacker to crack. How can you create such a long password? You can do this with Linux's shasum command. Here, I'm piping the password, imadolphin, to the shasum utility that comes with OS X. By specifying a 512-bit hash, I can create a password that's exactly 128 characters long. 
-
-![alt shasum](img/shasum.png)
-
-So what I've just described is the most basic form of Redis authentication. In this case, there's only a single user and password for all people and services accessing Redis. It's a much better practice to use finer-grained per-user access control. Redis supports these with ACLs or Access Control Lists, and we'll discuss these next week.
-
-
-### VIII. [Securing Redis Client Code](https://youtu.be/JquRVRKYTxk)
-In this unit, we're going to cover common techniques for securing the client-side code that interacts with Redis. But first, some good news. One of the most well-known security exploits in the database world is [SQL injection](https://en.wikipedia.org/wiki/SQL_injection). Because Redis doesn't use a query language, malicious injection isn't a real concern with Redis, so don't worry about SQL injection.
-
-What you do need to worry about is validating any input that's used to run commands against Redis. This is relevant when constructing Redis key names and running Lua scripts.
-
-Let's first look at key names. It's quite common in Redis to dynamically generate key names. Usually, you have a key naming pattern where you separate a different part of a key with a colon. For instance, if I'm storing user sessions in Redis, my keys might look like this. I'd start with a session to indicate the type of key, plus a colon, plus user to indicate the type of session, plus an ID representing that user. 
-
-![alt session user](img/session_user.png)
-
-If I had separate session keys for, say, an API, those keys might look like this. 
-
-![alt session api](img/session_api.png)
-
-Now let's look at a real-world example where unvalidated input might result in a user getting access to a key they shouldn't have access to. Suppose you run an e-commerce site that offers discounts for special promotions on your products. You have two API endpoints, one that gets the full product price and one that gets the value of the discount. The key for the price on the product you're purchasing is product colon 1234 while the key for the discount is product 1234 discount. The full price of the product is $200 while the discount gives you $100 off. Now, suppose your price API takes a product ID as one of its parameters. So a normal input would be 1234, and that would resolve internally to the key product 1234. See where I'm going with this? What if the attacker provided an ID of 1234 colon discount? Without any validation, this will resolve to the key product 1234 discount. That's a big problem because the value stored in that key is negative 100. Great deal, right?
-
-![alt normal hacker usage](img/normal_hacker_usage.png)
-
-The company owes you $100 just for ordering their product. While it may be great as a customer, it's terrible if you're an e-commerce company. That's why, when you design applications that will be constructing keys with untrusted data, you need to validate the input data. In this case, we need to make sure that the input consists of a series of digits and nothing more, no colons or other characters allowed. If the input doesn't validate, we'll send the user a 404 instead of giving them a $100 refund. 
-
-OK. So in addition to validating any input that's used to construct keys, you also need to be a little careful with [Lua](https://redis.io/docs/latest/develop/interact/programmability/eval-intro/) scripts. You may remember that Redis embeds a Lua interpreter so that you can write scripts in Redis for more complex business logic. If you're not familiar with Lua scripting in Redis, see [RU101](https://redis.io/university/courses/ru101/) intro course. Anyway, it should go without saying that you should never accept a Redis Lua script as a user input. Similarly, you should never dynamically construct a Redis Lua script from user input. As long as you're never constructing Lua scripts from your user input, you should be safe from any kind of Lua script injection.
-
-So to recap, SQL injection is not a problem in Redis because Redis doesn't use a query language, let alone SQL. If you're dynamically constructing keys based on user input, then validate that input. And finally, Lua scripts can provide an injection attack vector if you construct them based on user input, so just don't do that. Lua scripts should always be written by your own developers.
-
-
-### IX. [Disaster Recovery and Availability](https://youtu.be/n8YOQwUwq2g)
-It's time for our first security tip of the week. If you read about the CIA triad in the reading I gave you earlier, then you should remember the A for availability. Availability is the property that the services you need are available for use when you need them. So if you're concerned about Redis security, you need to be thinking about what might cause your Redis servers to fail and how to get them running again in the event of a failure. Failure doesn't always happen. But when it does, you want to have a plan for recovering from it. There are three ways to recover from a failure event-- persistence, replication, and backups. 
-
-- Persistence is how Redis stores data and moves it from memory to disk for use in the event of a reboot or service restart. 
-
-- Replication is the movement of data to one instance of Redis from another, usually on another server. 
-
-- Backups are cold copies of your data stored in a secure location. 
-
-You should understand the choices associated with configuring both persistence and replication in order to feed into your disaster recovery and availability strategy. 
-
-Let's first discuss persistence. Redis uses two files for persistence-- `RDB files` and `append-only files`, otherwise known as `AOF` files. RDB files provide point-in-time snapshots of the data stored within Redis. AOF files provide a more durable form of persistence that writes data as it's written to Redis continuously. A reading on persistence in detail will be provided following this video to help you understand the various levels of persistence associated with AOF and RDB files. Persistence shouldn't be your only backup and recovery strategy though. It will only help in a small subset of failure events. 
-
-Replication through a Redis cluster is also a great recovery strategy. By deploying Redis in a cluster that uses replication, you can easily failover from one node or shard to another in the event that one fails. To deploy a higher availability cluster, you need to set up Redis in a cluster mode and use `Sentinel`. This will help Redis stay available in the event of a failure resulting in a cluster partition. Sentinel will help you deploy a highly available cluster by introducing *failure monitoring*, *failure notification*, and *automated failover*. If you don't want to implement a clustering strategy alone, that's OK. Redis Enterprise, the commercial offering for Redis offered by Redis Labs, implements an automatic clustering and sharding strategy for you while allowing you to use Redis as if it was running as a standalone server. Redis Enterprise also supports *active-active replication*. Active-active replication allows you to read and write from databases within geographically distributed clusters with strong eventual consistency. This allows you to achieve geographically separated high availability. 
-
-Your security tip of the week is to remember that availability is part of the CIA triad, and to always consider persistence, availability, and disaster recovery in any security strategy.
-
-
-### X. Configuring Redis
-When it comes to RDB files there are two important concepts to know: save types and save frequencies.
-
-There are two save types within Redis: `BGSAVE` and `SAVE`.
-
-The `BGSAVE` command can be executed in the background and does not disrupt the processing of data within Redis.
-
-On the other hand, The `SAVE` command, will block any other command from executing within Redis. Typically `BGSAVE` should be used and is the default within Redis configuration.
-
-You can also set a save policy within Redis. Save policies are defined by the number of changes that occur within a given timeframe. If this threshold is met then Redis will automatically perform a backup.
-
-To define a save policy you need to define the number of changes that can occur within Redis within any given timeframe. If this threshold is met, you will automatically perform a background save.
-
-#### Save Configurations
-Let's demonstrate some save configurations.
-
-As we’ve said before, every Redis configuration should use the `redis.conf` file in production. All of these configurations are available within the `redis.conf` with the exact same directive names. Modern devops practices configure these with code.
-
-However, to demonstrate these configurations we’ll be using the config command throughout this course.
-
-Let's get started in the terminal.
-
-You can set the filename by setting the `dbfilename`.
+Then we can create two keys: foo and bar.
 ```
-> config set dbfilename rdb.rdb
-```
-And then the directory by setting the `dir`.
-```
-> config set dir /var/lib/redis
-```
-Lastly, we need to define a save policy.
-```
-> config set save "900 1 300 10 60 1000"
+> SET foo bar
+> SET bar foo
 ```
 
-You can have multiple save policies. Simply define the thresholds for time and changes that meet your data loss tolerance. You can define multiple thresholds to meet your requirements. In this example, a snapshot will be taken if one key is changed every 900 seconds, if 10 keys are changed within 300 seconds or if 1000 keys are changed within 60 seconds.
-
-Your persistence file will load from the locations that you have defined here, or within your `redis.conf` file using the same directive.
-
-#### Append-only Files
-With Append only files there are two important concepts to understand, setting your `fsync` policy and setting your rewrite policy.
-
-Lets first discuss `fsync`.
-
-The function, `fsync` is the function responsible for writing data from memory to disk within Redis. You can configure how redis writes to disk in order to most effectively make tradeoffs between performance and durability for your use case. Redis supports three `fsync` policies, `always`, `everysec` and `no`.
-
-With the policy **appendfsync always** Redis will wait for the write and the fsync to complete prior to sending an acknowledgement to the client that the data has written. This introduces the performance overhead of the fsync in addition to the execution of the command. The fsync policy always favors durability over performance and should be used when there is a high cost for data loss.
-
-With the policy **appendfsync everysec** Redis will fsync any newly written data every second. This policy balances performance and durability and should be used when minimal data loss is acceptable in the event of a failure. This is the default Redis policy. This policy could result in between 1 and 2 seconds worth of data loss but on average this will be closer to one second.
-
-Finally the policy **appendfsync no** is the last supported fsync policy. This policy favors performance over durability and will provide some, although minimal performance enhancements over fsync everysec at the cost of additional durability. You should only use this when everysec is too detrimental to performance for your taste, and you can afford the cost of additional data loss.
-
-**An important exception to this policy is for clients using pipelining. When you pipeline with writes, you accept the potential for data loss for a maximum performance benefit because your client will not wait for a reply when pipelining.**
-
-**You shouldn’t use an `fsync always` policy while pipelining writes because this will decrease your database performance without guaranteeing the durability you expect.**
-
-You can also set how frequently you want this file to be re-written. This can help prevent the append only file from becoming too big, and improve the speed at which you can recover from a failure. *A rewrite is achieved by reading data in memory to create a new file so that the shortest AOF file is able to always be used.* You can set the percentage increase in size or the size increase of your AOF files as the trigger for a rewrite.
-
-This is important to set to prevent your AOF file from filling your entire disk and to prevent startups from being too cumbersome.
-
-The append only file can be found in the same working directory that we set earlier for our RDB file.
-
-Like RDB, AOF files can be configured using the config command or the `redis.conf`.
-
-It's always best to configure these in the `redis.conf` file since some configurations are not supported using the config command.
-
-Lets turn on appendonly files using config in the command line.
-
-First turn on `appendonly` mode by setting it to `yes`. **Append-only is turned off by default**.
+When we authenticate as john, you can see that the user cannot set the key foo because he does not have access to the SET command and can not GET the key bar because he doesn’t have access to that key.
 ```
-> config set appendonly yes
-```
-Then you set the policy for `fsync`. We’re going to set this one to `always` because our application has a low data loss tolerance.
-```
-> config set appendfsync always
+> AUTH john password
+> SET foo pickle
+(error) NOPERM this user has no permissions to run the 'set' command or its subcommand >
+GET bar
+(error) NOPERM this user has no permissions to access one of the keys used as arguments
 ```
 
-Next, we’ll define our rewrite policy.
+We can call ACL LOG to view these failed access attempts.
 ```
-# Automatic rewrite of the append only file.
-# Redis is able to automatically rewrite the log file implicitly calling
-# BGREWRITEAOF when the AOF log size grows by the specified percentage.
-#
-# This is how it works: Redis remembers the size of the AOF file after the
-# latest rewrite (if no rewrite has happened since the restart, the size of
-# the AOF at startup is used).
-#
-# This base size is compared to the current size. If the current size is
-# bigger than the specified percentage, the rewrite is triggered. Also
-# you need to specify a minimal size for the AOF file to be rewritten, this
-# is useful to avoid rewriting the AOF file even if the percentage increase
-# is reached but it is still pretty small.
-#
-# Specify a percentage of zero in order to disable the automatic AOF
-# rewrite feature.
-
-auto-aof-rewrite-percentage 100
-auto-aof-rewrite-min-size 64mb
-```
-
-The rewrite policy here will rewrite after the aof file is 100 percent larger than it was during the last rewrite:
-```
-> config set auto-aof-rewrite-percentage 100
-```
-
-This could be an issue if our database is already huge though. What if it has massive turnover for a small subset of its keys. To fix this, we’ll also set a minimum size for the rewrite.
-
-We’ll set ours here to 64 megabytes:
-```
-> config set auto-aof-rewrite-min-size 64mb
-```
-
-There are two important options you should be aware of when it comes to configuration of durability for AOF. Rewrite `fsync` handling and persistence with both the AOF and the RDB files.
-
-First let's look at how to handle fsync on AOF file rewrites.
-
-If you have extreme latency sensitivity and can accept some data loss, a configuration you may want to consider is `no-appendfsync-on-rewrite`.
-
-This will block Redis from calling `fsync` while performing a save, which will enhance performance. This generally is not recommended unless you are able to accept the risk of some data loss during this time and have extreme performance requirements.
-
-Finally, you need to consider that recovery speeds can be improved by using both aof and RDB files to recover data. You can set aof files to use the rdb file as a preamble to improve recovery speed:
-
-#### Log Rotation
-Log rotation helps you to ensure that the logs on your operating system don’t fill up disk space, which could result in an application issue if the disks are not partitioned separately. Also, it helps you to ensure that your Redis logs do not grow unnecessarily large.
-
-While it depends on your distribution, log rotation is typically found in `/etc/logrotate.conf`. If you configure your Redis logs to be archived or sent to an external log server, log rotation is a prudent way to protect availability while ensuring that your server logs are still auditable. Consider log rotation and external logging strategies for all Redis logs. An example of Redis log rotation can be found at [Stack Overflow](https://stackoverflow.com/questions/5496014/redis-logrotate-config#5564481).
-
-This will probably suffice:
-```
-/var/log/redis/*.log {
-       weekly
-       rotate 10
-       copytruncate
-       delaycompress
-       compress
-       notifempty
-       missingok
+> ACL LOG
+1)  1) "count"
+    2) (integer) 1
+    3) "reason"
+    4) "key"
+    5) "context"
+    6) "toplevel"
+    7) "object"
+    8) "bar"
+    9) "username"
+   10) "john"
+   11) "age-seconds"
+   12) "3.8490000000000002"
+   13) "client-info"
+   14) "id=4 addr=127.0.0.1:36758 fd=8 name= age=46 idle=0 flags=N db=0 sub=0
+psub=0 multi=-1 qbuf=22 qbuf-free=32746 obl=0 oll=0 omem=0 events=r cmd=get user=john"
+2)  1) "count"
+    2) (integer) 1
+    3) "reason"
+    4) "command"
+    5) "context"
+    6) "toplevel"
+    7) "object"
+    8) "set"
+    9) "username"
+   10) "john"
+   11) "age-seconds"
+   12) "10.545999999999999"
+   13) "client-info"
+   14) "id=4 addr=127.0.0.1:36758 fd=8 name= age=39 idle=0 flags=N db=0 sub=0
+psub=0 multi=-1 qbuf=34 qbuf-free=32734 obl=0 oll=0 omem=0 events=r cmd=set user=john"
 ```
 
+The ACL LOG output shows the following:
 
-### XI. Biblipgraphy 
+1. The reason a command was blocked
+- This can be seen under "reason". Reasons may be "auth", "command", and "key".
+2. The object denied access.
+- This may be a command, a key, or the user for whom authentication failed.
+3. How long ago the failure occurred
+4. The connection information for the client and user who requested the failed command.
+
+The ACL log is especially useful when you're troubleshooting application failures. The log can also help you to identify compromised connections.
+
+You can limit the number of log entries that are shown by appending a number to the ACL LOG. For example, here's how to request the two most recent log entries:
+```
+> ACL LOG 2
+```
+
+Since the ACL log is stored in memory, there are two ways to limit it: resetting the log or setting a maximum length. To clear the log, you can call the ACL LOG RESET command:
+```
+> ACL LOG RESET
+```
+
+To set a maximum length, you can set the acllog-max-len directive in the `redis.conf` file:
+```
+acllog-max-len 10
+```
+
+#### Setting up and using the Redis Log File
+The Redis log file is the other important log you need to be aware of. The Redis log file contains useful information for troubleshooting errors configuration and deployment errors. If you don't configure Redis logging, troubleshooting will be *significantly* harder.
+
+Redis has four logging levels, which you can configure directly in `redis.conf` file.
+
+Log Levels:`
+
+1. WARNING
+2. NOTICE
+3. VERBOSE
+4. DEBUG
+
+Redis also supports sending the log files to a remote logging server through the use of syslog.
+
+Remote logging is important to many security professionals. These remote logging servers are frequently used to monitor security events and manage incidents. These centralized log servers perform three common functions: ensure the integrity of your log files, ensure that logs are retained for a specific period of time, and to correlate logs against other system logs to discover potential attacks on your infrastructure.
+
+Let's set up logging on our Redis deployment. First we'll open our `redis.conf` file
+```
+$ sudo vi /etc/redis/redis.conf
+```
+
+The redis.conf file has an entire section dedicated to logging.
+
+First, find the `logfile` directive in the redis.conf file. This will allow you to define the logging directory. For this example lets use `/var/log/redis/redis.log`.
+
+If you'd like to use a remote logging server, then you'll need to uncomment the lines `syslog-enabled`, `syslog-ident` and `syslog-facility`, and ensure that `syslog-enabled` is set to `yes`.
+
+Next, we'll restart the Redis server.
+
+You should see the log events indicating that Redis is starting.
+```
+$ sudo tail -f /var/log/redis/redis.log
+```
+
+And next let's check that we are properly writing to syslog. You should see these same logs.
+```
+$ less /var/log/syslog | grep redis
+```
+
+Finally, you’ll need to send your logs to your remote logging server to ensure your logs will be backed up to this server. To do this, you’ll also have to modify the rsyslog configuration. This configuration varies depending on your remote logging server provider. Check with your administrator or DevOps team for details on this.
+
+
+### VII. [An Attacker's Perspective](https://youtu.be/NmPv15JJm5Y)
+Start of transcript. Skip to the end.
+At this point, I'm sure you understand
+that the majority of Redis exploits
+are caused by administrators exposing Redis directly
+to the internet and by not enabling authentication.
+After all, you've heard our horror stories.
+ACLs are important because they limit attack surface.
+But to limit attack surface, you need
+to understand a few post-exploitation techniques.
+Post-exploitation is what happens when an attacker has
+gained access to a system.
+This should get you thinking about exactly what you
+need to protect against.
+To do that, let's look at an attacker's perspective.
+Here's how I'd attack Redis if I were an attacker.
+First, I'd run the SCAN command to get a general sense
+of which keys exist.
+If I were a less-adept attacker, I
+might run the KEYS command, which returns
+every key on the Redis server.
+The problem with this command is that it might raise alarms.
+The KEYS command blocks until it completes.
+For this reason, KEYS is considered a dangerous command,
+so don't ever run it in production yourself.
+I might also run the MONITOR command --
+another dangerous command.
+The MONITOR command streams every command sent
+to Redis back to your client.
+This would allow me to see in real time exactly
+what's sent to the server.
+Once I had some key names, I'd run the TYPE command.
+This would show me what commands I could run against the keys
+that I had access to.
+For instance, here I have a hash.
+So I can use the HGETALL command to see what's inside.
+Look at all the sensitive data.
+I've just found someone's personal information.
+I've hit the jackpot.
+Before leaving though, I need to add one more thing --
+a backdoor user using the ACL SETUSER command.
+This would allow me to log back in later and continue my work.
+In this case, I've named the user applicationuser
+and given this user all permissions.
+I'll even persist it to your ACL configuration file.
+This ambiguous naming might get past any cursory check
+of the currently allowed users.
+So this incidentally shows why it's
+important to regularly review the accounts in your database.
+This is the approach often used by a low-and-slow type
+of attacker.
+These attackers are the most dangerous
+because they're hard to detect.
+Another type of attacker is the destructive one.
+As a destructive attacker, I do two things.
+If I thought your data was valuable,
+I'd use the MIGRATE command to send the data to my own Redis
+server.
+MIGRATE moves the entire key and removes it
+from its origin database.
+Here, I'm migrating the key secret:users:1
+to my own server.
+I can save these details for a later targeted attack
+using this user's personal information.
+Now on the other hand, if the data on the system
+was not valuable to me, I'd just drop the database
+using the FLUSHALL command.
+Now if I run KEYS, the database no longer exists.
+Pretty scary, huh?
+That's why access controls like ACLs are so important.
+You can help stop the bad guys from getting in,
+and you can stop them from stealing data or destroying
+your database.
+End of transcript. Skip to the start.
+
+[SCAN command](https://redis.io/commands/scan)
+[KEYS command](https://redis.io/commands/keys)
+[TYPE command](https://redis.io/commands/type)
+[MONITOR command](https://redis.io/docs/latest/commands/monitor/)
+[HGETALL command](https://redis.io/commands/hgetall)
+[MIGRATE command](https://redis.io/commands/migrate)
+[FLUSHALL command](https://redis.io/commands/flushall)
+[ACL commands](https://redis.io/docs/latest/commands/?name=ACL)
+
+
+### VIII. Biblipgraphy 
 1. [OVER 18,000 REDIS INSTANCES TARGETED BY FAKE RANSOMWARE](https://duo.com/decipher/over-18000-redis-instances-targeted-by-fake-ransomware)
-2. [The 2019 Cost of a Data Breach](https://securityintelligence.com/posts/whats-new-in-the-2019-cost-of-a-data-breach-report/)
+2. [SHA256 Online Tools](https://emn178.github.io/online-tools/sha256.html)
 3. [Redis configuration file example](https://redis.io/docs/latest/operate/oss_and_stack/management/config-file/)
 4. [The murder of Roger Ackroyd by Agatha Christie](https://www.gutenberg.org/ebooks/69087)
-
-[ACL](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/)
 
 
 ### Epilogue 
 > a man may work towards a certain object, may labour and toil to attain a certain kind of leisure and occupation, and then find that, after all, he yearns for the old busy days, and the old occupations that he thought himself so glad to leave?
 
 
-### EOF (2024/06/17)
+### EOF (2024/06/21)
