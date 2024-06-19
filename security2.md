@@ -298,7 +298,7 @@ Finally, for complex ACL setups that require role based access control, you shou
 **Addendum**
 
 1. As far as I can test in Redis 7.2.4, `ACL INFO` has to be granted *explictly* with a `+acl|whoami` even though the user already in @admin. 
-2. Redis is rather stringent then prudence in determining the category. As you may see in the `SET` command documentation: Time complexity is O(1) but ACL category is @slow. A search for @dangerous command yields 75, @slow command yields 271! 
+2. Redis is rather stringent than prudence in determining the category. As you may see in the `SET` command documentation: Time complexity is O(1) but ACL category is @slow. A search for @dangerous command yields 75, @slow command yields 271! 
 
 ![alt set command](img/set-command.jpg)
 
