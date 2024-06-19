@@ -286,7 +286,7 @@ You probably noticed that Redis has an entire ACL category dedicated to dangerou
 
 So what are dangerous commands, and why are they dangerous?
 
-Dangerous commands include administrative commands and other commands that may negatively affect database performance or render your database unavailable.
+**Dangerous commands include administrative commands and other commands that may negatively affect database performance or render your database unavailable.**
 
 As a general rule, you should avoid running dangerous commands in production.
 
