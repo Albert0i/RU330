@@ -498,6 +498,7 @@ If I were a less-adept attacker, I might run the `KEYS` command, which returns e
 
 I might also run the `MONITOR` command -- another dangerous command. The `MONITOR` command streams every command sent to Redis back to your client. This would allow me to see in real time exactly what's sent to the server. Once I had some key names, I'd run the `TYPE` command. This would show me what commands I could run against the keys that I had access to. For instance, here I have a hash. So I can use the `HGETALL` command to see what's inside. 
 ```
+TYPE secret:user:1
 HGETALL secret:user:1
 ```
 
