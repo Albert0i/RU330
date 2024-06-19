@@ -307,8 +307,8 @@ The final category of dangerous commands may impact the availability of your Red
 ### VI. Redis Logging
 Redis comes with two types of logs relevant to security: the ACL log and the Redis server log files.
 
-**The ACL log allows you to see failed authentication attempts and failed access attempts when access to a key or command is blocked by an ACL.
-**
+**The ACL log allows you to see failed authentication attempts and failed access attempts when access to a key or command is blocked by an ACL.**
+
 The ACL log is stored in memory, in Redis itself. By default, the log stores 128 entries, but this is configurable.
 
 #### Using ACL LOG
