@@ -270,6 +270,10 @@ OK, finally to delete a user, run the` ACL DELUSER` command. This is the sort of
 
 At this point, you should have all the basic knowledge needed to start using ACLs with your own Redis deployments. There are a few more details in the Redis ACL docs, which you should explore at your leisure. We'll link to those docs in the course handout.
 
+[ACL commands at Redis.io](https://redis.io/commands#server)
+
+[ACL documentation at Redis.io](https://redis.io/topics/acl)
+
 Finally, for complex ACL setups that require role based access control, you should check out Redis Enterprise Cloud or Redis Enterprise Software. These products can really simplify the management of users and rules. OK, end of shameless plug. See you after the security tips.
 
 ![alt enterprise acl](img/enterprise-acl.png)
