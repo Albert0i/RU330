@@ -180,6 +180,21 @@ But for more complex ACL setups, you can and should write them to a separate con
 > Use an external Redis ACL file to manage ACLs
 
 ```
+# Using an external ACL file
+#
+# Instead of configuring users here in this file, it is possible to use
+# a stand-alone file just listing users. The two methods cannot be mixed:
+# if you configure users here and at the same time you activate the external
+# ACL file, the server will refuse to start.
+#
+# The format of the external ACL user file is exactly the same as the
+# format that is used inside redis.conf to describe users.
+#
+# aclfile /etc/redis/users.acl
+```
+
+or 
+```
 # Included paths may contain wildcards. All files matching the wildcards will
 # be included in alphabetical order.
 # Note that if an include path contains a wildcards but no files match it when
