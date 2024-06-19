@@ -156,9 +156,42 @@ You should now have a basic idea about how to create users and ACLs. And you're 
 
 
 ### IV. [Administering Redis ACLs](https://youtu.be/Q1rPFw6Iz64)
-The best way to manage ACL users in Redis is to specify them in an ACL configuration file. If you have just a few users, you can configure them directly in the Redis conf config file. But for more complex ACL setups, you can and should write them to a separate configuration file.
+The best way to manage ACL users in Redis is to specify them in an ACL configuration file. If you have just a few users, you can configure them directly in the Redis conf config file. 
+```
+# Redis ACL users are defined in the following format:
+#
+#   user <username> ... acl rules ...
+#
+# For example:
+#
+#   user worker +@list +@connection ~jobs:* on >ffa9203c493aa99
+#
+# The special username "default" is used for new connections. If this user
+# has the "nopass" rule, then new connections will be immediately authenticated
+# as the "default" user without the need of any password provided via the
+# AUTH command. Otherwise if the "default" user is not flagged with "nopass"
+# the connections will start in not authenticated state, and will require
+# AUTH (or the HELLO command AUTH option) in order to be authenticated and
+# start to work.
+```
+
+But for more complex ACL setups, you can and should write them to a separate configuration file.
 
 > Use an external Redis ACL file to manage ACLs
+
+```
+# Included paths may contain wildcards. All files matching the wildcards will
+# be included in alphabetical order.
+# Note that if an include path contains a wildcards but no files match it when
+# the server is started, the include statement will be ignored and no error will
+# be emitted.  It is safe, therefore, to include wildcard files from empty
+# directories.
+#
+# include /path/to/local.conf
+# include /path/to/other.conf
+# include /path/to/fragments/*.conf
+#
+```
 
 In this unit, we're going to show you just how to do that. But before we move on, let me just do a quick shameless plug and say that if you have dozens of users and complex roles to configure, then you might want to check out Redis Enterprise Software or Redis Enterprise Cloud. Both of these products feature role based access control or RBAC for short. And that means that you can define generic roles and then assign those roles to your users. And all of this is done using a user friendly UI. So this will likely be more convenient if you're a bigger organization.
 
