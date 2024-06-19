@@ -508,7 +508,7 @@ You can help stop the bad guys from getting in,
 and you can stop them from stealing data or destroying
 your database.
 
-| Documentation at redis.io |
+|  |  |  |
 | ----------- | ----------- | ----------- |
 | [SCAN command](https://redis.io/commands/scan) | [KEYS command](https://redis.io/commands/keys) | [TYPE command](https://redis.io/commands/type) |
 | [MONITOR command](https://redis.io/docs/latest/commands/monitor/) | [HGETALL command](https://redis.io/commands/hgetall) | [MIGRATE command](https://redis.io/commands/migrate) |
