@@ -38,34 +38,90 @@ TLS solves all these problems, plus a few more. And the primary tools it uses to
 If you understand encryption, even on a basic level, then you have a much better idea of what you're doing when you're configuring TLS in your own Redis deployments. 
 
 
-### I. [Redis Horror Story #2](https://youtu.be/7VrOt4DETlo)
-Before we start looking at ACLs, let's explore a use case for ACLs, and a reason why you should never run Redis as a sudo user. 
-
-Here's a Redis horror story-- the Redis ransom. Imagine that you woke up and noticed your application was experiencing a complete outage. When you logged into your server both your database and web server were gone. All that was left was a smile file
-named READ_TO_DECRYPT. In it was a link to the note that you see here.
-
-![alt ransomware](img/ransomware.png)
-![alt ransomware-2](img/ransomware-2.png)
-
-This note claims that all your data has been encrypted. To get to the private key that will decrypt your files, you just need to send two Bitcoin to the provided Bitcoin wallet address. So you pay the ransom. What do you get in return? Nothing. Your data is lost forever, and you're two Bitcoin poorer which today is like $20,000. This is exactly what happened in the Crackit exploit of 2016.
-
-According to [Duo Security](https://duo.com/decipher/over-18000-redis-instances-targeted-by-fake-ransomware), a cloud security vendor now owned by Cisco, over 18,000 Redis servers were affected. And we can assume that some undeserving attacker got a nice payday. This exploit affected Redis servers that were open to the internet and that either had no password, or a very weak password. Once the attackers had access to the Redis server, they ran a clever series of Redis commands that gave them access to the hosting server itself. Here's how it worked.
-
-First they issued a `FLUSHALL` command to remove all the data from the Redis server. Next, they set a single Redis key to the value of an SSH key. 
-
-![alt ransomw-1](img/ransom-1.png)
-
-And after that, they used a couple of Redis `CONFIG` commands to write their SSH key to the server which enabled them to log in as root. If you're not familiar with it, the Redis `CONFIG` command allows you to update most Redis configuration settings using any Redis client.
-
-As you can imagine, this is rather dangerous. For this reason, Redis Enterprise completely disables this command. If you're running open source Redis, you should either disable this command or ensure that almost no one has privileges to run it. OK, so once an attacker had installed their SSH key, they could log into the server itself and delete whatever data they wanted. Here's the script they ran once they had access to the server. 
-
-![alt ransomw-2](img/ransom-2.png)
-
-See how they delete web servers and data files? This attack easily could have been prevented with some of the basic security controls we learned last week: enabling authentication and not running Redis as root. But it turns out that you can do even better than this by using [Access Control Lists](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/) and abiding by the principle of least privilege. For the rest of this week, we'll see just how that is done.
-
-![alt reduce-risk](img/reduce-risk.png)
-
-> Be sure to disable dangerous commands when they aren't needed, you never know how they will be used. 
+### II. [Redis Horror Story #3](https://youtu.be/foOn3sED2EM)
+Before we get into the meat of this unit,
+let's do one final horror story.
+We've talked a lot about how to secure Redis processes
+and Redis users.
+But what about the network connections themselves?
+In this final horror story, I want
+to talk about packet sniffing or packet capture.
+Packet sniffing is the act of recording
+the individual segments of data traveling over a network.
+And it's commonly used to analyze networks.
+The upshot is that it's pretty easy to record and view
+unencrypted network traffic.
+And that includes the traffic between your applications
+and your database.
+And if an attacker is sniffing your unencrypted network
+traffic, well, that can easily turn
+into the kind of horror stories we want to avoid.
+So let's quickly see just how easy
+it is to view unencrypted traffic on a network connection
+and how to prevent that with TLS.
+Here, you can see I have two terminal windows open,
+one is my Redis client and the other is Redis server.
+I'm here on the server now.
+I'll start my server in the least secure way
+I know, for demonstration purposes, obviously,
+without a configuration file and just with the defaults.
+Next, I'll disable protected mode from the command line
+so that we can make a remote connection.
+Finally, I'll launch tcpdump.
+tcpdump allows me to inspect all of the traffic running
+between my Redis client and the Redis server.
+Now, let's switch back to our client terminal window.
+I'll connect to the server I've just
+started using the Redis CLI.
+Now that I'm connected, I'll write some sensitive data
+to Redis.
+Here, I'm entering a gender, birthday, credit card number,
+and credit card expiration date.
+Now, let's look at the output of the tcpdump command.
+If you look closely, you'll see everything
+I just sent to Redis, including all
+of the sensitive data is there.
+In this example, I'm sniffing unencrypted data
+from the server where Redis is hosted.
+But this kind of surveillance can
+be run on any server, network switch, or router
+that sits between your Redis client and your Redis server.
+This means that usually there are quite a few opportunities
+for someone to sniff and record unencrypted network traffic.
+Running a traceroute from your client to your Redis server
+will give you an idea of just how many sniffing opportunities
+might exist.
+And you can't secure this network route
+because it's completely outside of your control.
+So let's see what happens if we encrypt our network
+traffic using TLS instead.
+I'm going to start Redis again, this time with TLS enabled.
+Now I'll clear my screen and start that tcpdump again.
+Moving back to my client screen, I'll
+now connect to Redis, this time using TLS.
+This means my connection is now encrypted.
+Now I'll issue the same command I did before.
+Then, let's look again at the tcpdump output.
+See the difference?
+All you can see now are what appear
+to be a bunch of random characters.
+This is the value of encryption in action.
+Encryption protects your sensitive data
+from prying eyes on the network.
+For the rest of the unit, I'm going
+to explain how TLS works and everything
+you need to know to set it up with Redis.
+But first, two key points to remember for now.
+First, if you're storing sensitive information in Redis,
+and most personal information is sensitive,
+then you should encrypt your Redis connections with TLS.
+Second, even if you're using TLS,
+avoid public networks if you can.
+If you're on a private network, you greatly
+limit the number of attack vectors.
+OK.
+So with that out of the way, let's learn about TLS
+and how to use it with Redis.
 
 
 ### II. [ACL Concepts](https://youtu.be/GuWWmR4od-A)
