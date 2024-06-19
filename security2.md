@@ -274,11 +274,11 @@ At this point, you should have all the basic knowledge needed to start using ACL
 
 [ACL documentation at Redis.io](https://redis.io/topics/acl)
 
+> The best way to manage ACL users in Redis is to specify them in an ACL configuration file. If you have just a few users, you can configure them directly in the redis.conf configuration file. For large and complex ACL setups, you can and should write them to a separate configuration file.
+
 Finally, for complex ACL setups that require role based access control, you should check out Redis Enterprise Cloud or Redis Enterprise Software. These products can really simplify the management of users and rules. OK, end of shameless plug. See you after the security tips.
 
 ![alt enterprise acl](img/enterprise-acl.png)
-
-> The best way to manage ACL users in Redis is to specify them in an ACL configuration file. If you have just a few users, you can configure them directly in the redis.conf configuration file. For large and complex ACL setups, you can and should write them to a separate configuration file.
 
 
 ### V. Dangerous Commands
