@@ -222,7 +222,7 @@ echo -n "pickle" | shasum -a 256
 
 Here, I'm getting the shasum for the password: pickle. But it's probably easier to start up a Redis instance, configure your ACLs from the command line, and then call `ACL SAVE` so that Redis will write out the configurations to a file for you. To do this, all you need is a user who has access to the @admin cat command category or permissions the ACL command.
 
-Let's use the command line to add a new user named Claude with the password: blueberry. Next, we'll call `ACL SAVE`. Now, if we open up our acl.conf file, we can see that Redis has written our ACL users alphabetically and in a fully normalized form. 
+Let's use the command line to add a new user named Claude with the password: blueberry. Next, we'll call `ACL SAVE`. 
 ```
 redis-cli 
 AUTH rick pickle 
@@ -230,6 +230,8 @@ ACL SETUSER claude on >buleberry +@admin
 ACL SAVE 
 EXIT
 ```
+
+Now, if we open up our acl.conf file, we can see that Redis has written our ACL users alphabetically and in a fully normalized form. 
 
 ![alt acl save](img/acl-save.png)
 
