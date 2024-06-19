@@ -436,7 +436,6 @@ Finally, you’ll need to send your logs to your remote logging server to ensure
 
 
 ### VII. [An Attacker's Perspective](https://youtu.be/NmPv15JJm5Y)
-Start of transcript. Skip to the end.
 At this point, I'm sure you understand
 that the majority of Redis exploits
 are caused by administrators exposing Redis directly
@@ -508,7 +507,6 @@ That's why access controls like ACLs are so important.
 You can help stop the bad guys from getting in,
 and you can stop them from stealing data or destroying
 your database.
-End of transcript. Skip to the start.
 
 [SCAN command](https://redis.io/commands/scan)
 
