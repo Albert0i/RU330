@@ -230,15 +230,15 @@ As a general rule, you should avoid running dangerous commands in production.
 #### Administrative commands
 You should consider most admin commands dangerous, as you want to prevent these commands from being run by an attacker at all costs.
 
-For example, the CONFIG command is an administrative command that allows you to modify the Redis configuration at runtime. Changing the configuration could disrupt applications and cause outages. CONFIG should only be used in production by those who understand what they are doing and only when absolutely required.
+For example, the `CONFIG` command is an administrative command that allows you to modify the Redis configuration at runtime. Changing the configuration could disrupt applications and cause outages. `CONFIG` should only be used in production by those who understand what they are doing and only when absolutely required.
 
-On the other hand, the LASTSAVE command is also an admin command and is therefore marked as dangerous. This command gives you the timestamp of the last successful write to disk. It's highly unlikely that this command could be used to damage Redis in any way.
+On the other hand, the `LASTSAVE` command is also an admin command and is therefore marked as dangerous. This command gives you the timestamp of the last successful write to disk. It's highly unlikely that this command could be used to damage Redis in any way.
 
 #### Dangerous commands may impact performance
-Commands that may significantly impact performance are dangerous. If you're an experienced Redis user, you probably know to avoid the KEYS command. The KEYS command scans all keys stored in the Redis server and blocks until it completes. This can take anywhere from several seconds to several minutes depending on the number of keys on the server, which means that this command can block other clients for quite some time. For this reason, KEYS is considered dangerous.
+Commands that may significantly impact performance are dangerous. If you're an experienced Redis user, you probably know to avoid the `KEYS` command. The `KEYS` command scans all keys stored in the Redis server and blocks until it completes. This can take anywhere from several seconds to several minutes depending on the number of keys on the server, which means that this command can block other clients for quite some time. For this reason, KEYS is considered dangerous.
 
 #### Dangerous commands may impact availability
-The final category of dangerous commands may impact the availability of your Redis database. For instance, the FLUSHDB and FLUSHALL commands will delete all of the data in your database. Likewise, the SHUTDOWN command will terminate the Redis process. Obviously, running this command on a production database will affect your applications negatively.
+The final category of dangerous commands may impact the availability of your Redis database. For instance, the `FLUSHDB` and `FLUSHALL` commands will delete all of the data in your database. Likewise, the `SHUTDOWN` command will terminate the Redis process. Obviously, running this command on a production database will affect your applications negatively.
 
 
 ### VI. [Basic Redis Security](https://youtu.be/BoZOZhDnxtI)
