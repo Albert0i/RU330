@@ -436,77 +436,11 @@ Finally, you’ll need to send your logs to your remote logging server to ensure
 
 
 ### VII. [An Attacker's Perspective](https://youtu.be/NmPv15JJm5Y)
-At this point, I'm sure you understand
-that the majority of Redis exploits
-are caused by administrators exposing Redis directly
-to the internet and by not enabling authentication.
-After all, you've heard our horror stories.
-ACLs are important because they limit attack surface.
-But to limit attack surface, you need
-to understand a few post-exploitation techniques.
-Post-exploitation is what happens when an attacker has
-gained access to a system.
-This should get you thinking about exactly what you
-need to protect against.
-To do that, let's look at an attacker's perspective.
-Here's how I'd attack Redis if I were an attacker.
-First, I'd run the SCAN command to get a general sense
-of which keys exist.
-If I were a less-adept attacker, I
-might run the KEYS command, which returns
-every key on the Redis server.
-The problem with this command is that it might raise alarms.
-The KEYS command blocks until it completes.
-For this reason, KEYS is considered a dangerous command,
-so don't ever run it in production yourself.
-I might also run the MONITOR command --
-another dangerous command.
-The MONITOR command streams every command sent
-to Redis back to your client.
-This would allow me to see in real time exactly
-what's sent to the server.
-Once I had some key names, I'd run the TYPE command.
-This would show me what commands I could run against the keys
-that I had access to.
-For instance, here I have a hash.
-So I can use the HGETALL command to see what's inside.
-Look at all the sensitive data.
-I've just found someone's personal information.
-I've hit the jackpot.
-Before leaving though, I need to add one more thing --
-a backdoor user using the ACL SETUSER command.
-This would allow me to log back in later and continue my work.
-In this case, I've named the user applicationuser
-and given this user all permissions.
-I'll even persist it to your ACL configuration file.
-This ambiguous naming might get past any cursory check
-of the currently allowed users.
-So this incidentally shows why it's
-important to regularly review the accounts in your database.
-This is the approach often used by a low-and-slow type
-of attacker.
-These attackers are the most dangerous
-because they're hard to detect.
-Another type of attacker is the destructive one.
-As a destructive attacker, I do two things.
-If I thought your data was valuable,
-I'd use the MIGRATE command to send the data to my own Redis
-server.
-MIGRATE moves the entire key and removes it
-from its origin database.
-Here, I'm migrating the key secret:users:1
-to my own server.
-I can save these details for a later targeted attack
-using this user's personal information.
-Now on the other hand, if the data on the system
-was not valuable to me, I'd just drop the database
-using the FLUSHALL command.
-Now if I run KEYS, the database no longer exists.
-Pretty scary, huh?
-That's why access controls like ACLs are so important.
-You can help stop the bad guys from getting in,
-and you can stop them from stealing data or destroying
-your database.
+At this point, I'm sure you understand that the majority of Redis exploits are caused by administrators exposing Redis directly to the internet and by not enabling authentication. After all, you've heard our horror stories. ACLs are important because they limit attack surface. But to limit attack surface, you need to understand a few post-exploitation techniques. Post-exploitation is what happens when an attacker has gained access to a system. This should get you thinking about exactly what you need to protect against. To do that, let's look at an attacker's perspective. Here's how I'd attack Redis if I were an attacker. First, I'd run the SCAN command to get a general sense of which keys exist.
+
+If I were a less-adept attacker, I might run the KEYS command, which returns every key on the Redis server. The problem with this command is that it might raise alarms. The KEYS command blocks until it completes. For this reason, KEYS is considered a dangerous command, so don't ever run it in production yourself. I might also run the MONITOR command -- another dangerous command. The MONITOR command streams every command sent to Redis back to your client. This would allow me to see in real time exactly what's sent to the server. Once I had some key names, I'd run the TYPE command. This would show me what commands I could run against the keys that I had access to. For instance, here I have a hash. So I can use the HGETALL command to see what's inside. Look at all the sensitive data. I've just found someone's personal information. I've hit the jackpot. Before leaving though, I need to add one more thing --
+
+a backdoor user using the ACL SETUSER command. This would allow me to log back in later and continue my work. In this case, I've named the user applicationuser and given this user all permissions. I'll even persist it to your ACL configuration file. This ambiguous naming might get past any cursory check of the currently allowed users. So this incidentally shows why it's important to regularly review the accounts in your database. This is the approach often used by a low-and-slow type of attacker. These attackers are the most dangerous because they're hard to detect. Another type of attacker is the destructive one. As a destructive attacker, I do two things. If I thought your data was valuable, I'd use the MIGRATE command to send the data to my own Redis server. MIGRATE moves the entire key and removes it from its origin database. Here, I'm migrating the key secret:users:1 to my own server. I can save these details for a later targeted attack using this user's personal information. Now on the other hand, if the data on the system was not valuable to me, I'd just drop the database using the FLUSHALL command. Now if I run KEYS, the database no longer exists. Pretty scary, huh? That's why access controls like ACLs are so important. You can help stop the bad guys from getting in, and you can stop them from stealing data or destroying your database.
 
 |  |  |  |
 | ----------- | ----------- | ----------- |
