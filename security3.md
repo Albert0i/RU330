@@ -35,7 +35,7 @@ TLS solves all these problems, plus a few more. And the primary tools it uses to
 - Encryption 
 - Public key infrastructure 
 
-If you understand encryption, even on a basic level, then you have a much better idea of what you're doing when you're configuring TLS in your own Redis deployments. This is the final week of the course. I'm really glad you're here. And I encourage you to stick with it to the end.
+If you understand encryption, even on a basic level, then you have a much better idea of what you're doing when you're configuring TLS in your own Redis deployments. 
 
 
 ### I. [Redis Horror Story #2](https://youtu.be/7VrOt4DETlo)
