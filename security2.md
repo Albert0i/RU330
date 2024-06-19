@@ -197,7 +197,7 @@ In this unit, we're going to show you just how to do that. But before we move on
 
 > Redis Enterprise & Redis Enterprise Clould come with role based access control to simplify provisioning ACLs. 
 
-OK, back to our open source Redis. when you're configuring access control lists in a file, you want to start with the user directive, followed by the syntax used with the ACL SETUSER command. Let's see how we'd store the three users we created in the last unit. We're going to store this configuration in a file called `acl.conf`. We're referencing the file from a `redis.conf` file, as you can see here. So let's now open up `acf.conf`.
+OK, back to our open source Redis. when you're configuring access control lists in a file, you want to start with the `user` directive, followed by the syntax used with the `ACL SETUSER` command. Let's see how we'd store the three users we created in the last unit. We're going to store this configuration in a file called `acl.conf`. We're referencing the file from a `redis.conf` file, as you can see here. So let's now open up `acf.conf`.
 
 First, we disable the default user. 
 ```
@@ -213,9 +213,9 @@ user rick on #6d08a4e630e4aa0d5cd873e65aea0a23df42de61073ecb49ef17158fe6a9dcea +
 user cacheservice on #a9c5ed4cb5ff21ddf0d2125554aa94c5ab487803bb27eca081b925cde8473360 +set +get ~cache:*
 ```
 
-Notice that each user declarative starts with the user directive. You'll also notice a long, encoded string beginning with a pound sign. This is the user's password hashed with the sha256 hash function. If you're going to store ACL configuration in a file, it's really important never to store the passwordsas plain text.
+Notice that each user declarative starts with the user directive. You'll also notice a long, encoded string beginning with a pound sign. This is the user's password hashed with the sha256 hash function. *If you're going to store ACL configuration in a file, it's really important never to store the passwordsas plain text*.
 
-So here, we've hashed the passwords. The pound sign tells Redis that these passwords have been hashed with the sha256 hash algorithm. So how do you hash your passwords? You can run them through the Linux shasum utility like this. 
+So here, we've hashed the passwords. The pound sign tells Redis that these passwords have been hashed with the [sha256](https://computersciencewiki.org/index.php/SHA256) hash algorithm. So how do you hash your passwords? You can run them through the Linux shasum utility like this. 
 ```
 echo -n "pickle" | shasum -a 256
 ```
