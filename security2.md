@@ -186,114 +186,59 @@ So here, we've hashed the passwords. The pound sign tells Redis that these passw
 ```
 echo -n "pickle" | shasum -a 256
 ```
-Here, I'm getting the shasum for the password: pickle. But it's probably easier to start up a Redis instance, configure your ACLs from the command line, and then call ACL SAVE so that Redis will write out the configurations to a file for you. To do this, all you need is a user who has access to the @admin cat command category or permissions the ACL command.
 
-Let's use the command line to add a new user named Claude with the password: blueberry. Next, we'll call ACL SAVE. Now, if we open up our acl.conf file, we can see that Redis has written our ACL users alphabetically and in a fully normalized form. Here's the line with the user we just added. And notice that Redis writes out the hashed password for us. Once we've updated our ACL file locally, we need to get it into our Redis servers. We'll assume that you have a way of syncing configuration files to your production deployment. Once you've done that, issue an ACL LOAD command to each Redis server in your deployment. This will ensure a zero downtime update. Now, let's look at some commands you might run when you're administering ACLs from the Redis CLI.
+Here, I'm getting the shasum for the password: pickle. But it's probably easier to start up a Redis instance, configure your ACLs from the command line, and then call `ACL SAVE` so that Redis will write out the configurations to a file for you. To do this, all you need is a user who has access to the @admin cat command category or permissions the ACL command.
 
-First, I'll run an ACL WHOAMI. This command will show me which user I'm currently logged in as. Here you can see, I'm logged in as Rick. To see a list of all Redis database users, run the ACL LIST command. Notice the default user is off and has access to no commands. You'll also see other users we've provisioned. We can also use the ACL CAT command to explore command categories. So here are all the categories. And as I said in the last unit, you can also use the ACL CAT command to see which commands each category includes. So here's what's included in the scripting commands category. OK, finally to delete a user, run the ACL DELUSER command.
+Let's use the command line to add a new user named Claude with the password: blueberry. Next, we'll call `ACL SAVE`. Now, if we open up our acl.conf file, we can see that Redis has written our ACL users alphabetically and in a fully normalized form. 
+```
+redis-cli 
+AUTH rick pickle 
+ACL SETUSER claude on >buleberry +@admin 
+ACL SAVE 
+EXIT
+```
 
-This is the sort of ACL modification you might need to make in production in the event of some kind of emergency. Just be sure that any change you make here also gets written back to your ACL configuration files. At this point, you should have all the basic knowledge needed to start using ACLs with your own Redis deployments. There are a few more details in the Redis ACL docs, which you should explore at your leisure. We'll link to those docs in the course handout.
+![alt acl save](img/acl-save.png)
+
+Here's the line with the user we just added. And notice that Redis writes out the hashed password for us. Once we've updated our ACL file locally, we need to get it into our Redis servers. We'll assume that you have a way of syncing configuration files to your production deployment. Once you've done that, issue an `ACL LOAD` command to each Redis server in your deployment. This will ensure a zero downtime update. Now, let's look at some commands you might run when you're administering ACLs from the Redis CLI.
+
+![alt load acl](img/load-acl.png)
+
+First, I'll run an `ACL WHOAMI`. This command will show me which user I'm currently logged in as. Here you can see, I'm logged in as Rick. To see a list of all Redis database users, run the `ACL LIST` command. Notice the default user is off and has access to no commands. You'll also see other users we've provisioned. We can also use the `ACL CAT` command to explore command categories. So here are all the categories. And as I said in the last unit, you can also use the ACL CAT command to see which commands each category includes. So here's what's included in the scripting commands category. 
+```
+ACL CAT scripting 
+```
+
+OK, finally to delete a user, run the` ACL DELUSER` command. This is the sort of ACL modification you might need to make in production in the event of some kind of emergency. Just be sure that any change you make here also gets written back to your ACL configuration files. At this point, you should have all the basic knowledge needed to start using ACLs with your own Redis deployments. There are a few more details in the Redis ACL docs, which you should explore at your leisure. We'll link to those docs in the course handout.
 
 Finally, for complex ACL setups that require role based access control, you should check out Redis Enterprise Cloud or Redis Enterprise Software. These products can really simplify the management of users and rules. OK, end of shameless plug. See you after the security tips.
+
+![alt enterprise acl](img/enterprise-acl.png)
 
 > The best way to manage ACL users in Redis is to specify them in an ACL configuration file. If you have just a few users, you can configure them directly in the redis.conf configuration file. For large and complex ACL setups, you can and should write them to a separate configuration file.
 
 
-### V. [Installing Redis Securely](https://youtu.be/Qj5shmkyUDc)
-In this unit, we'll look at some Redis installation best practices. I want to start with my top three recommendations for securely installing Redis on a server.
+### V. Dangerous Commands
+You probably noticed that Redis has an entire ACL category dedicated to dangerous commands.
 
-First, always run Redis as a dedicated non-privileged user. In other words, don't run Redis as a sudoer or as root. Second, always restrict permissions on your Redis installation path. Third, always restrict Redis log and configuration files. 
+So what are dangerous commands, and why are they dangerous?
 
-![alt ](img/3_tips.png)
+Dangerous commands include administrative commands and other commands that may negatively affect database performance or render your database unavailable.
 
-In other words, ensure the Redis log and config are only accessible by a dedicated non-privileged Redis user plus a small group of trusted admin. This is all basic operating system-level configuration. This OS-level config limits the risk of unauthorized access to Redis. Let's review an example configuration in action. And by the way, if you want to run this on your own, we've provided a Dockerfile in the course [GitHub repo](https://github.com/redislabs-training/ru330). 
+As a general rule, you should avoid running dangerous commands in production.
 
-Here I am in the terminal. I'm going to show you how I'd set up a secure Redis installation for the first time and what I'm thinking along the way.
-```
-sudo apt update -y
+#### Administrative commands
+You should consider most admin commands dangerous, as you want to prevent these commands from being run by an attacker at all costs.
 
-sudo apt install build-essential tcl -y 
+For example, the CONFIG command is an administrative command that allows you to modify the Redis configuration at runtime. Changing the configuration could disrupt applications and cause outages. CONFIG should only be used in production by those who understand what they are doing and only when absolutely required.
 
-sudo apt install tcl-tls libssl-dev -y 
+On the other hand, the LASTSAVE command is also an admin command and is therefore marked as dangerous. This command gives you the timestamp of the last successful write to disk. It's highly unlikely that this command could be used to damage Redis in any way.
 
-sudo adduser --system --group --no-create-home redis 
+#### Dangerous commands may impact performance
+Commands that may significantly impact performance are dangerous. If you're an experienced Redis user, you probably know to avoid the KEYS command. The KEYS command scans all keys stored in the Redis server and blocks until it completes. This can take anywhere from several seconds to several minutes depending on the number of keys on the server, which means that this command can block other clients for quite some time. For this reason, KEYS is considered dangerous.
 
-sudo mkdir /var/lib/redis 
-
-sudo chown redis:redis /var/lib/redis 
-
-sudo chmod 770 /var/lib/redis 
-
-sudo mkdir /var/log/redis 
-
-sudo touch /var/log/redis/redis.log 
-
-sudo chmod 660 /var/log/redis/
-
-sudo chmod 640 /var/log/redis/redis.log
-```
-
-We're using Ubuntu for this example. First, we'll update the operating system-level dependencies and install the dependencies required to run Redis securely. We'll also install `tcl-tls` and `libssl-dev`. These are the OpenSSL development libraries that TLS requires. 
-
-We don't want Redis to run as a root user. Instead, we're going to install Redis as a dedicated non-privileged user and group. Here, I'm creating a user and group called `Redis` for this purpose. In some distributions, this user will be pre-created by previous package installations. 
-
-Now that we have a user, let's create a working directory for Redis. This is where we will install Redis later.Next, I'll chown to ensure that the Redis user owns its directory. Finally, I want to restrict this directory's permissions so that only Redis can access it. Now I will create a file and directory for the Redis logs.
-
-First, I'll create the directory `/var/log/redis`. Next, I'll pre-create the Redis log file so that it has the appropriate permissions. We modify these permissions to ensure that only the Redis user, the root user, or a user added to the Redis group can access these log files.
-
-![alt install 1](img/install_1.png)
-
-Next, we'll install Redis. You'll want the latest version of Redis from the [redis.io downloads](https://redis.io/downloads/) website.
-
----
-
-Scroll down to the **Redis Community Edition & Stack** section and you will see **Redis Stack downloads** for various platforms. 
-
-![alt redis stack download](img/redis_stack_download.JPG)
-
----
-You should always check the Redis website to ensure you're running the latest version of Redis.
-
-```
-cd /tmp
-
-wget http://download.redis.io/release/redis-6.0.5.tar.gz 
-
-sha256sum redis-6.0.5.tar.gz
-
-tar -xzvf redis-6.0.5.tar.gz
-
-cd ./redis-6.0.5
-
-sudo make BUILD_TLS=yes install 
-
-sudo mkdir /etc/redis
-
-sudo cp redis.conf /etc/redis
-
-sudo chown -R redis:redis /etc/redis 
-
-sudo chmod 640 /etc/redis/redis.conf 
-```
-
-First, let's download the package. Before we do anything else, we need to verify the integrity of the download. This will give us a pretty good assurance that the code we've downloaded is official. The Redis GitHub page contains an integrity check for each downloadable tarball file. To verify the integrity of the file, we'll want to check its SHA-256 hash using the SHA-256 hash sum utility. We'll compare this output with the output of the Redis
-repository.
-
-We see here that both files start with 4 and 2 and end with 596. On further comparison, we know that they are a match, so it's safe to install Redis using this file. Now let's build Redis from source. First, we'll untar the archive we just downloaded. We need to set the `BUILD_TLS` environment variable when we compile so that `TLS` will be available for us. Now, this might take some time. So through the magic of video editing, we'll fast forward through it. Now that Redis is installed, we can set the appropriate permissions for the Redis conf configuration file. Let's create a directory to store the config file. We'll use `/etc/redis`. Now we'll copy over the Redis conf file. And now, we'll change the files, user, and group to Redis. We also need to set the proper user permissions. We don't want just anyone to be able to write to our Redis conf file. With this basic OS configuration out of the way, we can start Redis. 
-
-```
-sudo runuser -u redis /usr/local/bin/redis-server /etc/redis/redis.conf & 
-
-sudo apt install redis-tools -y
-```
-
-![alt install 2](img/install_2.png)
-
-Usually, you'll daemonize Redis in whatever OS-specific way your organization prefers. For our purposes here, it's enough to start Redis as a simple background process using the ampersand. Now we should be able to access Redis via the `redis-cli`. I'll run the ping command, and I get back pong. So I've successfully connected.
-
-![alt install 3](img/install_3.png)
-
-There are a ton of ways to install Redis. The way we showed you here might not be right for everyone. What's important here is that we've restricted the files on the operating system and run Redis as a non-privileged user. This approach will allow us to limit the damage that could take place if our server or Redis instance were ever compromised.
+#### Dangerous commands may impact availability
+The final category of dangerous commands may impact the availability of your Redis database. For instance, the FLUSHDB and FLUSHALL commands will delete all of the data in your database. Likewise, the SHUTDOWN command will terminate the Redis process. Obviously, running this command on a production database will affect your applications negatively.
 
 
 ### VI. [Basic Redis Security](https://youtu.be/BoZOZhDnxtI)
