@@ -76,42 +76,182 @@ Here, I'm entering a gender, birthday, credit card number, and credit card expir
 
 In this example, I'm sniffing unencrypted data from the server where Redis is hosted. But this kind of surveillance can be run on any server, network switch, or router that sits between your Redis client and your Redis server. This means that usually there are quite a few opportunities for someone to sniff and record unencrypted network traffic. 
 
-Running a traceroute from your client to your Redis server will give you an idea of just how many sniffing opportunities might exist. And you can't secure this network route because it's completely outside of your control. So let's see what happens if we encrypt our network traffic using TLS instead. I'm going to start Redis again, this time with TLS enabled. Now I'll clear my screen and start that `tcpdump` again. Moving back to my client screen, I'll now connect to Redis, this time using TLS. This means my connection is now encrypted. Now I'll issue the same command I did before. Then, let's look again at the `tcpdump` output. See the difference? All you can see now are what appear to be a bunch of random characters. This is the value of encryption in action. Encryption protects your sensitive data from prying eyes on the network. For the rest of the unit, I'm going to explain how TLS works and everything you need to know to set it up with Redis. But first, two key points to remember for now. First, if you're storing sensitive information in Redis, and most personal information is sensitive, then you should encrypt your Redis connections with TLS. Second, even if you're using TLS, avoid public networks if you can. If you're on a private network, you greatly limit the number of attack vectors. OK. So with that out of the way, let's learn about TLS and how to use it with Redis.
-
-
-### II. [ACL Concepts](https://youtu.be/GuWWmR4od-A)
-[Access Control Lists](https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/), or ACLs for short, fundamentally change how Redis's authentication model works. Before Redis 6, Redis authentication was primitive. A single password secured your Redis deployment. There was no support for multiple users and passwords. And there was no support for per-user permissions either, what you might call authorization. 
-
-![alt prior redis 6](img/prior-redis-6.png)
-
-Redis ACLs changed all of that. Now you can create multiple Redis users, each with their own password. And you can control each user's permissions. This is important because you can now effectively implement the *principle of least privilege*. Using ACLs to implement the principle of least privilege prevents a number of bad outcomes. For example, you wouldn't want a new administrator to accidentally drop your database. In this case, you create an ACL that prevents your new administrator from running the `FLUSHDB` or `FLUSHALL` commands.
+Running a `traceroute` from your client to your Redis server will give you an idea of just how many sniffing opportunities might exist. And you can't secure this network route because it's completely outside of your control. 
 ```
-ACL SETUSER newadminuser on >password -FLUSHDB -FLUSHALL 
+traceroute ru330.redis.cloud 
 ```
 
-Similarly, you wouldn't want an attacker with compromised credentials to be able to probe or steal data from your Redis database. If I were an attacker with compromised credentials, one of the first things I would do is run the `SCAN` or `KEYS` command to find out what keys were in the database. I'd then run the `TYPE` command to see which Redis commands I could run on each key. If I couldn't run the `SCAN` or `KEYS` commands, I'd be left guessing what key names to attack this database with. So as an administrator, I'd want to prevent most service account users from running the `SCAN`, `KEYS`, or `TYPE` commands, unless they're part of the application design, just in case those account credentials
-ever got into the wrong hands. It could also help you to reduce the impact of careless user
-mistakes.
+![alt tracert]()
 
-In general, you should be giving users the least amount of privilege used to perform their job.You can do this by separating users by *role*. For example, a developer may only need read and write access, while an administrator may only need the ability to configure Redis. You may also want to separate applications by role. For example, some applications may only read from the database, and others may only write to the database. 
+So let's see what happens if we encrypt our network traffic using TLS instead. I'm going to start Redis again, this time with TLS enabled. Now I'll clear my screen and start that `tcpdump` again. Moving back to my client screen, I'll now connect to Redis, this time using TLS. 
+```
+redis-cli -h ru330.redis --tls --cacert ca.crt 
+```
 
-![alt by role](img/by-role.png)
+This means my connection is now encrypted. Now I'll issue the same command I did before. Then, let's look again at the `tcpdump` output. See the difference? All you can see now are what appear to be a bunch of random characters. This is the value of encryption in action. Encryption protects your sensitive data from prying eyes on the network. 
 
-A good example of this is a Pub/Sub application. In a Pub/Sub pattern, you have a publisher and a subscriber. Your publishers will probably only need the ability to create data, while your subscribers will probably only need access to read from the channels they're subscribed to. Another way to implement the principle of least privilege is to restrict data based on key patterns using namespacing techniques.
+For the rest of the unit, I'm going to explain how TLS works and everything you need to know to set it up with Redis. But first, two key points to remember for now. 
 
-For example, if you do not want an administrator to be able to access sensitive data, you can prefix all of the keys that are sensitive with the secret namespace. Imagine that you had an accounts table that contained user names, user details, and password hashes. You can namespace the keys for each user to be `secret:users` and only give access to the secret namespace to the service account for your application. 
+- First, if you're storing sensitive information in Redis, and most personal information is sensitive, then you should encrypt your Redis connections with TLS. 
+- Second, even if you're using TLS, avoid public networks if you can. If you're on a private network, you greatly limit the number of attack vectors. OK. So with that out of the way, let's learn about TLS and how to use it with Redis.
 
-![alt by name space](img/by_namespace.png)
+**Addendum**
 
-Any restriction on keys should be considered carefully as they must be built into the design of your keys when implementing your applications. OK, so that's ACLs in a nutshell.
+Life in Windows is no better than that in Linux for there is no such things as `tcpdump` bundled with. However, one can install [WinShark](https://www.wireshark.org/#homeMemberLink) which requires [Npcap](https://npcap.com/) to work together. 
 
-**Benefits of Access Control Lists**
-- Command and Key Restrictions 
-- Mitigate damge from a compromised username and password
-- Reduce impact of mistakes 
+![alt winshark](img/winshark-1.JPG) 
 
-In the next unit, we'll see how ACLs work in practice,
-so stay tuned.
+Typically, redis client uses [RESP](https://redis.io/docs/latest/develop/reference/protocol-spec/) protocol, which is plain text, to communicate with redis server. As you can see in following screens. 
+
+![alt ](img/unsafe-1.JPG)
+
+![alt ](img/unsafe-1.JPG)
+
+All commands sent as well as results received can be cleally seen. 
+
+
+### III. [Encryption](https://youtu.be/ULlTtFlSmkY)
+Encryption is the process of taking a message
+and encoding it so that only the intended recipients can
+read it.
+The algorithm you use to encrypt a message is called a cipher.
+Most of us are familiar with basic substitution ciphers
+such as ROT13.
+In ROT13, you can encrypt text by substituting or rotating
+each letter in a message with the letter that
+appears 13 letters later in the Latin alphabet.
+So for example, suppose we start with the plain-text message
+"HELLO".
+If we encrypt "HELLO" using ROT13,
+we get the cipher text URYYB.
+Shifting the H 13 letters forward gets us U and so on.
+To decrypt the cipher text, we just
+perform the reverse operation.
+Take a moment to see if you can decrypt
+the ROT13 encoded message you see on the screen now.
+Of course, the ciphers used by TLS
+are much more sophisticated than ROT13.
+TLS relies on two types of ciphers, symmetric key ciphers
+and asymmetric key ciphers.
+Now when I say key here, I'm talking about an encryption
+key.
+An encryption key is a little bit like a password,
+but it's generally much longer than a password
+and not really easy for a human to memorize.
+Ciphers use encryption keys to encrypt and decrypt data.
+In symmetric key cryptography, the same key
+is used for both encryption and decryption.
+In asymmetric key cryptography, one key is used for encryption,
+and a different key is used for decryption.
+Let's look at some examples to see how this works.
+If you've ever encrypted a file, you've probably
+used a symmetric key cipher.
+Here I'm using the gpg command line utility to encrypt a file
+called treasure-map.txt.
+Here I'm specifying that I want symmetric encryption,
+that I want to use the AES256 cipher,
+which is a commonly used symmetric key cipher,
+that the output should be written to a file called
+treasure-map.encrypted, and that the file I want to encrypt is
+called treasure-map.txt.
+When I run this command, the program asks me for a password.
+Now this is important. gpg uses the password
+I enter to generate an encryption key,
+and then it uses that encryption key to encrypt the file.
+So now we can see the encrypted file.
+To decrypt the file, I run gpg's decrypt command,
+providing the password that I use to encrypt the file.
+Again, gpg then uses that password
+to generate the key that will successfully decrypt the file.
+Clearly, you need to keep the password and encryption
+keys secret if you want your encrypted file to remain
+secret.
+Now suppose it's my friend, Captain Long
+Beard, who wants to send me the encrypted treasure map.
+If I want to receive this encrypted map,
+then I also need to receive the password or key that
+was used to encrypt it, but of course, I run into a problem
+here.
+How is that Captain securely share the key with me?
+He needs to be very careful when sharing his secret key
+because if it gets into anyone else's hands,
+then they'll be able to decrypt the map.
+That's where asymmetric key encryption comes in.
+As I mentioned, asymmetric key ciphers
+use two keys, one to encrypt and another to decrypt.
+The key to encrypt is called the public key,
+and the key to decrypt is called the private key.
+Do you see why?
+You can share your public key far and wide,
+and it doesn't matter who gets access to it.
+Public keys are meant to be publicly distributed.
+I can safely share my public key in an email,
+a tweet, or a published blog post.
+Once Captain Long Beard has my public key,
+he can use it to encrypt messages for me.
+To decrypt those messages, I need to use my private key.
+Obviously, then, I need to keep my private key secret.
+We're going to use the openssl command line
+utility to see how asymmetric encryption works in action.
+First, I'm going to generate my private key,
+so I run the openssl genrsa command.
+This creates the file that I'll use as my private key.
+Remember that this file can't be shared with anyone.
+Here's what the contents of the file look like.
+Now, an interesting fact is that the private key file actually
+contains the public key, but we need to extract it.
+So here's the command to do that,
+and here's what the public key actually looks like.
+So now I just need to send my public key to the Captain.
+It doesn't matter how I send it because it's only used
+for encryption, not decryption.
+I can send it over email, or I can paint it on a billboard.
+Now Captain Long Beard can use my public key
+to encrypt the file containing the treasure map.
+This is the openssl command he'll run.
+He then sends me the encrypted file, treasure-text.encrypted.
+Once I get the file, I use my private key to decrypt it.
+Here's the openssl command I'll run.
+If I'm using the correct private key,
+then I'll be able to decrypt the cipher text into the plain text
+message that leads me to the treasure.
+OK. So there's another important difference
+between asymmetric key and symmetric key ciphers,
+which is performance.
+Asymmetric key ciphers are much more computationally expensive
+and often thousands of times slower
+than symmetric key ciphers, so if you
+need to encrypt a lot of data, you should actually
+use a symmetric key cipher.
+And TLS actually uses both.
+TLS uses asymmetric key cryptography
+to help the two parties establish a shared secret key,
+and then TLS switches to symmetric key cryptography
+for all subsequent exchange of data.
+Let me elaborate on that just a bit.
+Here's how a TLS connection to your bank
+works on a very rudimentary level.
+Step one, you connect to your bank's website.
+Step two, your bank sends you its public key.
+Step three, you use the bank's public key to encrypt and send
+a large random number.
+Step four, the bank decrypts the number with its private key.
+Now you and your bank both have this secret, random number.
+Step five, you and your bank independently
+use this secret random number to generate an encryption key
+that you'll use with symmetric cryptography.
+Step six, communication then switches
+to using a symmetric key cipher.
+You and your bank then encrypt and decrypt
+all subsequent communication using the same encryption
+key you both just independently generated.
+We've just covered a lot of material,
+and you may need to re-watch this video to really master it.
+But at this point, you should have
+a sense for what encryption is and how it ensures
+the privacy of a conversation.
+In the next units, we'll see how TLS solves the problems
+of authenticity and integrity.
 
 
 ### III. [Practical ACLs with Redis](https://youtu.be/Va95q2SXGPA)
@@ -569,6 +709,11 @@ Now on the other hand, if the data on the system was not valuable to me, I'd jus
 
 
 ### VIII. Biblipgraphy 
+1. [WinShark](https://www.wireshark.org/#homeMemberLink)
+2. [Npcap](https://npcap.com/)
+3. 
+
+
 1. [OVER 18,000 REDIS INSTANCES TARGETED BY FAKE RANSOMWARE](https://duo.com/decipher/over-18000-redis-instances-targeted-by-fake-ransomware)
 2. [SHA256 Online Tools](https://emn178.github.io/online-tools/sha256.html)
 3. [Redis configuration file example](https://redis.io/docs/latest/operate/oss_and_stack/management/config-file/)
