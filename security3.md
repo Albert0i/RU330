@@ -285,9 +285,9 @@ Let me elaborate on that just a bit. Here's how a TLS connection to your bank wo
 
 OK. We've just covered a lot of material, and you may need to re-watch this video to really master it. But at this point, you should have a sense for what encryption is and how it ensures the privacy of a conversation. In the next units, we'll see how TLS solves the problems of authenticity and integrity.
 
-[gpg - GNU Privacy Guard](https://gnupg.org/)
+- [gpg - GNU Privacy Guard](https://gnupg.org/)
 
-[OpenSSL Command Line Utilities](https://wiki.openssl.org/index.php/Command_Line_Utilities)
+- [OpenSSL Command Line Utilities](https://wiki.openssl.org/index.php/Command_Line_Utilities)
 
 
 ### IV. [Authentication](https://youtu.be/aD9L_hlXx04)
@@ -451,11 +451,11 @@ is beyond the scope of this course,
 but I encourage you to go do some casual research
 to learn about how these attacks have occurred in the past.
 
-[Digital Certificates (Wikipedia)](https://en.wikipedia.org/wiki/Public_key_certificate)
+- [Digital Certificates (Wikipedia)](https://en.wikipedia.org/wiki/Public_key_certificate)
 
-[Certificate Authority (Wikipedia)](https://en.wikipedia.org/wiki/Certificate_authority)
+- [Certificate Authority (Wikipedia)](https://en.wikipedia.org/wiki/Certificate_authority)
 
-[Man-in-the-middle Attack (Wikipedia)](https://en.wikipedia.org/wiki/Man-in-the-middle_attack)
+- [Man-in-the-middle Attack (Wikipedia)](https://en.wikipedia.org/wiki/Man-in-the-middle_attack)
 
 
 ### IV. [Administering Redis ACLs](https://youtu.be/Q1rPFw6Iz64)
