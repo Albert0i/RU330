@@ -273,16 +273,16 @@ TLS uses asymmetric key cryptography to help the two parties establish a shared 
 
 Let me elaborate on that just a bit. Here's how a TLS connection to your bank works on a very rudimentary level. 
 
-![alt bank-1](img/bank-1.png)
-
-![alt bank-2](img/bank-2.png)
-
 - Step one, you connect to your bank's website. 
 - Step two, your bank sends you its public key. 
 - Step three, you use the bank's public key to encrypt and send a large random number. 
 - Step four, the bank decrypts the number with its private key. Now you and your bank both have this secret, random number. 
 - Step five, you and your bank independently use this secret random number to generate an encryption key that you'll use with symmetric cryptography. 
 - Step six, communication then switches to using a symmetric key cipher. You and your bank then encrypt and decrypt all subsequent communication using the same encryption key you both just independently generated. 
+
+![alt bank-1](img/bank-1.png)
+
+![alt bank-2](img/bank-2.png)
 
 OK. We've just covered a lot of material, and you may need to re-watch this video to really master it. But at this point, you should have a sense for what encryption is and how it ensures the privacy of a conversation. In the next units, we'll see how TLS solves the problems of authenticity and integrity.
 
