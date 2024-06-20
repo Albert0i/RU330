@@ -109,147 +109,169 @@ All commands sent as well as results received can be cleally seen.
 
 
 ### III. [Encryption](https://youtu.be/ULlTtFlSmkY)
-Encryption is the process of taking a message
-and encoding it so that only the intended recipients can
-read it.
-The algorithm you use to encrypt a message is called a cipher.
-Most of us are familiar with basic substitution ciphers
-such as ROT13.
-In ROT13, you can encrypt text by substituting or rotating
-each letter in a message with the letter that
-appears 13 letters later in the Latin alphabet.
-So for example, suppose we start with the plain-text message
-"HELLO".
-If we encrypt "HELLO" using ROT13,
-we get the cipher text URYYB.
-Shifting the H 13 letters forward gets us U and so on.
-To decrypt the cipher text, we just
-perform the reverse operation.
-Take a moment to see if you can decrypt
-the ROT13 encoded message you see on the screen now.
-Of course, the ciphers used by TLS
-are much more sophisticated than ROT13.
-TLS relies on two types of ciphers, symmetric key ciphers
-and asymmetric key ciphers.
-Now when I say key here, I'm talking about an encryption
-key.
-An encryption key is a little bit like a password,
-but it's generally much longer than a password
-and not really easy for a human to memorize.
-Ciphers use encryption keys to encrypt and decrypt data.
-In symmetric key cryptography, the same key
-is used for both encryption and decryption.
-In asymmetric key cryptography, one key is used for encryption,
-and a different key is used for decryption.
-Let's look at some examples to see how this works.
-If you've ever encrypted a file, you've probably
-used a symmetric key cipher.
-Here I'm using the gpg command line utility to encrypt a file
-called treasure-map.txt.
-Here I'm specifying that I want symmetric encryption,
-that I want to use the AES256 cipher,
-which is a commonly used symmetric key cipher,
-that the output should be written to a file called
-treasure-map.encrypted, and that the file I want to encrypt is
-called treasure-map.txt.
-When I run this command, the program asks me for a password.
-Now this is important. gpg uses the password
-I enter to generate an encryption key,
-and then it uses that encryption key to encrypt the file.
-So now we can see the encrypted file.
-To decrypt the file, I run gpg's decrypt command,
-providing the password that I use to encrypt the file.
-Again, gpg then uses that password
-to generate the key that will successfully decrypt the file.
-Clearly, you need to keep the password and encryption
-keys secret if you want your encrypted file to remain
-secret.
-Now suppose it's my friend, Captain Long
-Beard, who wants to send me the encrypted treasure map.
-If I want to receive this encrypted map,
-then I also need to receive the password or key that
-was used to encrypt it, but of course, I run into a problem
-here.
-How is that Captain securely share the key with me?
-He needs to be very careful when sharing his secret key
-because if it gets into anyone else's hands,
-then they'll be able to decrypt the map.
-That's where asymmetric key encryption comes in.
-As I mentioned, asymmetric key ciphers
-use two keys, one to encrypt and another to decrypt.
-The key to encrypt is called the public key,
-and the key to decrypt is called the private key.
-Do you see why?
-You can share your public key far and wide,
-and it doesn't matter who gets access to it.
-Public keys are meant to be publicly distributed.
-I can safely share my public key in an email,
-a tweet, or a published blog post.
-Once Captain Long Beard has my public key,
-he can use it to encrypt messages for me.
-To decrypt those messages, I need to use my private key.
-Obviously, then, I need to keep my private key secret.
-We're going to use the openssl command line
-utility to see how asymmetric encryption works in action.
-First, I'm going to generate my private key,
-so I run the openssl genrsa command.
-This creates the file that I'll use as my private key.
-Remember that this file can't be shared with anyone.
-Here's what the contents of the file look like.
-Now, an interesting fact is that the private key file actually
-contains the public key, but we need to extract it.
-So here's the command to do that,
-and here's what the public key actually looks like.
-So now I just need to send my public key to the Captain.
-It doesn't matter how I send it because it's only used
-for encryption, not decryption.
-I can send it over email, or I can paint it on a billboard.
-Now Captain Long Beard can use my public key
-to encrypt the file containing the treasure map.
-This is the openssl command he'll run.
-He then sends me the encrypted file, treasure-text.encrypted.
-Once I get the file, I use my private key to decrypt it.
-Here's the openssl command I'll run.
-If I'm using the correct private key,
-then I'll be able to decrypt the cipher text into the plain text
-message that leads me to the treasure.
-OK. So there's another important difference
-between asymmetric key and symmetric key ciphers,
-which is performance.
-Asymmetric key ciphers are much more computationally expensive
-and often thousands of times slower
-than symmetric key ciphers, so if you
-need to encrypt a lot of data, you should actually
-use a symmetric key cipher.
-And TLS actually uses both.
-TLS uses asymmetric key cryptography
-to help the two parties establish a shared secret key,
-and then TLS switches to symmetric key cryptography
-for all subsequent exchange of data.
-Let me elaborate on that just a bit.
-Here's how a TLS connection to your bank
-works on a very rudimentary level.
-Step one, you connect to your bank's website.
-Step two, your bank sends you its public key.
-Step three, you use the bank's public key to encrypt and send
-a large random number.
-Step four, the bank decrypts the number with its private key.
-Now you and your bank both have this secret, random number.
-Step five, you and your bank independently
-use this secret random number to generate an encryption key
-that you'll use with symmetric cryptography.
-Step six, communication then switches
-to using a symmetric key cipher.
-You and your bank then encrypt and decrypt
-all subsequent communication using the same encryption
-key you both just independently generated.
-We've just covered a lot of material,
-and you may need to re-watch this video to really master it.
-But at this point, you should have
-a sense for what encryption is and how it ensures
-the privacy of a conversation.
-In the next units, we'll see how TLS solves the problems
-of authenticity and integrity.
+Encryption is the process of taking a message and encoding it so that only the intended recipients can read it. The algorithm you use to encrypt a message is called a *cipher*. Most of us are familiar with basic substitution ciphers such as [ROT13](https://en.wikipedia.org/wiki/ROT13). In ROT13, you can encrypt text by substituting or rotating each letter in a message with the letter that appears 13 letters later in the Latin alphabet. So for example, suppose we start with the plain-text message "HELLO". If we encrypt "HELLO" using ROT13, we get the cipher text URYYB.
+
+![alt HELLO](img/HELLO.png)
+
+Shifting the H 13 letters forward gets us U and so on. To decrypt the cipher text, we just perform the reverse operation. Take a moment to see if you can decrypt the ROT13 encoded message you see on the screen now. 
+```
+SYNZVATB
+```
+```
+FLAMINGO
+```
+
+Of course, the ciphers used by TLS are much more sophisticated than ROT13. TLS relies on two types of ciphers, *symmetric* key ciphers and *asymmetric* key ciphers. Now when I say key here, I'm talking about an encryption key. An encryption key is a little bit like a password, but it's generally much longer than a password and not really easy for a human to memorize. Ciphers use encryption keys to encrypt and decrypt data. 
+
+In symmetric key cryptography, the same key is used for both encryption and decryption. 
+
+![alt symmetric](img/symmetric-encryption.png)
+
+In asymmetric key cryptography, one key is used for encryption, and a different key is used for decryption. 
+
+![alt asymmetric](img/asymmetric-encryption.png)
+
+Let's look at some examples to see how this works. 
+```
+hexdump -C treasure-map.txt
+000000  48 61 6c 65 6c 65 61 20 46 6f 72 65 73 74 20 52  Halelea Forest R
+000010  65 73 65 72 76 65 0d 0a 32 32 2e 31 31 31 38 32  eserve..22.11182
+000020  35 0d 0a 2d 31 35 39 2e 34 36 34 35 30 35 0d 0a  5..-159.464505..
+000030  22 58 20 6d 61 72 6b 73 20 74 68 65 20 73 70 6f  "X marks the spo
+000040  74 21 22                                         t!"
+```
+
+If you've ever encrypted a file, you've probably used a symmetric key cipher. Here I'm using the gpg command line utility to encrypt a file called treasure-map.txt.
+```
+gpg --symmetric --cipher-algo AES256 --no-symkey-cache --output treasure-map.encrypted treasure-map.txt
+
+hexdump -C treasure-map.encrypted
+000000  8c 0d 04 09 03 02 8d 03 43 0b 9b 93 fb 49 f5 d2  ........C....I..
+000010  87 01 99 a6 ba b1 5a 51 12 31 fa f8 5f d0 07 d7  ......ZQ.1.._...
+000020  b0 4a a9 11 c2 aa 13 12 5c 1d 8e 52 99 7c 38 23  .J......\..R.|8#
+000030  18 73 da 20 e2 88 67 24 c7 bf 20 54 53 9a a4 0d  .s. ..g$.. TS...
+000040  03 2d c2 c8 45 d7 cc 43 2f 49 95 3f de e0 0d bd  .-..E..C/I.?....
+000050  62 6f ba f7 81 53 0f a6 4a 1d f2 0d 90 23 67 dd  bo...S..J....#g.
+000060  ed e7 13 f1 b7 dd 9a b4 86 c4 36 fc 97 1f f4 8e  ..........6.....
+000070  64 ed 03 1d 37 0d 5e 7e 32 6d 60 2b f7 44 0c a6  d...7.^~2m`+.D..
+000080  cd 96 e9 7a 53 5d 00 e6 03 37 83 76 00 2e d1 0a  ...zS]...7.v....
+000090  8f c2 cd fb 49 0b 22 03                          ....I.".
+```
+
+Here I'm specifying that I want symmetric encryption, that I want to use the AES256 cipher, which is a commonly used symmetric key cipher, that the output should be written to a file called treasure-map.encrypted, and that the file I want to encrypt is called treasure-map.txt. 
+
+When I run this command, the program asks me for a password. Now this is important. 
+
+![alt passphrase](img/passphrase.JPG)
+
+gpg uses the password I enter to generate an encryption key, and then it uses that encryption key to encrypt the file. So now we can see the encrypted file.
+
+To decrypt the file, I run gpg's decrypt command, providing the password that I use to encrypt the file.
+Again, gpg then uses that password to generate the key that will successfully decrypt the file.
+```
+gpg --decrypt treasure-map.encrypted
+gpg: AES256 encrypted data
+gpg: encrypted with 1 passphrase
+Halelea Forest Reserve
+22.111825
+-159.464505
+"X marks the spot!"
+D:\RU\RU330>123456789
+```
+
+Clearly, you need to keep the password and encryption keys secret if you want your encrypted file to remain secret. 
+
+Now suppose it's my friend, Captain Long Beard, who wants to send me the encrypted treasure map. If I want to receive this encrypted map, then I also need to receive the password or key that was used to encrypt it, but of course, I run into a problem here. How is that Captain securely share the key with me? 
+He needs to be very careful when sharing his secret key because if it gets into anyone else's hands, then they'll be able to decrypt the map. That's where asymmetric key encryption comes in. 
+
+As I mentioned, asymmetric key ciphers use two keys, one to encrypt and another to decrypt. The key to encrypt is called the *public* key, and the key to decrypt is called the *private* key. Do you see why? You can share your public key far and wide, and it doesn't matter who gets access to it. Public keys are meant to be publicly distributed. I can safely share my public key in an email, a tweet, or a published blog post. Once Captain Long Beard has my public key, he can use it to encrypt messages for me. To decrypt those messages, I need to use my private key. Obviously, then, I need to keep my private key secret. We're going to use the openssl command line utility to see how asymmetric encryption works in action.
+
+First, I'm going to generate my private key, so I run the openssl genrsa command. This creates the file that I'll use as my private key. Remember that this file can't be shared with anyone. Here's what the contents of the file look like. 
+```
+openssl genrsa -out key.pem 2048
+Generating RSA private key, 2048 bit long modulus
+............................................................+++++
+...............................................................................................................................................................................+++++
+e is 65537 (0x010001)
+
+head -n 15 key.pem
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEA2AvmKYv4rX6WbjN7US2sca0OzOqDaiB2mSOi1J8gMeAs/ZxQ
+ZV6IFxw/djpn1H6RxqsSWKvMMzwWZdz/wOIphPEcxpKDR+Zmhd+i7kJ/5OEOWc26
+gI1yquPzZ2exNdC0vEs4fnZopqABNzngugXvLolmzNvH6gRh7DUelBqIw59Xt8h1
+7/W9nWG64/9wKs+jblgFNAHjPiQYd5zdurcfwiX9wuPJ1M8QjMlpteIMrpczp6UL
+i74Ra6miEcg6MtwkruG2PtLX0jSJEOOX/WTSbUsSRMpZdnK6J+sLaVpp4gZerznV
+oG4D1Ib044JwFC0EHHxW1UPsZ63H44mXSfu1IwIDAQABAoIBAQCPd1dgP5LjoyxC
+Ae3h+nKJCmLJsPGTh/s5tnBqwUCf3j4CK8s3hY7Zyehamm5YrbQgOXn1aCAx5bT5
+78fmTklD/tkdBC4pkNaED/4iOgaz9r+Q4wz2UPfUg4sfH7yOAAoE/+6EDB1yiM5F
+3ildXpN2U8fwQgJ/ZGmicaPctcIcJHuUXZR17aosBs4u8pKm/eli87RFmUF0JyM+
+UQ8Kv5VSMCubEqNifIHfyJfrm10aftRRMYvXuFb6CMF3MtGQ+/mGwcjNhAkDVye7
+ojTR+JlAWqsRd8Jqy0IwhTOVt2rD4khdRktEOzdvnjdpz3TWY68ARtoh1K8E68GA
+lIKZ0XABAoGBAPNmtBFSXzSqbcYwlN/xYtURw2rm4VN8os/p4K4DWiNmSz13DGj1
+8OgyebAEBNAhNt3Q8fGmu4+YHW3je2UJgePZLX9EYHYzqZ395vj8567tnUlDv6HN
+xngg0b4tFUrtZt+citK9C+Gm9divtXhADdU2Ro7kqE7Zld3CpXknsZKlAoGBAOM6
+```
+
+Now, an interesting fact is that the private key file actually contains the public key, but we need to extract it. 
+```
+openssl rsa -in key.pem -out key.pub -pubout
+writing RSA key
+
+cat key.pub
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2AvmKYv4rX6WbjN7US2s
+ca0OzOqDaiB2mSOi1J8gMeAs/ZxQZV6IFxw/djpn1H6RxqsSWKvMMzwWZdz/wOIp
+hPEcxpKDR+Zmhd+i7kJ/5OEOWc26gI1yquPzZ2exNdC0vEs4fnZopqABNzngugXv
+LolmzNvH6gRh7DUelBqIw59Xt8h17/W9nWG64/9wKs+jblgFNAHjPiQYd5zdurcf
+wiX9wuPJ1M8QjMlpteIMrpczp6ULi74Ra6miEcg6MtwkruG2PtLX0jSJEOOX/WTS
+bUsSRMpZdnK6J+sLaVpp4gZerznVoG4D1Ib044JwFC0EHHxW1UPsZ63H44mXSfu1
+IwIDAQAB
+-----END PUBLIC KEY-----
+```
+
+So here's the command to do that, and here's what the public key actually looks like. So now I just need to send my public key to the Captain. It doesn't matter how I send it because it's only used for encryption, not decryption. I can send it over email, or I can paint it on a billboard. 
+
+Now Captain Long Beard can use my public key to encrypt the file containing the treasure map. This is the openssl command he'll run. 
+```
+openssl rsautl -in treasure-map.txt -out treasure-map.encrypted -pubin -inkey key.pub -encrypt
+
+hexdump -C treasure-map.encrypted
+000000  32 c8 72 66 ae fc a4 77 33 49 cf 7a b0 da ff 2b  2.rf...w3I.z...+
+000010  72 98 c5 e0 86 bd 0e 63 ba fa d1 1a 30 67 d2 ed  r......c....0g..
+000020  7a 63 01 05 a9 90 a1 6b fa 46 e6 bb e0 c1 d2 3e  zc.....k.F.....>
+000030  e0 9a e6 fe ff 2a eb c3 70 08 44 ca 3d cd c2 bf  .....*..p.D.=...
+000040  68 99 31 9b 99 aa 37 a5 ab a0 d0 7f 70 f9 2f 02  h.1...7.....p./.
+000050  ea 7c c8 db c2 ac 9d 8b 17 f2 02 5f df 3c 63 07  .|........._.<c.
+000060  36 7b a0 eb cf 88 43 f6 83 88 13 fd 6a cd 0a 86  6{....C.....j...
+000070  27 ac ee 61 01 38 71 c2 16 b7 87 c6 66 59 27 a9  '..a.8q.....fY'.
+000080  26 19 06 c7 7c cc de 5a 52 22 e2 42 9a 40 44 9c  &...|..ZR".B.@D.
+000090  5b f1 83 aa db f5 5c 55 00 d2 c8 27 85 91 46 d6  [.....\U...'..F.
+0000a0  c8 bc e6 28 a3 b1 6e 18 c0 fe 47 02 a7 79 a5 49  ...(..n...G..y.I
+0000b0  ea 17 e7 36 50 4e 89 3d 39 e5 d5 4f 1d fa 72 57  ...6PN.=9..O..rW
+0000c0  84 29 35 ed 56 f5 7e 55 1e 9e 6b 14 cb 12 37 c9  .)5.V.~U..k...7.
+0000d0  0a 31 a7 dc c8 eb 4b c5 27 c9 06 40 52 9c fb a5  .1....K.'..@R...
+0000e0  78 b0 fa 1f 7e 3d 7f 44 f9 61 0b 44 af 91 a9 e8  x...~=.D.a.D....
+0000f0  20 66 8e 14 dd dc 23 d6 22 d6 54 90 ff 76 83 a4   f....#.".T..v..
+```
+
+He then sends me the encrypted file, treasure-text.encrypted. Once I get the file, I use my private key to decrypt it. Here's the openssl command I'll run. 
+```
+rsautl -in treasure-map.encrypted -inkey key.pem -decrypt
+Halelea Forest Reserve
+22.111825
+-159.464505
+"X marks the spot!"
+```
+
+If I'm using the correct private key, then I'll be able to decrypt the cipher text into the plain text message that leads me to the treasure. 
+
+OK. So there's another important difference between asymmetric key and symmetric key ciphers, which is performance. Asymmetric key ciphers are much more computationally expensive and often thousands of times slower than symmetric key ciphers, so if you need to encrypt a lot of data, you should actually use a symmetric key cipher. And TLS actually uses both.
+
+TLS uses asymmetric key cryptography to help the two parties establish a shared secret key, and then TLS switches to symmetric key cryptography for all subsequent exchange of data. 
+
+![alt performance considerations](img/performance-considerations.png)
+
+Let me elaborate on that just a bit. Here's how a TLS connection to your bank works on a very rudimentary level. Step one, you connect to your bank's website. Step two, your bank sends you its public key. Step three, you use the bank's public key to encrypt and send a large random number. Step four, the bank decrypts the number with its private key. Now you and your bank both have this secret, random number. Step five, you and your bank independently use this secret random number to generate an encryption key that you'll use with symmetric cryptography. Step six, communication then switches to using a symmetric key cipher. You and your bank then encrypt and decrypt all subsequent communication using the same encryption key you both just independently generated. We've just covered a lot of material, and you may need to re-watch this video to really master it. But at this point, you should have a sense for what encryption is and how it ensures the privacy of a conversation. In the next units, we'll see how TLS solves the problems of authenticity and integrity.
 
 
 ### III. [Practical ACLs with Redis](https://youtu.be/Va95q2SXGPA)
@@ -709,8 +731,8 @@ Now on the other hand, if the data on the system was not valuable to me, I'd jus
 ### VIII. Biblipgraphy 
 1. [WinShark](https://www.wireshark.org/#homeMemberLink)
 2. [Npcap](https://npcap.com/)
-3. 
-
+3. [Hexdump for Windows](https://www.di-mgt.com.au/hexdump-for-windows.html#downloads)
+4. [Gpg4win](https://www.gpg4win.org/)
 
 1. [OVER 18,000 REDIS INSTANCES TARGETED BY FAKE RANSOMWARE](https://duo.com/decipher/over-18000-redis-instances-targeted-by-fake-ransomware)
 2. [SHA256 Online Tools](https://emn178.github.io/online-tools/sha256.html)
