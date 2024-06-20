@@ -141,7 +141,7 @@ hexdump -C treasure-map.txt
 000040  74 21 22                                         t!"
 ```
 
-If you've ever encrypted a file, you've probably used a symmetric key cipher. Here I'm using the gpg command line utility to encrypt a file called treasure-map.txt.
+If you've ever encrypted a file, you've probably used a symmetric key cipher. Here I'm using the `gpg` command line utility to encrypt a file called treasure-map.txt.
 ```
 gpg --symmetric --cipher-algo AES256 --no-symkey-cache --output treasure-map.encrypted treasure-map.txt
 
@@ -181,12 +181,11 @@ D:\RU\RU330>123456789
 
 Clearly, you need to keep the password and encryption keys secret if you want your encrypted file to remain secret. 
 
-Now suppose it's my friend, Captain Long Beard, who wants to send me the encrypted treasure map. If I want to receive this encrypted map, then I also need to receive the password or key that was used to encrypt it, but of course, I run into a problem here. How is that Captain securely share the key with me? 
-He needs to be very careful when sharing his secret key because if it gets into anyone else's hands, then they'll be able to decrypt the map. That's where asymmetric key encryption comes in. 
+Now suppose it's my friend, Captain Long Beard, who wants to send me the encrypted treasure map. If I want to receive this encrypted map, then I also need to receive the password or key that was used to encrypt it, but of course, I run into a problem here. How is that Captain securely share the key with me?  He needs to be very careful when sharing his secret key because if it gets into anyone else's hands, then they'll be able to decrypt the map. That's where asymmetric key encryption comes in. 
 
 As I mentioned, asymmetric key ciphers use two keys, one to encrypt and another to decrypt. The key to encrypt is called the *public* key, and the key to decrypt is called the *private* key. Do you see why? You can share your public key far and wide, and it doesn't matter who gets access to it. Public keys are meant to be publicly distributed. I can safely share my public key in an email, a tweet, or a published blog post. Once Captain Long Beard has my public key, he can use it to encrypt messages for me. To decrypt those messages, I need to use my private key. Obviously, then, I need to keep my private key secret. We're going to use the openssl command line utility to see how asymmetric encryption works in action.
 
-First, I'm going to generate my private key, so I run the openssl genrsa command. This creates the file that I'll use as my private key. Remember that this file can't be shared with anyone. Here's what the contents of the file look like. 
+First, I'm going to generate my private key, so I run the `openssl genrsa` command. This creates the file that I'll use as my private key. Remember that this file can't be shared with anyone. Here's what the contents of the file look like. 
 ```
 openssl genrsa -out key.pem 2048
 Generating RSA private key, 2048 bit long modulus
