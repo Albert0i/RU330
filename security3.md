@@ -286,87 +286,166 @@ Let me elaborate on that just a bit. Here's how a TLS connection to your bank wo
 OK. We've just covered a lot of material, and you may need to re-watch this video to really master it. But at this point, you should have a sense for what encryption is and how it ensures the privacy of a conversation. In the next units, we'll see how TLS solves the problems of authenticity and integrity.
 
 
-### III. [Practical ACLs with Redis](https://youtu.be/Va95q2SXGPA)
-Onscreen, you can see three ACL commands.
-
-FALCO
-```
-acl setuser falco on >butterscotch +@all -@dangerous -@admin +acl|whoami allkeys 
-```
-
-RICK
-```
-acl setuser rick on >pickle +@admin 
-```
-
-CACHESERVICE 
-```
-acl setuser cacheservice on >cacheme +set +get ~cache:*
-```
-
-By the end of this unit, you'll understand what these commands are doing and how you might use them as part of a database caching service. 
-
-We've specified three users here: `Falco`, who's our software developer, `Rick`, our administrator, and `cacheservice`, which is for the application itself. We'll see what these commands do in a moment. 
-
-But first, before we do anything, we need to disable the default user and set an admin user. The default user exists in every Redis deployment and has full permissions. Here's the command to disable the default user. 
-```
-acl setuser default off
-```
-
-Remember, always disable the default user when you're not using ACLs, but only after you add the administrative user of your own. *You should only use the default user when it's required for backwards compatibility with Redis 5 or below*. 
-
-So now, let's look at `Falco`. 
-```
-acl setuser falco on >butterscotch allcommands -@dngerous -@admin +acl|whoami allkeys 
-```
-
-`Falco` is our development user. She needs database access to create and test her applications. We start with the ACL [SETUSER](https://redis.io/docs/latest/commands/acl-setuser/) command, followed by the user name, which in this case is `Falco`. We next specify "on" to indicate that the user can log in. After that, we specify the user's password: butterscotch. The greater than sign here indicates that this is a password. Next, we'll specify three rules that give `Falco` access to the full suite of Redis commands, except those that are in the dangerous category. *By default, ACL users have no permissions*. So we start by giving `Falco` permission for all commands, using the allcommands flag here. We then subtract the dangerous commands with the -@dangerous rule. We next explicitly grant access to the ACL WHOAMI command with the plus ACL pipe whoami. And finally, we specify allkeys, which allows `Falco` to access any key in the database. If we authenticate as `Falco`, you'll see that she has access to the ACL WHOAMI command, but not the ACL LIST command. `Falco` also can't run the KEYS command, because this is in the dangerous command category. And `Falco` can't run the CONFIG command, because this is an admin command. `Falco` can, however, SET and GET the key foo and run any other data structure commands. So `Falco` can do her job as a developer. Notice that in configuring `Falco`, we followed the principle of least privilege. She has access to the exact commands she needs and none that she doesn't. 
-
-You might be wondering what commands the Redis ACL system considers dangerous. To check this or any ACL category rule, run the `ACL CAT` command. For example, here we'll run `ACL CAT DANGEROUS`. You'll see a list of commands that include KEYS and FLUSHDB to take a couple of examples. To see a list of all command categories, run `ACL CAT` with no arguments like this. 
-```
-> ACL CAT
-1) "keyspace"
-2) "read"
-3) "write"
-4) "set"
-5) "sortedset"
-6) "list"
-7) "hash"
-8) "string"
-9) "bitmap"
-10) "hyperloglog"
-11) "geo"
-12) "stream"
-13) "pubsub"
-14) "admin"
-15) "fast"
-16) "slow"
-17) "blocking"
-18) "dangerous"
-19) "connection"
-20) "transaction"
-21) "scripting"
-```
-
-OK, so now let's configure our admin user, Rick. 
-```
-acl setuser rick on >pickle +@admin 
-```
-
-In this case, the ACL settings are pretty simple. We set our user, Rick, to on so that he can log in. We set his password to pickle, as indicated by the greater than sign. And finally, we specify +@admin, which gives Rick access to the admin commands. Now, let's log in as Rick. You can see, unlike `Falco`, Rick can run the CONFIG command to see how this Redis instance is configured. Rick can also run the ACL LIST command to see the users for this Redis database. Here again is the principle of least privilege. Rick's primary duty is to administer Redis. This includes adding users, using the ACL command, configuring Redis, and setting up the deployment model. It may also include helping to troubleshoot issues. Rick only has the access needed to do his job, to perform administrative functions. 
-
-Our last user is for the application itself. It's also important to create specific users for your applications and to apply privileges accordingly. 
-```
-acl setuser cacheservice on >cacheme +set +get ~cache:*
-```
-
-Here, we create the cacheservice user. We set the user to on. Then, we provide a password. Now comes the permissions. The cache service can run two commands, SET and GET. We indicate that with the +SET and +GET rules, we also limit the queues that the cache service can touch. The rule ~cache:* restricts this user to the keys beginning with cache: . 
-
-Let's log in as the cache service. If we try to set the key, `data:123`, we get a NOPERM error, saying that we don't have access to the given key. That's because we're limited to certain keys in the Redis key space. Let's try again with the key, `cache:123` In this case, the command succeeds. We also get the same key. Notice that we can't run any other commands as the cache user. If we do, we'll get a no permissions error. 
-
-You should now have a basic idea about how to create users and ACLs. And you're probably already thinking about how you might assign your own administrative users, developers, and service accounts their respective ACLs. To learn more about Redis ACLs and get all of the details on the ACL rule syntax, we encourage you to check the Redis docs. 
-
-> Before deployment, disable the default user and set an admin user. The default user exists in every Redis deployment and has full permissions, which is considered dangerous as an attacker will expect its presence as a way to access your data.
+### IV. [Authentication](https://youtu.be/aD9L_hlXx04)
+In the last unit, we looked at the basics of encryption
+and a simplified version of TLS.
+You should recall that a TLS connection
+starts with the exchange of a public key.
+Of course, public keys are designed to be shared freely.
+But there's a problem here that we haven't discussed.
+If someone provides you with their public key
+over the internet, how do you know
+that the public key you've been given actually
+belongs to the person you want to communicate with?
+This is the problem of authentication.
+And TLS solves this problem using a variety of techniques.
+These include asymmetric-key ciphers, certificates,
+certificate authorities, and digital signatures.
+By the end of this unit, you'll understand
+each of these concepts and how they're
+combined to create secure, authenticated connections.
+Let's review how a TLS connection is initiated.
+Say you want to create a secure connection to your bank, which
+lives at the URL, moneybags.com.
+When you navigate to https://moneybags.com
+with your browser, you're announcing
+that you'd like to connect to a server hosted on this domain.
+So a server at moneybags.com then sends you its public key.
+Now it's time to put on your paranoid hat.
+Suppose an evil underground organization
+has taken control of moneybags.com
+and rerouted the domain to their nefarious servers.
+If that's happened, then the public key you've been given
+doesn't belong to your bank at all.
+It belongs to an attacker.
+And that means that any data you encrypt and send
+with that public key can and will be read by the bad guys.
+So you need a way to verify that the public key you've
+received indeed belongs to the server you're connecting to.
+Again, this is called authentication.
+TLS solves the authentication problem
+first by using a trusted third party.
+To understand the idea of a trusted third party,
+let's think about a passport.
+I'm an American citizen.
+So I carry a US passport.
+When I travel internationally, I present my passport
+to identify myself.
+Suppose I'm traveling to the country of Lilliput.
+If I don't have a passport, the Lilliputian border control
+isn't going to let me in the country.
+Why?
+Because they have no way of verifying that I'm the person
+I say I am.
+But if I have a valid US passport,
+then they will trust me.
+Why?
+Because hopefully they trust the US government.
+And the US government, by issuing me a passport,
+is vouching for my identity.
+So to break this down, my passport
+is a document that certifies my identity.
+The US government is a third party that issued my passport.
+To enter a new country, I need a passport issued
+by a trusted third party.
+If the Lilliputian government trusts
+the US government to issue valid passports,
+and if I have a valid US passport,
+then I can enter the country.
+An important point here is that each government gets
+to decide which third parties, or which other governments,
+it's going to trust to issue valid passports.
+So let's take the analogy back to TLS.
+When you connect to your bank online.
+The bank presents its public key in the form
+of a digital certificate.
+A digital certificate is an electronic document
+that proves ownership of a public key.
+This document is issued by a third party known
+as a certificate authority.
+The certificate contains a public key.
+But it also contains a digital signature
+which validates the contents of the certificate.
+To complete the analogy, the digital certificate
+is like a passport.
+The certificate authority is like the government
+that issued the passport.
+And the digital signature is akin to the physical features
+of the passport that allow a border agent to verify
+its authenticity, things like watermarks,
+holograms, and biometric chips.
+So let's briefly look at a real website
+to see how this all works.
+Here, I'm connecting to https://wikipedia.org.
+If my browser successfully connects,
+then I'll see a little lock icon to the left of the address.
+I can click on this icon to get more information
+about the security of the connection.
+Specifically, I can view Wikipedia's server certificate.
+This is the certificate that was presented to my web browser
+when it initially connected.
+You can see it first that this certificate is for servers
+accessible at *.wikipedia.org.
+So wikipedia.org plus any subdomain.
+You can also see when the certificate expires.
+Scroll down a bit further and you'll see the public key,
+along with which asymmetric key cipher was used to generate it.
+In this case, it was an elliptical curve cipher.
+You can also see the signature that verifies the key along
+with the algorithm used to generate it.
+Finally, you should also notice the name of the certificate
+authority that signed this certificate.
+In this case, the certificate authority
+is called Let's Encrypt.
+Let's Encrypt is what's known as a intermediate certificate
+authority.
+What validates the authority of an intermediate certificate
+authority?
+A root certificate authority does that.
+Here, the root certificate authority
+that verifies Let's Encrypt as a valid certificate authority
+is the digital signature trust company.
+Its root certificate is called DST Root CA X3.
+Your browser or operating system maintains
+a list of root certificate authorities
+that it implicitly trusts.
+On Mac OS, you can see a list of all the root
+certificates it trusts by opening up the keychain app.
+So here's the list of authorities
+that my system trusts.
+And you can see the DST Root CA certificate authority
+that certifies the Let's Encrypt certificate
+authority, which certifies Wikipedia's certificate.
+And by the way, there's a name for this web
+of root and intermediate certificate authorities
+that certify the authenticity of digital certificates.
+It's known as Public Key Infrastructure, or PKI.
+Anyway, what all this means is that for a certificate
+to be trusted, the certificate must
+be traceable back to a trusted root certificate authority.
+So to take this full circle, the root certificate authorities
+are the trusted third parties you
+use to authenticate the public key of any server you connect
+to.
+Your browser will form a secure connection
+if, one, the certificate presented
+matches the domain name of the server you're
+trying to connect to, so, in this case, wikipedia.org,
+and, two, the certificate can be traced back
+to a trusted third party which will
+include any root certificate authority trusted
+by your browser.
+That's pretty amazing, right?
+What all this implies is that it's really important
+that all of the root certificates installed
+in your browser or computer are trustworthy.
+If an attacker were able to install a root certificate
+on your computer, then they might
+be able to implement various man in the middle attacks.
+Describing how this works in detail
+is beyond the scope of this course,
+but I encourage you to go do some casual research
+to learn about how these attacks have occurred in the past.
 
 
 ### IV. [Administering Redis ACLs](https://youtu.be/Q1rPFw6Iz64)
