@@ -81,8 +81,6 @@ Running a `traceroute` from your client to your Redis server will give you an id
 traceroute ru330.redis.cloud 
 ```
 
-![alt tracert]()
-
 So let's see what happens if we encrypt our network traffic using TLS instead. I'm going to start Redis again, this time with TLS enabled. Now I'll clear my screen and start that `tcpdump` again. Moving back to my client screen, I'll now connect to Redis, this time using TLS. 
 ```
 redis-cli -h ru330.redis --tls --cacert ca.crt 
