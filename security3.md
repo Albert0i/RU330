@@ -212,7 +212,7 @@ lIKZ0XABAoGBAPNmtBFSXzSqbcYwlN/xYtURw2rm4VN8os/p4K4DWiNmSz13DGj1
 xngg0b4tFUrtZt+citK9C+Gm9divtXhADdU2Ro7kqE7Zld3CpXknsZKlAoGBAOM6
 ```
 
-Now, an interesting fact is that the private key file actually contains the public key, but we need to extract it. 
+Now, an interesting fact is that the private key file actually contains the public key, but we need to extract it. So here's the command to do that, and here's what the public key actually looks like. 
 ```
 openssl rsa -in key.pem -out key.pub -pubout
 writing RSA key
@@ -229,7 +229,7 @@ IwIDAQAB
 -----END PUBLIC KEY-----
 ```
 
-So here's the command to do that, and here's what the public key actually looks like. So now I just need to send my public key to the Captain. It doesn't matter how I send it because it's only used for encryption, not decryption. I can send it over email, or I can paint it on a billboard. 
+So now I just need to send my public key to the Captain. It doesn't matter how I send it because it's only used for encryption, not decryption. I can send it over email, or I can paint it on a billboard. 
 
 Now Captain Long Beard can use my public key to encrypt the file containing the treasure map. This is the openssl command he'll run. 
 ```
