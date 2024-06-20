@@ -101,9 +101,9 @@ Life in Windows is no better than that in Linux for there is no such things as `
 
 Typically, redis client uses [RESP](https://redis.io/docs/latest/develop/reference/protocol-spec/) protocol, which is plain text, to communicate with redis server. As you can see in following screens. 
 
-![alt ](img/unsafe-1.JPG)
+![alt unsafe 1](img/unsafe-1.JPG)
 
-![alt ](img/unsafe-1.JPG)
+![alt unsafe 2](img/unsafe-2.JPG)
 
 All commands sent as well as results received can be cleally seen. 
 
