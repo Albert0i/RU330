@@ -47,11 +47,36 @@ Before we get into the meat of this unit, let's do one final horror story. We've
 
 Packet sniffing is the act of recording the individual segments of data traveling over a network. And it's commonly used to analyze networks. The upshot is that it's pretty easy to record and view unencrypted network traffic. And that includes the traffic between your applications and your database. And if an attacker is sniffing your unencrypted network traffic, well, that can easily turn into the kind of horror stories we want to avoid. 
 
-So let's quickly see just how easy it is to view unencrypted traffic on a network connection and how to prevent that with TLS. Here, you can see I have two terminal windows open, one is my Redis client and the other is Redis server. I'm here on the server now. I'll start my server in the least secure way I know, for demonstration purposes, obviously, without a configuration file and just with the defaults. Next, I'll disable protected mode from the command line so that we can make a remote connection. 
+So let's quickly see just how easy it is to view unencrypted traffic on a network connection and how to prevent that with TLS. Here, you can see I have two terminal windows open, one is my Redis client and the other is Redis server. I'm here on the server now. I'll start my server in the least secure way I know, for demonstration purposes, obviously, without a configuration file and just with the defaults. 
+```
+redis-server 2>&1 > redis.out & 
+```
 
-Finally, I'll launch `tcpdump`. `tcpdump` allows me to inspect all of the traffic running between my Redis client and the Redis server. Now, let's switch back to our client terminal window. I'll connect to the server I've just started using the Redis CLI. Now that I'm connected, I'll write some sensitive data to Redis.
+Next, I'll disable protected mode from the command line so that we can make a remote connection. 
+```
+redis-cli 
+config set protected-mode no 
+exit
+```
 
-Here, I'm entering a gender, birthday, credit card number, and credit card expiration date. Now, let's look at the output of the `tcpdump` command. If you look closely, you'll see everything I just sent to Redis, including all of the sensitive data is there. In this example, I'm sniffing unencrypted data from the server where Redis is hosted. But this kind of surveillance can be run on any server, network switch, or router that sits between your Redis client and your Redis server. This means that usually there are quite a few opportunities for someone to sniff and record unencrypted network traffic. Running a traceroute from your client to your Redis server will give you an idea of just how many sniffing opportunities might exist. And you can't secure this network route because it's completely outside of your control. So let's see what happens if we encrypt our network traffic using TLS instead. I'm going to start Redis again, this time with TLS enabled. Now I'll clear my screen and start that `tcpdump` again. Moving back to my client screen, I'll now connect to Redis, this time using TLS. This means my connection is now encrypted. Now I'll issue the same command I did before. Then, let's look again at the `tcpdump` output. See the difference? All you can see now are what appear to be a bunch of random characters. This is the value of encryption in action. Encryption protects your sensitive data from prying eyes on the network. For the rest of the unit, I'm going to explain how TLS works and everything you need to know to set it up with Redis. But first, two key points to remember for now. First, if you're storing sensitive information in Redis, and most personal information is sensitive, then you should encrypt your Redis connections with TLS. Second, even if you're using TLS, avoid public networks if you can. If you're on a private network, you greatly limit the number of attack vectors. OK. So with that out of the way, let's learn about TLS and how to use it with Redis.
+Finally, I'll launch `tcpdump`. `tcpdump` allows me to inspect all of the traffic running between my Redis client and the Redis server. 
+```
+tcpdump port 6379 
+```
+
+Now, let's switch back to our client terminal window. I'll connect to the server I've just started using the Redis CLI. Now that I'm connected, I'll write some sensitive data to Redis.
+```
+redis-cli -h ru330.redis 
+hset user:1:secret gender m birthdate 19790101 ccn 5270426764505555 ccn_expire 1224 
+```
+
+Here, I'm entering a gender, birthday, credit card number, and credit card expiration date. Now, let's look at the output of the `tcpdump` command. If you look closely, you'll see everything I just sent to Redis, including all of the sensitive data is there. 
+
+![alt tcp dump output](img/tcpdump-output.png)
+
+In this example, I'm sniffing unencrypted data from the server where Redis is hosted. But this kind of surveillance can be run on any server, network switch, or router that sits between your Redis client and your Redis server. This means that usually there are quite a few opportunities for someone to sniff and record unencrypted network traffic. 
+
+Running a traceroute from your client to your Redis server will give you an idea of just how many sniffing opportunities might exist. And you can't secure this network route because it's completely outside of your control. So let's see what happens if we encrypt our network traffic using TLS instead. I'm going to start Redis again, this time with TLS enabled. Now I'll clear my screen and start that `tcpdump` again. Moving back to my client screen, I'll now connect to Redis, this time using TLS. This means my connection is now encrypted. Now I'll issue the same command I did before. Then, let's look again at the `tcpdump` output. See the difference? All you can see now are what appear to be a bunch of random characters. This is the value of encryption in action. Encryption protects your sensitive data from prying eyes on the network. For the rest of the unit, I'm going to explain how TLS works and everything you need to know to set it up with Redis. But first, two key points to remember for now. First, if you're storing sensitive information in Redis, and most personal information is sensitive, then you should encrypt your Redis connections with TLS. Second, even if you're using TLS, avoid public networks if you can. If you're on a private network, you greatly limit the number of attack vectors. OK. So with that out of the way, let's learn about TLS and how to use it with Redis.
 
 
 ### II. [ACL Concepts](https://youtu.be/GuWWmR4od-A)
