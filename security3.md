@@ -545,48 +545,56 @@ Now, we have Redis binaries with TLS enabled. To establish encryption, we need t
 
 ![alt three files for tls](img/three-files-for-tls.png)
 
-For example, it's common in many enterprises to operate an internal certificate authority to issue certificates. But for the purpose of this demo, we'll create our own issuing certificate. So we'll effectively be acting like our own certificate authority. Let's use the `openssl` utility to create these files. openssl is pretty complex. So I'm just going to give a high-level description of the commands you need to run here. For all the details, check out the handout and the openssl docs.
+For example, it's common in many enterprises to operate an internal certificate authority to issue certificates. But for the purpose of this demo, we'll create our own issuing certificate. So we'll effectively be acting like our own certificate authority. Let's use the `openssl` utility to create these files. `openssl` is pretty complex. So I'm just going to give a high-level description of the commands you need to run here. For all the details, check out the handout and the `openssl` [docs](https://wiki.openssl.org/index.php/Command_Line_Utilities).
 
 First, we'll create the issuing certificate's private key. 
 ```
 openssl genrsa -out ca.key 4096
 ```
 
-If you run this openssl command, you'll get a file called ca.key, which contains the private key. Then we'll use that private key to create the issuing certificate itself. 
+If you run this `openssl` command, you'll get a file called ca.key, which contains the private key. Then we'll use that private key to create the issuing certificate itself. 
 ```
-openssl req -x509 -new -nodes -sha256 -key ca.key -days 6350 -subj '/O=Redislabs/CN=Redis Prod CA' -out ca.crt 
+openssl req -x509 -new -nodes -sha256 -key ca.key -days 3650 -subj /O=Redislabs/CN=Redis-Prod-CA -out ca.crt 
 ```
 
-So when we run this command, we provide the ca.key file to create the issuing certificate, which is stored in the ca.crt file. Now that we have the issuing certificate, we'll create our server certificate.
+So when we run this command, we provide the ca.key file to create the issuing certificate, which is stored in the ca.crt file. Now that we have the issuing certificate, we'll create our server certificate. The first step is creating a private key for the server. That's stored in the file redis.key. 
 ```
 openssl genrsa -out redis.key 2048 
 ```
 
-The first step is creating a private key for the server. That's stored in the file redis.key. Then, we use this private key and the issuing certificate we just created to create the server certificate. 
+Then, we use this private key and the issuing certificate we just created to create the server certificate. 
 ```
-openssl req -new -sha256 -nodes -sha256 -key redis.key -subj '/O=Redis/CN=Production Redis' | openssl x509 -req -sha256 -CA ca.crt -CAkey ca.key -CAserial /etc/ssl/private/ca.txt -CAcreateserial -days 365 -out redis.crt 
+openssl req -new -sha256 -nodes -key redis.key -subj /O=Redis/CN=Production-Redis | openssl x509 -req -sha256 -CA ca.crt -CAkey ca.key -CAserial private/ca.txt -CAcreateserial -days 365 -out redis.crt
+Certificate request self-signature ok
+subject=O=Redis, CN=Production-Redis
+```
 
-mv ca.crt /usr/local/share/ca-certifications 
+So the server certificate is now in the file redis.crt. Let's move these files to some standard directories. We'll store our issuing certificate in /usr/local/share/ca-certificates. We'll store our private keys in /etc/ssl/private. And finally, we'll store the server certificate in /etc/ssl. 
+```
+mv ca.crt /usr/local/share/ca-certificates
 mv ca.key /etc/ssl/private 
 mv redis.key /etc/ssl/private 
 mv redis.crt /etc/ssl
+```
 
+On Ubuntu, you can tell the system about new certificates by running update-ca-certificates, which I'm doing here.
+```
 update-ca-certificates 
+```
+
+We'll also need to set the correct permissions on these files. Private keys should be restricted to the owner with permissions 400. The public keys ending in .crt should have permissions 644. 
+```
 chown redis:redis /etc/ssl/private/*.key 
 chown 400 /etc/ssl/private/*.key 
-chown redis:redis /user/local/share/ca-certifications/ca.crt 
+
+chown redis:redis /usr/local/share/ca-certificates/ca.crt 
 chown redis:redis /etc/ssl/redis.crt 
-chmod 644 /usr/local/share/ca-certifications/ca.crt 
+
+chmod 644 /usr/local/share/ca-certificates/ca.crt 
 chmod 644 /etc/ssl/redis.crt 
 ```
 
-So the server certificate is now in the file redis.crt. Let's move these files to some standard directories. We'll store our issuing certificate in /usr/local/share/ca-certificates. We'll store our private keys in /etc/ssl/private.
-
-And finally, we'll store the server certificate in /etc/ssl. On Ubuntu, you can tell the system about new certificates by running update-ca-certificates, which I'm doing here.
-
-We'll also need to set the correct permissions on these files. Private keys should be restricted to the owner with permissions 400. The public keys ending in .crt should have permissions 644. Now we have the files we need to set up Redis with TLS. So to begin, let's open up our redis.conf configuration file.
-
-First, we set the port value to 0. This is how we disable unencrypted clear text connections to Redis. This is an important step. Next, we set the TLS port to 6379.
+Now we have the files we need to set up Redis with TLS. So to begin, let's open up our `redis.conf` configuration file. First, we set the port value to 0. This is how we disable unencrypted clear text connections to Redis. This is an important step. Next, we set the TLS port to 6379.
 
 This means that Redis will require TLS when clients connect to it on the standard port. Now, we'll specify the server certificate file, which is redis.crt. And we also specify the server's private key file, which is redis.key. We also need to provide the issuing certificate authority files that this Redis server will trust. This is important for client authentication later on. We'll provide the file ca.crt from
 ```
@@ -684,9 +692,10 @@ Changing the default port is not supported at runtime using the CONFIG command.
 2. [Npcap](https://npcap.com/)
 3. [Hexdump for Windows](https://www.di-mgt.com.au/hexdump-for-windows.html#downloads)
 4. [Laragon](https://laragon.org/)
-5. [Man-in-the-Middle (MITM) Attack: Definition, Examples & More](https://www.strongdm.com/blog/man-in-the-middle-attack)
-6. [Redis configuration file example](https://redis.io/docs/latest/operate/oss_and_stack/management/config-file/)
-7. [The Gold-Bug by  Edgar Allan Poe](https://poemuseum.org/the-gold-bug/)
+5. [Win32/Win64 OpenSSL](https://slproweb.com/products/Win32OpenSSL.html)
+6. [Man-in-the-Middle (MITM) Attack: Definition, Examples & More](https://www.strongdm.com/blog/man-in-the-middle-attack)
+7. [Redis configuration file example](https://redis.io/docs/latest/operate/oss_and_stack/management/config-file/)
+8. [The Gold-Bug by  Edgar Allan Poe](https://poemuseum.org/the-gold-bug/)
 
 
 ### Epilogue 
