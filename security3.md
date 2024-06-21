@@ -517,6 +517,8 @@ SSL-Session:
 
 Under SSL-Session/Cipher, you'll see a series of acronyms (ECDHE-ECDSA-AES256-GCM-SHA384). This is the **cipher suite**, and again, what's specified here are the algorithms used in the asymmetric key and symmetric key ciphers, digital signature algorithms, and message authentication codes for this TLS session. 
 
+![alt cipher](img/cipher.JPG)
+
 #### TLS Versions
 Another thing you'll notice here is the TLS version. In the sample output, you can see what we're connected using TLS version 1.2. The TLS version is also negotiated when we make a TLS connection.
 
@@ -529,8 +531,6 @@ TLS 1.3 improves upon TLS 1.2 in a couple of ways: First, it's slightly faster i
 Second, TLS 1.3 requires more sophisticated cipher suites that TLS 1.2.
 
 So by now you should know the different building blocks of TLS. Obviously, we've just scratched the surface here. But if you've managed to grasp these basic ideas, then you'll be in a much better position to understand what you're doing when you configure TLS for Redis. That's exactly what we'll be doing in the next unit.
-
-![alt cipher](img/cipher.JPG)
 
 
 ### VI. [Encrypting Connections](https://youtu.be/5zO-DKDtG3Q)
