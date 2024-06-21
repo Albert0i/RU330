@@ -530,6 +530,8 @@ Second, TLS 1.3 requires more sophisticated cipher suites that TLS 1.2.
 
 So by now you should know the different building blocks of TLS. Obviously, we've just scratched the surface here. But if you've managed to grasp these basic ideas, then you'll be in a much better position to understand what you're doing when you configure TLS for Redis. That's exactly what we'll be doing in the next unit.
 
+![alt cipher](img/cipher.JPG)
+
 
 ### VI. Redis Logging
 Redis comes with two types of logs relevant to security: the ACL log and the Redis server log files.
