@@ -605,7 +605,12 @@ It's also possible to specify a directory of trusted issuing certificates, or ro
 
 First, we'll specify that we only support TLS versions 1.2 and 1.3. We'll also specify some allowed cipher suites. The tls-ciphers directive determines which cipher suites can be used when a client requests a TLS v1.2 connection. Similarly, the tls-ciphersuites directive determines which cipher suites are allowed for v1.3 connections. And finally, we;ll set tls-prefer-server-ciphers to no to indicate that the server should allow clients to choose the cipher suite for TLS connections. We can now start Redis so that it uses TLS. So first, we'll start a Redis server process and point it to the redis.conf we were just editing.
 
-Next, let's try connecting to the server using Redis CLI. And notice that the connection gets closed right away. If we look at the Redis log file, we'll see an SSL error. We actually need to tell the client that we're connecting over TLS. So here I am providing the --tls option. And I'm also providing a certificate authority file. In this case, this is the certificate that issued the server's public key. This is effectively telling the client that the server's certificate should be signed by this issuing certificate.
+Next, let's try connecting to the server using Redis CLI. And notice that the connection gets closed right away. If we look at the Redis log file, we'll see an SSL error. We actually need to tell the client that we're connecting over TLS. So here I am providing the --tls option. And I'm also providing a certificate authority file. 
+```
+redis-cli --tls --cacert /usr/local/share/ca-certificates/ca.crt 
+```
+
+In this case, this is the certificate that issued the server's public key. This is effectively telling the client that the server's certificate should be signed by this issuing certificate.
 
 Now when we connect, we can run commands. And we know that our connection is encrypted. So that's the basics of setting up encryption in Redis. in the next unit, we'll see how to enable TLS for Redis clusters, how to set up client authentication, and how to tweak some advanced TLS parameters.
 
