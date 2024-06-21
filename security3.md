@@ -854,12 +854,9 @@ Now on the other hand, if the data on the system was not valuable to me, I'd jus
 1. [WinShark](https://www.wireshark.org/#homeMemberLink)
 2. [Npcap](https://npcap.com/)
 3. [Hexdump for Windows](https://www.di-mgt.com.au/hexdump-for-windows.html#downloads)
-4. [Gpg4win](https://www.gpg4win.org/)
-
-1. [OVER 18,000 REDIS INSTANCES TARGETED BY FAKE RANSOMWARE](https://duo.com/decipher/over-18000-redis-instances-targeted-by-fake-ransomware)
-2. [SHA256 Online Tools](https://emn178.github.io/online-tools/sha256.html)
-3. [Redis configuration file example](https://redis.io/docs/latest/operate/oss_and_stack/management/config-file/)
-4. [The Gold-Bug by  Edgar Allan Poe](https://poemuseum.org/the-gold-bug/)
+4. [Laragon](https://laragon.org/)
+5. [Redis configuration file example](https://redis.io/docs/latest/operate/oss_and_stack/management/config-file/)
+6. [The Gold-Bug by  Edgar Allan Poe](https://poemuseum.org/the-gold-bug/)
 
 
 ### Epilogue 
