@@ -534,15 +534,53 @@ So by now you should know the different building blocks of TLS. Obviously, we've
 
 
 ### VI. [Encrypting Connections](https://youtu.be/5zO-DKDtG3Q)
-It's finally time to secure Redis with TLS. In this unit, we'll configure a Redis server process for TLS. And we'll connect over TLS using the Redis CLI. In the next unit, we'll look at some additional TLS settings, including mutual authentication. For TLS to work, we'll need to build Redis with encryption enabled. To do this, set the BUILD_TLS environment variable when you compile Redis, like you see here on screen. 
+It's finally time to secure Redis with TLS. In this unit, we'll configure a Redis server process for TLS. And we'll connect over TLS using the Redis CLI. In the next unit, we'll look at some additional TLS settings, including mutual authentication. 
+
+For TLS to work, we'll need to build Redis with encryption enabled. To do this, set the `BUILD_TLS` environment variable when you compile Redis, like you see here on screen. 
+```
+sudo make BUILD_TLS=yes install 
+```
 
 Now, we have Redis binaries with TLS enabled. To establish encryption, we need to create three files-- the server certificate, which is the file containing the server's public key, which has been signed by a certificate authority, the issuing certificate, that is, the certificate used to sign the server's public key, and finally, the server's private key. In a production environment, the issuing certificate will usually be provided by whichever certificate authority you use.
 
-For example, it's common in many enterprises to operate an internal certificate authority to issue certificates. But for the purpose of this demo, we'll create our own issuing certificate. So we'll effectively be acting like our own certificate authority. Let's use the openssl utility to create these files. openssl is pretty complex. So I'm just going to give a high-level description of the commands you need to run here. For all the details, check out the handout and the openssl docs.
+![alt three files for tls](img/three-files-for-tls.png)
 
-First, we'll create the issuing certificate's private key. If you run this openssl command, you'll get a file called ca.key, which contains the private key. Then we'll use that private key to create the issuing certificate itself. So when we run this command, we provide the ca.key file to create the issuing certificate, which is stored in the ca.crt file. Now that we have the issuing certificate, we'll create our server certificate.
+For example, it's common in many enterprises to operate an internal certificate authority to issue certificates. But for the purpose of this demo, we'll create our own issuing certificate. So we'll effectively be acting like our own certificate authority. Let's use the `openssl` utility to create these files. openssl is pretty complex. So I'm just going to give a high-level description of the commands you need to run here. For all the details, check out the handout and the openssl docs.
 
-The first step is creating a private key for the server. That's stored in the file redis.key. Then, we use this private key and the issuing certificate we just created to create the server certificate. So the server certificate is now in the file redis.crt. Let's move these files to some standard directories. We'll store our issuing certificate in /usr/local/share/ca-certificates. We'll store our private keys in /etc/ssl/private.
+First, we'll create the issuing certificate's private key. 
+```
+openssl genrsa -out ca.key 4096
+```
+
+If you run this openssl command, you'll get a file called ca.key, which contains the private key. Then we'll use that private key to create the issuing certificate itself. 
+```
+openssl req -x509 -new -nodes -sha256 -key ca.key -days 6350 -subj '/O=Redislabs/CN=Redis Prod CA' -out ca.crt 
+```
+
+So when we run this command, we provide the ca.key file to create the issuing certificate, which is stored in the ca.crt file. Now that we have the issuing certificate, we'll create our server certificate.
+```
+openssl genrsa -out redis.key 2048 
+```
+
+The first step is creating a private key for the server. That's stored in the file redis.key. Then, we use this private key and the issuing certificate we just created to create the server certificate. 
+```
+openssl req -new -sha256 -nodes -sha256 -key redis.key -subj '/O=Redis/CN=Production Redis' | openssl x509 -req -sha256 -CA ca.crt -CAkey ca.key -CAserial /etc/ssl/private/ca.txt -CAcreateserial -days 365 -out redis.crt 
+
+mv ca.crt /usr/local/share/ca-certifications 
+mv ca.key /etc/ssl/private 
+mv redis.key /etc/ssl/private 
+mv redis.crt /etc/ssl
+
+update-ca-certificates 
+chown redis:redis /etc/ssl/private/*.key 
+chown 400 /etc/ssl/private/*.key 
+chown redis:redis /user/local/share/ca-certifications/ca.crt 
+chown redis:redis /etc/ssl/redis.crt 
+chmod 644 /usr/local/share/ca-certifications/ca.crt 
+chmod 644 /etc/ssl/redis.crt 
+```
+
+So the server certificate is now in the file redis.crt. Let's move these files to some standard directories. We'll store our issuing certificate in /usr/local/share/ca-certificates. We'll store our private keys in /etc/ssl/private.
 
 And finally, we'll store the server certificate in /etc/ssl. On Ubuntu, you can tell the system about new certificates by running update-ca-certificates, which I'm doing here.
 
