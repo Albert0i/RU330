@@ -291,165 +291,31 @@ OK. We've just covered a lot of material, and you may need to re-watch this vide
 
 
 ### IV. [Authentication](https://youtu.be/aD9L_hlXx04)
-In the last unit, we looked at the basics of encryption
-and a simplified version of TLS.
-You should recall that a TLS connection
-starts with the exchange of a public key.
-Of course, public keys are designed to be shared freely.
-But there's a problem here that we haven't discussed.
-If someone provides you with their public key
-over the internet, how do you know
-that the public key you've been given actually
-belongs to the person you want to communicate with?
-This is the problem of authentication.
-And TLS solves this problem using a variety of techniques.
-These include asymmetric-key ciphers, certificates,
-certificate authorities, and digital signatures.
-By the end of this unit, you'll understand
-each of these concepts and how they're
-combined to create secure, authenticated connections.
-Let's review how a TLS connection is initiated.
-Say you want to create a secure connection to your bank, which
-lives at the URL, moneybags.com.
-When you navigate to https://moneybags.com
-with your browser, you're announcing
-that you'd like to connect to a server hosted on this domain.
-So a server at moneybags.com then sends you its public key.
-Now it's time to put on your paranoid hat.
-Suppose an evil underground organization
-has taken control of moneybags.com
-and rerouted the domain to their nefarious servers.
-If that's happened, then the public key you've been given
-doesn't belong to your bank at all.
-It belongs to an attacker.
-And that means that any data you encrypt and send
-with that public key can and will be read by the bad guys.
-So you need a way to verify that the public key you've
-received indeed belongs to the server you're connecting to.
-Again, this is called authentication.
-TLS solves the authentication problem
-first by using a trusted third party.
-To understand the idea of a trusted third party,
-let's think about a passport.
-I'm an American citizen.
-So I carry a US passport.
-When I travel internationally, I present my passport
-to identify myself.
-Suppose I'm traveling to the country of Lilliput.
-If I don't have a passport, the Lilliputian border control
-isn't going to let me in the country.
-Why?
-Because they have no way of verifying that I'm the person
-I say I am.
-But if I have a valid US passport,
-then they will trust me.
-Why?
-Because hopefully they trust the US government.
-And the US government, by issuing me a passport,
-is vouching for my identity.
-So to break this down, my passport
-is a document that certifies my identity.
-The US government is a third party that issued my passport.
-To enter a new country, I need a passport issued
-by a trusted third party.
-If the Lilliputian government trusts
-the US government to issue valid passports,
-and if I have a valid US passport,
-then I can enter the country.
-An important point here is that each government gets
-to decide which third parties, or which other governments,
-it's going to trust to issue valid passports.
-So let's take the analogy back to TLS.
-When you connect to your bank online.
-The bank presents its public key in the form
-of a digital certificate.
-A digital certificate is an electronic document
-that proves ownership of a public key.
-This document is issued by a third party known
-as a certificate authority.
-The certificate contains a public key.
-But it also contains a digital signature
-which validates the contents of the certificate.
-To complete the analogy, the digital certificate
-is like a passport.
-The certificate authority is like the government
-that issued the passport.
-And the digital signature is akin to the physical features
-of the passport that allow a border agent to verify
-its authenticity, things like watermarks,
-holograms, and biometric chips.
-So let's briefly look at a real website
-to see how this all works.
-Here, I'm connecting to https://wikipedia.org.
-If my browser successfully connects,
-then I'll see a little lock icon to the left of the address.
-I can click on this icon to get more information
-about the security of the connection.
-Specifically, I can view Wikipedia's server certificate.
-This is the certificate that was presented to my web browser
-when it initially connected.
-You can see it first that this certificate is for servers
-accessible at *.wikipedia.org.
-So wikipedia.org plus any subdomain.
-You can also see when the certificate expires.
-Scroll down a bit further and you'll see the public key,
-along with which asymmetric key cipher was used to generate it.
-In this case, it was an elliptical curve cipher.
-You can also see the signature that verifies the key along
-with the algorithm used to generate it.
-Finally, you should also notice the name of the certificate
-authority that signed this certificate.
-In this case, the certificate authority
-is called Let's Encrypt.
-Let's Encrypt is what's known as a intermediate certificate
-authority.
-What validates the authority of an intermediate certificate
-authority?
-A root certificate authority does that.
-Here, the root certificate authority
-that verifies Let's Encrypt as a valid certificate authority
-is the digital signature trust company.
-Its root certificate is called DST Root CA X3.
-Your browser or operating system maintains
-a list of root certificate authorities
-that it implicitly trusts.
-On Mac OS, you can see a list of all the root
-certificates it trusts by opening up the keychain app.
-So here's the list of authorities
-that my system trusts.
-And you can see the DST Root CA certificate authority
-that certifies the Let's Encrypt certificate
-authority, which certifies Wikipedia's certificate.
-And by the way, there's a name for this web
-of root and intermediate certificate authorities
-that certify the authenticity of digital certificates.
-It's known as Public Key Infrastructure, or PKI.
-Anyway, what all this means is that for a certificate
-to be trusted, the certificate must
-be traceable back to a trusted root certificate authority.
-So to take this full circle, the root certificate authorities
-are the trusted third parties you
-use to authenticate the public key of any server you connect
-to.
-Your browser will form a secure connection
-if, one, the certificate presented
-matches the domain name of the server you're
-trying to connect to, so, in this case, wikipedia.org,
-and, two, the certificate can be traced back
-to a trusted third party which will
-include any root certificate authority trusted
-by your browser.
-That's pretty amazing, right?
-What all this implies is that it's really important
-that all of the root certificates installed
-in your browser or computer are trustworthy.
-If an attacker were able to install a root certificate
-on your computer, then they might
-be able to implement various man in the middle attacks.
-Describing how this works in detail
-is beyond the scope of this course,
-but I encourage you to go do some casual research
-to learn about how these attacks have occurred in the past.
+In the last unit, we looked at the basics of encryption and a simplified version of TLS. You should recall that a TLS connection starts with the exchange of a public key. Of course, public keys are designed to be shared freely. But there's a problem here that we haven't discussed.
+
+If someone provides you with their public key over the internet, how do you know that the public key you've been given actually belongs to the person you want to communicate with? This is the problem of authentication. And TLS solves this problem using a variety of techniques. These include asymmetric-key ciphers, certificates, certificate authorities, and digital signatures. By the end of this unit, you'll understand each of these concepts and how they're combined to create secure, authenticated connections. Let's review how a TLS connection is initiated. Say you want to create a secure connection to your bank, which lives at the URL, moneybags.com. When you navigate to https://moneybags.com with your browser, you're announcing that you'd like to connect to a server hosted on this domain. So a server at moneybags.com then sends you its public key.
+
+Now it's time to put on your paranoid hat. Suppose an evil underground organization has taken control of moneybags.com and rerouted the domain to their nefarious servers. If that's happened, then the public key you've been given doesn't belong to your bank at all. It belongs to an attacker. And that means that any data you encrypt and send with that public key can and will be read by the bad guys. So you need a way to verify that the public key you've received indeed belongs to the server you're connecting to. Again, this is called authentication. TLS solves the authentication problem first by using a trusted third party. To understand the idea of a trusted third party, let's think about a passport. I'm an American citizen. So I carry a US passport. When I travel internationally, I present my passport to identify myself. Suppose I'm traveling to the country of Lilliput. If I don't have a passport, the Lilliputian border control isn't going to let me in the country. Why? Because they have no way of verifying that I'm the person I say I am. But if I have a valid US passport, then they will trust me. Why?
+
+Because hopefully they trust the US government. And the US government, by issuing me a passport, is vouching for my identity. So to break this down, my passport is a document that certifies my identity. The US government is a third party that issued my passport. To enter a new country, I need a passport issued by a trusted third party. If the Lilliputian government trusts the US government to issue valid passports, and if I have a valid US passport, then I can enter the country.
+
+An important point here is that each government gets to decide which third parties, or which other governments, it's going to trust to issue valid passports. So let's take the analogy back to TLS. When you connect to your bank online. The bank presents its public key in the form of a digital certificate. A digital certificate is an electronic document that proves ownership of a public key. This document is issued by a third party known as a certificate authority. The certificate contains a public key. But it also contains a digital signature which validates the contents of the certificate. To complete the analogy, the digital certificate is like a passport. The certificate authority is like the government that issued the passport.
+
+And the digital signature is akin to the physical features of the passport that allow a border agent to verify its authenticity, things like watermarks, holograms, and biometric chips. So let's briefly look at a real website to see how this all works. Here, I'm connecting to https://wikipedia.org. If my browser successfully connects, then I'll see a little lock icon to the left of the address. I can click on this icon to get more information about the security of the connection. Specifically, I can view Wikipedia's server certificate. This is the certificate that was presented to my web browser when it initially connected. 
+
+You can see it first that this certificate is for servers accessible at *.wikipedia.org. So wikipedia.org plus any subdomain. You can also see when the certificate expires. Scroll down a bit further and you'll see the public key, along with which asymmetric key cipher was used to generate it. In this case, it was an elliptical curve cipher. You can also see the signature that verifies the key along with the algorithm used to generate it.
+
+Finally, you should also notice the name of the certificate authority that signed this certificate. In this case, the certificate authority is called Let's Encrypt. Let's Encrypt is what's known as a intermediate certificate authority.
+
+What validates the authority of an intermediate certificate authority? A root certificate authority does that. Here, the root certificate authority that verifies Let's Encrypt as a valid certificate authority is the digital signature trust company. Its root certificate is called DST Root CA X3. Your browser or operating system maintains a list of root certificate authorities that it implicitly trusts. On Mac OS, you can see a list of all the root certificates it trusts by opening up the keychain app.
+
+So here's the list of authorities that my system trusts. And you can see the DST Root CA certificate authority that certifies the Let's Encrypt certificate authority, which certifies Wikipedia's certificate. And by the way, there's a name for this web of root and intermediate certificate authorities that certify the authenticity of digital certificates. It's known as Public Key Infrastructure, or PKI.
+
+Anyway, what all this means is that for a certificate to be trusted, the certificate must be traceable back to a trusted root certificate authority. So to take this full circle, the root certificate authorities are the trusted third parties you use to authenticate the public key of any server you connect to.
+
+Your browser will form a secure connection if, one, the certificate presented matches the domain name of the server you're trying to connect to, so, in this case, wikipedia.org, and, two, the certificate can be traced back to a trusted third party which will include any root certificate authority trusted by your browser.
+
+That's pretty amazing, right? What all this implies is that it's really important that all of the root certificates installed in your browser or computer are trustworthy. If an attacker were able to install a root certificate on your computer, then they might be able to implement various man in the middle attacks. Describing how this works in detail is beyond the scope of this course, but I encourage you to go do some casual research to learn about how these attacks have occurred in the past.
 
 - [Digital Certificates (Wikipedia)](https://en.wikipedia.org/wiki/Public_key_certificate)
 
@@ -478,6 +344,7 @@ You can now browse through the certificate stores and view the individual certif
 
 Please note that accessing and managing certificates may require administrative privileges. Additionally, the specific certificate stores and the certificates available may vary depending on your system configuration and installed applications. 
 (Generated by ChatGPT)
+
 
 ### IV. [Administering Redis ACLs](https://youtu.be/Q1rPFw6Iz64)
 The best way to manage ACL users in Redis is to specify them in an ACL configuration file. If you have just a few users, you can configure them directly in the Redis conf config file. 
