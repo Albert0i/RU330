@@ -328,15 +328,17 @@ You can see it first that this certificate is for servers accessible at *.wikipe
 
 Finally, you should also notice the name of the certificate authority that signed this certificate. In this case, the certificate authority is called Let's Encrypt. Let's Encrypt is what's known as a intermediate certificate authority.
 
-What validates the authority of an intermediate certificate authority? A root certificate authority does that. Here, the root certificate authority that verifies Let's Encrypt as a valid certificate authority is the digital signature trust company. Its root certificate is called DST Root CA X3. Your browser or operating system maintains a list of root certificate authorities that it implicitly trusts. On Mac OS, you can see a list of all the root certificates it trusts by opening up the keychain app.
+What validates the authority of an intermediate certificate authority? A root certificate authority does that. Here, the root certificate authority that verifies Let's Encrypt as a valid certificate authority is the digital signature trust company. Its root certificate is called DST Root CA X3. Your browser or operating system maintains a list of root certificate authorities that it implicitly trusts. On Mac OS, you can see a list of all the root certificates it trusts by opening up the **keychain app**.
 
-So here's the list of authorities that my system trusts. And you can see the DST Root CA certificate authority that certifies the Let's Encrypt certificate authority, which certifies Wikipedia's certificate. And by the way, there's a name for this web of root and intermediate certificate authorities that certify the authenticity of digital certificates. It's known as Public Key Infrastructure, or PKI.
+So here's the list of authorities that my system trusts. And you can see the DST Root CA certificate authority that certifies the Let's Encrypt certificate authority, which certifies Wikipedia's certificate. And by the way, there's a name for this web of root and intermediate certificate authorities that certify the authenticity of digital certificates. It's known as **Public Key Infrastructure**, or **PKI**.
 
 Anyway, what all this means is that for a certificate to be trusted, the certificate must be traceable back to a trusted root certificate authority. So to take this full circle, the root certificate authorities are the trusted third parties you use to authenticate the public key of any server you connect to.
 
-Your browser will form a secure connection if, one, the certificate presented matches the domain name of the server you're trying to connect to, so, in this case, wikipedia.org, and, two, the certificate can be traced back to a trusted third party which will include any root certificate authority trusted by your browser.
+Your browser will form a secure connection if: 
+- Certificate presented matches the domain name of the server you're trying to connect to, so, in this case, wikipedia.org
+- Certificate can be traced back to a trusted third party which will include any root certificate authority trusted by your browser
 
-That's pretty amazing, right? What all this implies is that it's really important that all of the root certificates installed in your browser or computer are trustworthy. If an attacker were able to install a root certificate on your computer, then they might be able to implement various man in the middle attacks. Describing how this works in detail is beyond the scope of this course, but I encourage you to go do some casual research to learn about how these attacks have occurred in the past.
+That's pretty amazing, right? What all this implies is that it's really important that all of the root certificates installed in your browser or computer are trustworthy. If an attacker were able to install a root certificate on your computer, then they might be able to implement various [man in the middle attacks](https://www.strongdm.com/blog/man-in-the-middle-attack). Describing how this works in detail is beyond the scope of this course, but I encourage you to go do some casual research to learn about how these attacks have occurred in the past.
 
 - [Digital Certificates (Wikipedia)](https://en.wikipedia.org/wiki/Public_key_certificate)
 
@@ -743,8 +745,9 @@ Now on the other hand, if the data on the system was not valuable to me, I'd jus
 2. [Npcap](https://npcap.com/)
 3. [Hexdump for Windows](https://www.di-mgt.com.au/hexdump-for-windows.html#downloads)
 4. [Laragon](https://laragon.org/)
-5. [Redis configuration file example](https://redis.io/docs/latest/operate/oss_and_stack/management/config-file/)
-6. [The Gold-Bug by  Edgar Allan Poe](https://poemuseum.org/the-gold-bug/)
+5. [Man-in-the-Middle (MITM) Attack: Definition, Examples & More](https://www.strongdm.com/blog/man-in-the-middle-attack)
+6. [Redis configuration file example](https://redis.io/docs/latest/operate/oss_and_stack/management/config-file/)
+7. [The Gold-Bug by  Edgar Allan Poe](https://poemuseum.org/the-gold-bug/)
 
 
 ### Epilogue 
