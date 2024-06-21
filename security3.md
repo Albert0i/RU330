@@ -533,166 +533,128 @@ So by now you should know the different building blocks of TLS. Obviously, we've
 ![alt cipher](img/cipher.JPG)
 
 
-### VI. Redis Logging
-Redis comes with two types of logs relevant to security: the ACL log and the Redis server log files.
+### VI. [Encrypting Connections](https://youtu.be/5zO-DKDtG3Q)
+It's finally time to secure Redis with TLS.
+In this unit, we'll configure a Redis server process for TLS.
+And we'll connect over TLS using the Redis CLI.
+In the next unit, we'll look at some additional TLS
+settings, including mutual authentication.
+For TLS to work, we'll need to build Redis
+with encryption enabled.
+To do this, set the BUILD_TLS environment
+variable when you compile Redis, like you see here on screen.
+Now, we have Redis binaries with TLS enabled.
+To establish encryption, we need to create three files--
+the server certificate, which is the file containing
+the server's public key, which has been signed
+by a certificate authority, the issuing certificate, that is,
+the certificate used to sign the server's public key,
+and finally, the server's private key.
+In a production environment, the issuing certificate
+will usually be provided by whichever certificate
+authority you use.
+For example, it's common in many enterprises
+to operate an internal certificate authority
+to issue certificates.
+But for the purpose of this demo,
+we'll create our own issuing certificate.
+So we'll effectively be acting like our own certificate
+authority.
+Let's use the openssl utility to create these files.
+openssl is pretty complex.
+So I'm just going to give a high-level description
+of the commands you need to run here.
+For all the details, check out the handout and the openssl
+docs.
+First, we'll create the issuing certificate's private key.
+If you run this openssl command,
+you'll get a file called ca.key, which contains the private key.
+Then we'll use that private key to create
+the issuing certificate itself.
+So when we run this command, we provide
+the ca.key file to create the issuing certificate, which
+is stored in the ca.crt file.
+Now that we have the issuing certificate,
+we'll create our server certificate.
+The first step is creating a private key for the server.
+That's stored in the file redis.key.
+Then, we use this private key and the issuing certificate
+we just created to create the server certificate.
+So the server certificate is now in the file redis.crt.
+Let's move these files to some standard directories.
+We'll store our issuing certificate
+in /usr/local/share/ca-certificates.
+We'll store our private keys in /etc/ssl/private.
+And finally, we'll store the server certificate in /etc/ssl.
+On Ubuntu, you can tell the system about new certificates
+by running update-ca-certificates, which
+I'm doing here.
+We'll also need to set the correct permissions
+on these files.
+Private keys should be restricted to the owner
+with permissions 400.
+The public keys ending in .crt should have permissions 644.
+Now we have the files we need to set up Redis with TLS.
+So to begin, let's open up our redis.conf configuration file.
+First, we set the port value to 0.
+This is how we disable unencrypted clear text
+connections to Redis.
+This is an important step.
+Next, we set the TLS port to 6379.
+This means that Redis will require
+TLS when clients connect to it on the standard port.
+Now, we'll specify the server certificate
+file, which is redis.crt.
+And we also specify the server's private key file,
+which is redis.key.
+We also need to provide the issuing certificate
+authority files that this Redis server will trust.
+This is important for client authentication later on.
+We'll provide the file ca.crt from
+/usr/local/share/ca-certificates.
+It's also possible to specify a directory of trusted issuing
+certificates, or root certificates.
+And you can see an example of that in the GitHub repo
+for this course.
+Now we're also going to disable client authentication for now.
+We'll see how to use client authentication
+in the next unit.
+Let's also specify a few reasonable TLS defaults.
+First, we'll specify that we only support TLS versions
+1.2 and 1.3.
+We'll also specify some allowed cipher suites.
+The tls-ciphers directive determines which cipher suites
+can be used when a client requests a TLS v1.2 connection.
+Similarly, the tls-ciphersuites directive determines which
+cipher suites are allowed for v1.3 connections.
+And finally, we;ll set tls-prefer-server-ciphers to no
+to indicate that the server should allow clients to choose
+the cipher suite for TLS connections.
+We can now start Redis so that it uses TLS.
+So first, we'll start a Redis server process
+and point it to the redis.conf we were just editing.
+Next, let's try connecting to the server using Redis CLI.
+And notice that the connection gets closed right away.
+If we look at the Redis log file, we'll see an SSL error.
+We actually need to tell the client
+that we're connecting over TLS.
+So here I am providing the --tls option.
+And I'm also providing a certificate authority file.
+In this case, this is the certificate that
+issued the server's public key.
+This is effectively telling the client
+that the server's certificate should be signed
+by this issuing certificate.
+Now when we connect, we can run commands.
+And we know that our connection is encrypted.
+So that's the basics of setting up encryption in Redis.
+in the next unit, we'll see how to enable
+TLS for Redis clusters, how to set up client authentication,
+and how to tweak some advanced TLS parameters.
 
-**The ACL log allows you to see failed authentication attempts and failed access attempts when access to a key or command is blocked by an ACL.**
+- [OpenSSL Command Line Utilities](https://wiki.openssl.org/index.php/Command_Line_Utilities)
 
-The ACL log is stored in memory, in Redis itself. By default, the log stores 128 entries, but this is configurable.
-
-#### Using ACL LOG
-To demonstrate, let's first create a new user 'john' with access to the key "foo" and the command GET.
-```
-> ACL SETUSER john on >password +get +acl ~foo*
-```
-
-Then we can create two keys: foo and bar.
-```
-> SET foo bar
-> SET bar foo
-```
-
-When we authenticate as john, you can see that the user cannot set the key foo because he does not have access to the SET command and can not GET the key bar because he doesn’t have access to that key.
-```
-> AUTH john password
-> SET foo pickle
-(error) NOPERM this user has no permissions to run the 'set' command or its subcommand >
-GET bar
-(error) NOPERM this user has no permissions to access one of the keys used as arguments
-```
-
-We can call ACL LOG to view these failed access attempts.
-```
-> ACL LOG
-1)  1) "count"
-    2) (integer) 1
-    3) "reason"
-    4) "key"
-    5) "context"
-    6) "toplevel"
-    7) "object"
-    8) "bar"
-    9) "username"
-   10) "john"
-   11) "age-seconds"
-   12) "3.8490000000000002"
-   13) "client-info"
-   14) "id=4 addr=127.0.0.1:36758 fd=8 name= age=46 idle=0 flags=N db=0 sub=0
-psub=0 multi=-1 qbuf=22 qbuf-free=32746 obl=0 oll=0 omem=0 events=r cmd=get user=john"
-2)  1) "count"
-    2) (integer) 1
-    3) "reason"
-    4) "command"
-    5) "context"
-    6) "toplevel"
-    7) "object"
-    8) "set"
-    9) "username"
-   10) "john"
-   11) "age-seconds"
-   12) "10.545999999999999"
-   13) "client-info"
-   14) "id=4 addr=127.0.0.1:36758 fd=8 name= age=39 idle=0 flags=N db=0 sub=0
-psub=0 multi=-1 qbuf=34 qbuf-free=32734 obl=0 oll=0 omem=0 events=r cmd=set user=john"
-```
-
-The ACL LOG output shows the following:
-
-1. The reason a command was blocked
-- This can be seen under "reason". Reasons may be "auth", "command", and "key".
-2. The object denied access.
-- This may be a command, a key, or the user for whom authentication failed.
-3. How long ago the failure occurred
-4. The connection information for the client and user who requested the failed command.
-
-The ACL log is especially useful when you're troubleshooting application failures. The log can also help you to identify compromised connections.
-
-You can limit the number of log entries that are shown by appending a number to the ACL LOG. For example, here's how to request the two most recent log entries:
-```
-> ACL LOG 2
-```
-
-Since the ACL log is stored in memory, there are two ways to limit it: resetting the log or setting a maximum length. To clear the log, you can call the ACL LOG RESET command:
-```
-> ACL LOG RESET
-```
-
-To set a maximum length, you can set the acllog-max-len directive in the `redis.conf` file:
-```
-acllog-max-len 10
-```
-
-#### Setting up and using the Redis Log File
-The Redis log file is the other important log you need to be aware of. The Redis log file contains useful information for troubleshooting errors configuration and deployment errors. If you don't configure Redis logging, troubleshooting will be *significantly* harder.
-
-Redis has four logging levels, which you can configure directly in `redis.conf` file.
-
-Log Levels:
-
-1. WARNING
-2. NOTICE
-3. VERBOSE
-4. DEBUG
-
-```
-# Specify the server verbosity level.
-# This can be one of:
-# debug (a lot of information, useful for development/testing)
-# verbose (many rarely useful info, but not a mess like the debug level)
-# notice (moderately verbose, what you want in production probably)
-# warning (only very important / critical messages are logged)
-# nothing (nothing is logged)
-loglevel notice
-
-# Specify the log file name. Also the empty string can be used to force
-# Redis to log on the standard output. Note that if you use standard
-# output for logging but daemonize, logs will be sent to /dev/null
-logfile ""
-
-# To enable logging to the system logger, just set 'syslog-enabled' to yes,
-# and optionally update the other syslog parameters to suit your needs.
-# syslog-enabled no
-
-# Specify the syslog identity.
-# syslog-ident redis
-
-# Specify the syslog facility. Must be USER or between LOCAL0-LOCAL7.
-# syslog-facility local0
-
-# To disable the built in crash log, which will possibly produce cleaner core
-# dumps when they are needed, uncomment the following:
-#
-# crash-log-enabled no
-```
-
-Redis also supports sending the log files to a remote logging server through the use of syslog.
-
-Remote logging is important to many security professionals. These remote logging servers are frequently used to monitor security events and manage incidents. These centralized log servers perform three common functions: ensure the integrity of your log files, ensure that logs are retained for a specific period of time, and to correlate logs against other system logs to discover potential attacks on your infrastructure.
-
-Let's set up logging on our Redis deployment. First we'll open our `redis.conf` file
-```
-$ sudo vi /etc/redis/redis.conf
-```
-
-The redis.conf file has an entire section dedicated to logging.
-
-First, find the `logfile` directive in the redis.conf file. This will allow you to define the logging directory. For this example lets use `/var/log/redis/redis.log`.
-
-If you'd like to use a remote logging server, then you'll need to uncomment the lines `syslog-enabled`, `syslog-ident` and `syslog-facility`, and ensure that `syslog-enabled` is set to `yes`.
-
-Next, we'll restart the Redis server.
-
-You should see the log events indicating that Redis is starting.
-```
-$ sudo tail -f /var/log/redis/redis.log
-```
-
-And next let's check that we are properly writing to syslog. You should see these same logs.
-```
-$ less /var/log/syslog | grep redis
-```
-
-Finally, you’ll need to send your logs to your remote logging server to ensure your logs will be backed up to this server. To do this, you’ll also have to modify the rsyslog configuration. This configuration varies depending on your remote logging server provider. Check with your administrator or DevOps team for details on this.
+- [TLS Support in Redis 6 at redis.io](https://redis.io/topics/encryption)
 
 
 ### VII. [An Attacker's Perspective](https://youtu.be/NmPv15JJm5Y)
