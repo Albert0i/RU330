@@ -21,6 +21,7 @@ help:
 	@echo "	up  		start the server"
 	@echo "	down 		stop the server"	
 	@echo "	bash		run server bash"
+	@echo "	cli		run redis-cli"	
 	@echo "	ps 		show running containers"
 	@echo "	logs		server logs"
 	@echo "	config		edit configuration"
@@ -49,6 +50,12 @@ down:
 #
 bash:
 	docker-compose exec redis bash
+
+#
+# run redis-cli
+#
+cli:
+	docker-compose exec rediscli redis-cli --tls --cacert /data/ca.crt
 
 #
 # show running containers 
