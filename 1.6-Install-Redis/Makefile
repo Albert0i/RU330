@@ -20,7 +20,7 @@ help:
 	@echo "	build		build custom image"
 	@echo "	up  		start the server"
 	@echo "	down 		stop the server"	
-	@echo "	cmd		run server cmd"
+	@echo "	bash		run server bash"
 	@echo "	ps 		show running containers"
 	@echo "	logs		server logs"
 	@echo "	config		edit configuration"
@@ -45,10 +45,10 @@ down:
 	docker-compose down -v
 
 #
-# run server cmd
+# run server bash
 #
-cmd:
-	docker-compose exec redis cmd
+bash:
+	docker-compose exec redis bash
 
 #
 # show running containers 
