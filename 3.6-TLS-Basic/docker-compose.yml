@@ -35,9 +35,14 @@ services:
     restart: unless-stopped    
     volumes:
           - ./data:/data:rw
-    command: ["redis-server", "/etc/redis/redis.conf"]
+    command: ["sleep", "365d"]
     depends_on:
       - redis 
+
+#
+# How to Keep Docker Container Running
+# https://kodekloud.com/blog/keep-docker-container-running/
+#
 
 #
 # EOF (2024/06/22)

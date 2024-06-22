@@ -55,7 +55,7 @@ bash:
 # run redis-cli
 #
 cli:
-	docker-compose exec rediscli redis-cli --tls --cacert /data/ca.crt
+	docker-compose exec rediscli redis-cli -h redis --tls --cacert /data/ca.crt
 
 #
 # show running containers 
