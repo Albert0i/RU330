@@ -1,0 +1,32 @@
+version: "3"
+services:
+# Redis 
+  redis:
+    container_name: redis_ru330
+    build: 
+      context: .
+    image: 
+      ${IMAGE_NAME}
+    ports:
+      - 6379:6379
+    restart: unless-stopped    
+    volumes:
+          - ./conf:/usr/local/etc/redis:ro
+          - ./data:/data:rw
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+
+# Redis Insight
+  redisinsight:
+    image: redis/redisinsight:2.50
+    container_name: redisinsight
+    ports:
+      - 5540:5540
+    restart: unless-stopped    
+    volumes:
+      - ./data:/data:rw
+    depends_on:
+      - redis 
+
+#
+# EOF (2024/06/22)
+#

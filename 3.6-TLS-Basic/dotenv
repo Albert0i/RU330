@@ -1,0 +1,6 @@
+
+# image name
+IMAGE_NAME=redisuniversity/ru330-tls-basic
+
+# image version
+IMAGE_VERSION=7.4-rc1
