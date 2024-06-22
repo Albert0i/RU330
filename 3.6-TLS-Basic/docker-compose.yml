@@ -17,8 +17,9 @@ services:
 
 # Redis Insight
   redisinsight:
-    image: redis/redisinsight:2.50
     container_name: redisinsight
+    image: 
+      redis/redisinsight:2.50
     ports:
       - 5540:5540
     restart: unless-stopped    
@@ -29,9 +30,9 @@ services:
 
 # Redis Cli
   rediscli:
-    container_name: redis_cli
+    container_name: rediscli
     image: 
-      ${IMAGE_NAME}
+      redisuniversity/ru330-base
     restart: unless-stopped    
     volumes:
           - ./data:/data:rw
