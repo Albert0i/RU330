@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/New_York
@@ -32,13 +32,25 @@ RUN chown redis:redis /var/log/redis
 RUN chown redis:redis /var/log/redis/redis.log
 
 RUN cd /tmp && \
-    wget http://download.redis.io/releases/redis-6.0.5.tar.gz && \
-    tar -xzvf redis-6.0.5.tar.gz && \
-    cd redis-6.0.5 && \
+    wget http://download.redis.io/releases/redis-7.4-rc1.tar.gz  && \
+    tar -xzvf redis-7.4-rc1.tar.gz && \
+    cd redis-7.4-rc1 && \
     BUILD_TLS=yes make install
 
 # Copy redis.conf file to /etc/redis
-RUN cd /tmp/redis-6.0.5 && \
+RUN cd /tmp/redis-7.4-rc1 && \
     cp redis.conf /etc/redis && \
     chown -R redis:redis /etc/redis && \
     chmod 640 /etc/redis/redis.conf
+
+#
+# ubuntu
+# https://hub.docker.com/_/ubuntu
+#
+# Redis download 
+# http://download.redis.io/releases/
+#
+
+#
+# EOF (2024/06/22)
+#

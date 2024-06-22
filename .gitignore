@@ -3,3 +3,6 @@
 *.log
 *.swp
 *.bak
+data
+node_modules
+.env
