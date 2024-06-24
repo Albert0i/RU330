@@ -1,6 +1,0 @@
-
-# image name
-IMAGE_NAME=redisuniversity/ru330-base
-
-# image version
-IMAGE_VERSION=7.4-rc1
