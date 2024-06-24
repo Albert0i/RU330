@@ -534,7 +534,7 @@ So by now you should know the different building blocks of TLS. Obviously, we've
 
 
 ### VI. [Encrypting Connections](https://youtu.be/5zO-DKDtG3Q)
-It's finally time to secure Redis with TLS. In this unit, we'll configure a Redis server process for TLS. And we'll connect over TLS using the Redis CLI. In the next unit, we'll look at some additional TLS settings, including mutual authentication. 
+It's finally time to secure Redis with TLS. In this unit, we'll configure a Redis server process for TLS. And we'll connect over TLS using the Redis CLI. In the next unit, we'll look at some additional TLS settings, includin*g mutual authentication*. 
 
 For TLS to work, we'll need to build Redis with encryption enabled. To do this, set the `BUILD_TLS` environment variable when you compile Redis, like you see here on screen. 
 ```
@@ -709,22 +709,140 @@ Now when we connect, we can run commands. And we know that our connection is enc
 - [TLS Support in Redis 6 at redis.io](https://redis.io/topics/encryption)
 
 
-### VII. [TLS 1.3, Mutual Authentication and Advanced TLS Configuration](https://youtu.be/GArzb2MU-6s)
-In the last unit, we enabled TLS in Redis for the first time. There are just a few more ideas we need to cover to round out our discussion of TLS and Redis. these include enabling TLS for Redis replicas and clusters, enabling mutual authentication, and enforcing TLS version 1.3. Let's take the easy one first. It's important to keep in mind that it's not just the connection between our Redis clients and our Redis servers that we want to secure. We also want to ensure that the connections between our Redis servers are encrypted. This is important when running Redis with replication. That is, when you have a master node and one or more replicas. And it's also important when running an open source Redis cluster where you partition your data across many Redis instances.
+### VII. [TLS 1.3*, Mutual Authentication and Advanced TLS Configuration](https://youtu.be/GArzb2MU-6*s)
+In the last unit, we enabled TLS in Redis for the first time. There are just a few more ideas we need to cover to round out our discussion of TLS and Redis. these include enabling TLS for Redis replicas and clusters, enablin*g mutual authentication, and enforcing TLS version 1.3*. 
 
-In general, this feature is known as internode encryption, and it's fully supported in open source Redis. If you open the Redis config file, you can scroll down to the TLS section to find the directive tls-replication. Just uncomment this, and make sure it's set to yes.
+![alt final tls topics](img/final-tls-topics.png)
 
-This will ensure that Redis replicas connect to their master nodes using TLS. If you're running Redis cluster, you should also uncomment the tls-cluster directive and make sure it's set to yes. This will ensure that TLS cluster bus connections are also encrypted. Now let's take a look at client authentication. Without client authentication, anybody can connect to our servers.
+Let's take the easy one first. It's important to keep in mind that it's not just the connection between our Redis clients and our Redis servers that we want to secure. We also want to ensure that the connections between our Redis servers are encrypted. This is important when running Redis with replication. That is, when you have a master node and one or more replicas. And it's also important when running an open source Redis cluster where you partition your data across many Redis instances. In general, this feature is known as *internode encryption*, and it's fully supported in open source Redis. 
 
-Imagine, for instance, that an attacker somehow gains access to our network and tries to connect to Redis. If we've enabled client authentication, this won't be so easy. With client authentication enabled, clients must present a certificate that's been signed by a certificate authority that's trusted by our Redis server. If the client doesn't have a signed trusted certificate, then it won't ever be able to connect. Remember in the last unit when we created our own issuing certificate and stored it in /usr/local/share/ca-certificates? Let's use that issuing certificate now to create a client certificate. First, we create the client's key, which here gives us the file client.key.
+![alt internode encryption](img/internode-encryption.png)
 
-Next, we use this key with some openssl commands to generate a client certificate. To do this, we need the issuing certificate, which is ca.crt. And we need the issuing certificate's private key, which is ca.key. Running these commands gives us client.crt, which is a certificate that's been signed by the issuing certificate that's trusted by our Redis server. Now, let's copy this certificate and private key to /etc/ssl/clients.
+If you open the Redis config file, you can scroll down to the TLS section to find the directive tls-replication. Just uncomment this, and make sure it's set to yes. This will ensure that Redis replicas connect to their master nodes using TLS. 
+```
+# By default, a Redis replica does not attempt to establish a TLS connection
+# with its master.
+#
+# Use the following directive to enable TLS on replication links.
+#
+tls-replication yes
+```
 
-Since our app will be the main user of this public and private key pair, we'll make the app user the owner of these files. We'll also set the appropriate permissions on them. So let's now enable client authentication. We'll open up the redis.conf file, and set the tls-auth-clients directive to yes. Next, we'll start the Redis server. Now when we connect to the server, we need to provide the certificate we just created when we start Redis CLI. We also need to specify the client cert and client key we just created. Now we connect. And if we can run the PING command, we know that we've successfully connected with mutual authentication. OK.
+ If you're running Redis cluster, you should also uncomment the tls-cluster directive and make sure it's set to yes. This will ensure that TLS cluster bus connections are also encrypted. 
+```
+# By default, the Redis Cluster bus uses a plain TCP connection. To enable
+# TLS for the bus protocol, use the following directive:
+#
+tls-cluster yes
+```
 
-Lastly, let's talk about running TLS v1.3. In the previous unit, we configured our Redis server so that it would accept connections via TLS 1.2 or TLS 1.3. Both are acceptable, but TLS 1.3 is the newer standard. Compared to 1.2, TLS 1.3 makes fewer round trips on the initial handshake, and it enforces stronger cipher suites. So it's slightly faster, and it ensures that you're using the latest, greatest encryption algorithms.
+Now let's take a look at client authentication. Without client authentication, anybody can connect to our servers. Imagine, for instance, that an attacker somehow gains access to our network and tries to connect to Redis. If we've enabled client authentication, this won't be so easy. *With client authentication enabled, clients must present a certificate that's been signed by a certificate authority that's trusted by our Redis server*. If the client doesn't have a signed trusted certificate, then it won't ever be able to connect. 
 
-As long as your application clients can handle TLS 1.3, you may as well configure your Redis server to exclusively use it. Here's how you do that. Open up redis.conf. Now set tls-protocols to "TLSv1.3". That is, you get rid of the TLSv1.2 part entirely. Then you restrict the TLS cipher suite to the ones you see here. And note that because we're restricting to TLS v 1.3, the tls-ciphers does not apply. And that's it.
+Remember in the last unit when we created our own issuing certificate and stored it in `/usr/local/share/ca-certificates`? Let's use that issuing certificate now to create a client certificate. First, we create the client's key, which here gives us the file client.key.
+```
+openssl genrsa -out client.key 2048
+
+head -n 15 client.key
+-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDTTn5l1ZCNfGQQ
+I7UIn9M0WvrGOvMscGA+aLIcDvYZzkx8DLKK5GCTfBHNKRYs0MxS89HaUcyjeYGW
+wOcCmmCCMxQhi9Z5NW3WhbwXUXf/IeBx/cOs9E+GoUKsvcRgycLwRbIGsySDKRzY
+iSidKVFAFLoOHUDWvfS914GOut0iPiCA1ZWq35jzwVA0NVQKq7D8cUsjXkyWRfEY
+3daszLeK1FRZNThhwb/aqT3kYKKQDkRp7lAQYh0uoGJz8DwIzMXlEYWLLDdk/3ML
+nY96p2SFZv3kezW2qx9pmsOL+I9dtCWwB2oeV72Awu29qIPy7/xgoL8YyutfsJea
+cPxCCLB3AgMBAAECggEABYOeFFuDJvYMP9q2sC+2Yr6XC//zGiYhcEHFmBf+bV/T
+mGqMsewtVCUWxrDgAOisiyzDz84IzPy5YX9f5+T72nVgWFLngj+DwedLFgoe23LG
+XbVw7Wra/dkMvgP5cUqU3ey00fWCYQ4g0DhUpKJrmgRr4IZFVNCvwxnozogPrIOJ
+rFMofH+jwy7dm29wllf7Gal/ZJ1rnNKaVj/SuG68LiwSGmvKy4KnsChINWPrqzqE
+M8SkDVM8k3OfNftzfjVmJF8LlZolDxeGYeL4b3MPXMQhnG/fl0TTINWrQx8D2WMT
+p3Wur3pmiTBDtXFmwKcqs1TTkQiA69ZKIkWj5LNe6QKBgQDq+HTQTX59zEGBIT6O
+tS7AwrFVHHOM1XEyTp0VQXQFt8QqEhsq3r4XDuWozrH0kH5oVWq4ZPBHiM9EUo+a
+tHLznWm8WlnYYx0JF7f1vfqahoMjw3ch8qlen+Gn/0MHTABxJ7OSJCFBj41nz1if
+```
+
+Next, we use this key with some openssl commands to generate a client certificate. To do this, we need the issuing certificate, which is ca.crt. And we need the issuing certificate's private key, which is ca.key. Running these commands gives us client.crt, which is a certificate that's been signed by the issuing certificate that's trusted by our Redis server. 
+```
+openssl req -new -sha256 -key client.key -subj /O=Redis/CN=Production-Redis | openssl x509 -req -sha256 -CA ca.crt -CAkey ca.key -CAserial private/ca.txt -CAcreateserial -days 365 -out client.crt
+Certificate request self-signature ok
+subject=O=Redis, CN=Production-Redis
+
+head -n 15 client.crt
+-----BEGIN CERTIFICATE-----
+MIIEJzCCAg+gAwIBAgIUco30tr2jB01vazGGmpfbSiFutsMwDQYJKoZIhvcNAQEL
+BQAwLDESMBAGA1UECgwJUmVkaXNsYWJzMRYwFAYDVQQDDA1SZWRpcy1Qcm9kLUNB
+MB4XDTI0MDYyNDA3NTE0MFoXDTI1MDYyNDA3NTE0MFowKzEOMAwGA1UECgwFUmVk
+aXMxGTAXBgNVBAMMEFByb2R1Y3Rpb24tUmVkaXMwggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQDTTn5l1ZCNfGQQI7UIn9M0WvrGOvMscGA+aLIcDvYZzkx8
+DLKK5GCTfBHNKRYs0MxS89HaUcyjeYGWwOcCmmCCMxQhi9Z5NW3WhbwXUXf/IeBx
+/cOs9E+GoUKsvcRgycLwRbIGsySDKRzYiSidKVFAFLoOHUDWvfS914GOut0iPiCA
+1ZWq35jzwVA0NVQKq7D8cUsjXkyWRfEY3daszLeK1FRZNThhwb/aqT3kYKKQDkRp
+7lAQYh0uoGJz8DwIzMXlEYWLLDdk/3MLnY96p2SFZv3kezW2qx9pmsOL+I9dtCWw
+B2oeV72Awu29qIPy7/xgoL8YyutfsJeacPxCCLB3AgMBAAGjQjBAMB0GA1UdDgQW
+BBQywMHI79fAW3Nyf+X9CNhHhTpbjjAfBgNVHSMEGDAWgBS7GmSyWxVJrEiUV2TP
+eIwOiSUpQDANBgkqhkiG9w0BAQsFAAOCAgEAN0mUK9vOm/GR36ldCYIXzpyr+AsZ
+CkcFzuYAoJ3Thx6N2uBz7oiYAJQmBbtVBwAWc+xtSHeBKNL1h2+XmEJ7VWkEjxem
++HSdjSWd8k5NZ5DbNCZTHsLYcs5qu+rCX4x16nXEoMjFN3LWx12PkBMaSwukoMkT
+```
+
+Now, let's copy this certificate and *private key* to `/etc/ssl/clients`.
+```
+mv client.* /etc/ssl/clients 
+```
+
+Since our app will be the main user of this public and private key pair, we'll make the app user the owner of these files. We'll also set the appropriate permissions on them. 
+```
+chown app:app /etc/ssl/clients/* 
+chmod 400 /etc/ssl/clients/*
+```
+
+So let's now enable client authentication. We'll open up the `redis.conf` file, and set the tls-auth-clients directive to yes. 
+```
+# By default, clients (including replica servers) on a TLS port are required
+# to authenticate using valid client side certificates.
+#
+# It is possible to disable authentication using this directive.
+#
+tls-auth-clients yes
+```
+
+Next, we'll start the Redis server. Now when we connect to the server, we need to provide the certificate we just created when we start Redis CLI. We also need to specify the client cert and client key we just created. Now we connect. And if we can run the PING command, we know that we've successfully connected with *mutual authentication*. 
+```
+redis-cli --tls --cacert /usr/local/share/ca-certificates/ca.crt --cert /etc/ssl/clients/client.crt --key /etc/ssl/clients/client.key 
+```
+
+OK. Lastly, let's talk about running TLS v1.3. In the previous unit, we configured our Redis server so that it would accept connections via TLS 1.2 or TLS 1.3. Both are acceptable, but TLS 1.3 is the newer standard. Compared to 1.2, TLS 1.3 makes fewer round trips on the initial handshake, and it enforces stronger cipher suites. So it's slightly faster, and it ensures that you're using the latest, greatest encryption algorithms. As long as your application clients can handle TLS 1.3, you may as well configure your Redis server to exclusively use it. 
+
+![alt tls 1.3](img/tls-1.3.png)
+
+Here's how you do that. Open up `redis.conf`. Now set tls-protocols to "TLSv1.3". That is, you get rid of the TLSv1.2 part entirely. 
+```
+# Explicitly specify TLS versions to support. Allowed values are case insensitive
+# and include "TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3" (OpenSSL >= 1.1.1) or
+# any combination. To enable only TLSv1.2 and TLSv1.3, use:
+#
+tls-protocols "TLSv1.3"
+```
+
+Then you restrict the TLS cipher suite to the ones you see here. 
+```
+# Configure allowed ciphers.  See the ciphers(1ssl) manpage for more information
+# about the syntax of this string.
+#
+# Note: this configuration applies only to <= TLSv1.2.
+#
+# tls-ciphers DEFAULT:!MEDIUM
+# tls-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+
+# Configure allowed TLSv1.3 ciphersuites.  See the ciphers(1ssl) manpage for more
+# information about the syntax of this string, and specifically for TLSv1.3
+# ciphersuites.
+#
+# tls-ciphersuites TLS_CHACHA20_POLY1305_SHA256
+
+tls-ciphersuites TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+```
+
+And note that because we're restricting to TLS v 1.3, the tls-ciphers does not apply. And that's it.
 
 That's all there is to setting up TLS in Redis. We encourage you to try setting this up all on your own. We've provided all of these commands and Docker files in the course git repository.
 
