@@ -851,7 +851,58 @@ That's all there is to setting up TLS in Redis. We encourage you to try setting 
 [TLS Support in Redis 6 at redis.io](https://redis.io/topics/encryption)
 
 
-### VIII. Redis Production Security Checklist
+### VIII. Security Maintenance and Advanced Hardening
+#### Security Maintenance
+The code we base modern applications on is always changing, and this introduces new problems frequently. In the case of open-source projects like Redis, this code may be reviewed at any time, by anyone in the world. Security researchers frequently find new ways to attack old code.
+
+The security maintenance tasks you need to worry about when running Redis include account management and security patching for both clients and servers.
+
+#### Account Management
+As your Redis deployment ages, permissions and accounts are bound to become irrelevant. Part of account management is the continuous review of ACL users to ensure they have appropriate permissions and still require access to Redis.
+
+If these accounts are no longer needed or the permissions are no longer appropriate, then the accounts should be removed or their permissions should be modified. Implementing a process to continuously review your Redis ACL users will help you to meet compliance standards as you use Redis. Many organizations conduct reviews quarterly or bi-annually; however, it's best to follow your organization's policy.
+
+You should use the `ACL LIST` command to review your Redis ACL users and permissions as well as review your redis.conf file and external ACL file.
+
+#### Password Management
+If your organization requires regular password rotation, then there are several Redis passwords you should keep in mind.
+
+**If Redis is deployed in standalone mode, consider:**
+
+1. ACL user passwords
+
+2. AUTH passwords (required for backwards compatibility)
+
+**If Redis is deployed in cluster mode:**
+
+1. ACL user passwords
+	a.  This applies to the master user for replica to master interactions
+	b.  This applies to the sentinel user
+	c.  This applies to all ACL users
+
+2. AUTH passwords
+	a.  This may apply to sentinel, client to server, or replica to master interactions (MasterAUTH)
+
+#### Software Maintenance
+Redis continuously receives code modifications, some of which may contain security updates. Because the impact to your deployment may vary depending on the update, it's best to ensure that you are always on the latest stable version of Redis.
+
+You can check what Redis version you are on using the `INFO` command. At the top of the output will be the Redis version that you are on. You can compare this to the latest stable version that you can find on the Redis downloads website at:
+
+https://redis.io/download
+
+The Redis client of your choice should be kept up to date for the same reasons, and how to upgrade and check your client will be different depending on the client that you use. There is one other important consideration for your client. Because Redis clients are maintained by a broad community of open-source maintainers, it's important that when selecting a client you ensure that the client is actively maintained.
+
+To check for clients that are actively maintained you can visit https://redis.io/clients. You can find a large list of clients to choose from on this site. Recommended clients for each language marked with a gold star, these clients are generally well maintained and safe to use.
+
+#### Changing the Redis Port
+The default Redis port is 6379. This well known port is frequently the target of automated attacks. Unless you are targeted by a motivated attacker directly, modifying the Redis port can be a way to ensure that scripts run against systems searching for vulnerabilities do not target you.
+
+Changing the Redis port is as simple as modifying the port or tls-port directive in the redis.conf file.
+
+Changing the default port is not supported at runtime using the `CONFIG` command.
+
+
+### IX. Redis Production Security Checklist
 #### Architecture
 **Standalone and Cluster Mode**
 1. Ensure Redis is always deployed inside a trusted network.
@@ -938,55 +989,6 @@ That's all there is to setting up TLS in Redis. We encourage you to try setting 
 
 **Cluster Mode Only**
 1. Ensure TLS is enabled on the cluster bus
-
-
-### IX. Security Maintenance and Advanced Hardening
-Security Maintenance
-The code we base modern applications on is always changing, and this introduces new problems frequently. In the case of open-source projects like Redis, this code may be reviewed at any time, by anyone in the world. Security researchers frequently find new ways to attack old code.
-
-The security maintenance tasks you need to worry about when running Redis include account management and security patching for both clients and servers.
-
-Account Management
-As your Redis deployment ages, permissions and accounts are bound to become irrelevant. Part of account management is the continuous review of ACL users to ensure they have appropriate permissions and still require access to Redis.
-
-If these accounts are no longer needed or the permissions are no longer appropriate, then the accounts should be removed or their permissions should be modified. Implementing a process to continuously review your Redis ACL users will help you to meet compliance standards as you use Redis. Many organizations conduct reviews quarterly or bi-annually; however, it's best to follow your organization's policy.
-
-You should use the ACL LIST command to review your Redis ACL users and permissions as well as review your redis.conf file and external ACL file.
-
-Password Management
-If your organization requires regular password rotation, then there are several Redis passwords you should keep in mind.
-
-If Redis is deployed in standalone mode, consider:
-
-ACL user passwords
-
-AUTH passwords (required for backwards compatibility)
-
-If Redis is deployed in cluster mode:
-
-ACL user passwords
-	a.  This applies to the master user for replica to master interactions
-	b.  This applies to the sentinel user
-	c.  This applies to all ACL users
-AUTH passwords
-	a.  This may apply to sentinel, client to server, or replica to master interactions (MasterAUTH)
-Software Maintenance
-Redis continuously receives code modifications, some of which may contain security updates. Because the impact to your deployment may vary depending on the update, it's best to ensure that you are always on the latest stable version of Redis.
-
-You can check what Redis version you are on using the INFO command. At the top of the output will be the Redis version that you are on. You can compare this to the latest stable version that you can find on the Redis downloads website at:
-
-https://redis.io/download
-
-The Redis client of your choice should be kept up to date for the same reasons, and how to upgrade and check your client will be different depending on the client that you use. There is one other important consideration for your client. Because Redis clients are maintained by a broad community of open-source maintainers, it's important that when selecting a client you ensure that the client is actively maintained.
-
-To check for clients that are actively maintained you can visit https://redis.io/clients. You can find a large list of clients to choose from on this site. Recommended clients for each language marked with a gold star, these clients are generally well maintained and safe to use.
-
-Changing the Redis Port
-The default Redis port is 6379. This well known port is frequently the target of automated attacks. Unless you are targeted by a motivated attacker directly, modifying the Redis port can be a way to ensure that scripts run against systems searching for vulnerabilities do not target you.
-
-Changing the Redis port is as simple as modifying the port or tls-port directive in the redis.conf file.
-
-Changing the default port is not supported at runtime using the CONFIG command.
 
 
 ### X. Biblipgraphy 
