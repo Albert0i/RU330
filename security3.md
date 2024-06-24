@@ -607,7 +607,7 @@ To summarize:
 | ca.key | certificate's private key | /etc/ssl/private | 400 |
 | ca.crt | issuing certificate | /usr/local/share/ca-certificates | 644 |
 | redis.key | server private key | /etc/ssl/private | 400 |
-| redis.crt | server certificate, signed by ca.crt| /etc/ssl | 644 |
+| redis.crt | server certificate, **signed by ca.crt** | /etc/ssl | 644 |
 
 Now we have the files we need to set up Redis with TLS. So to begin, let's open up our `redis.conf` configuration file. First, we set the port value to 0. This is how we disable unencrypted clear text connections to Redis. This is an important step. Next, we set the TLS port to 6379.
 ```
