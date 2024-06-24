@@ -689,12 +689,16 @@ tls-prefer-server-ciphers no
 
 We can now start Redis so that it uses TLS. So first, we'll start a Redis server process and point it to the `redis.conf` we were just editing.
 
+![alt tls connection](img/tls-connection.png)
+
 Next, let's try connecting to the server using Redis CLI. And notice that the connection gets closed right away. If we look at the Redis log file, we'll see an SSL error. 
 
 We actually need to tell the client that we're connecting over TLS. So here I am providing the `--tls` option. And I'm also providing a certificate authority file. 
 ```
 redis-cli --tls --cacert /usr/local/share/ca-certificates/ca.crt 
 ```
+
+![alt redis-cli tls](img/redis-cli-tls.png)
 
 In this case, this is the certificate that issued the server's public key. This is effectively telling the client that the server's certificate should be signed by this issuing certificate.
 
@@ -887,6 +891,8 @@ Changing the default port is not supported at runtime using the CONFIG command.
 4 ) 4 8 5 † 5 2 8 8 0 6 * 8 1 ( ‡ 9 ; 4 8 ; ( 8 8 ; 4 ( ‡ ? 3 4 ; 4 8 ) 4 ‡
 ; 1 6 1 ; : 1 8 8 ; ‡ ? ;
 ```
+
+![alt make a wish](img/make-a-wish.png)
 
 
 ### EOF (2024/06/28)
