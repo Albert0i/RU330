@@ -579,6 +579,17 @@ mv redis.key /etc/ssl/private
 mv redis.crt /etc/ssl
 ```
 
+**Addendum**
+
+To summarize: 
+
+| Filename | Description | Location |
+| ----------- | ----------- | ----------- |
+| ca.key | certificate's private key | /etc/ssl/private |
+| ca.crt | issuing certificate | /usr/local/share/ca-certificates |
+| redis.key | server private key | /etc/ssl/private |
+| redis.crt | server certificate, signed by ca.crt| /etc/ssl |
+
 On Ubuntu, you can tell the system about new certificates by running `update-ca-certificates`, which I'm doing here.
 ```
 update-ca-certificates 
