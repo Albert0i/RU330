@@ -643,7 +643,96 @@ That's all there is to setting up TLS in Redis. We encourage you to try setting 
 [TLS Support in Redis 6 at redis.io](https://redis.io/topics/encryption)
 
 
-### VIII. Security Maintenance and Advanced Hardening
+### VIII. Redis Production Security Checklist
+Architecture
+Standalone and Cluster Mode
+Ensure Redis is always deployed inside a trusted network.
+
+Ensure protected mode is on unless ACLs or AUTH is enabled.
+
+Ensure the Redis Log file is configured.
+
+Ensure Redis is run as a non-privileged user.
+
+Ensure Redis files are given a non-privileged group
+
+Ensure Redis logs, files and configurations are not readable or writable by others on the operating system.
+
+Ensure the Redis Log file is rotated.
+
+Ensure Redis configuration files are not accessible by others, such as 740 permissions.
+
+Ensure you leverage the latest Redis client and server version.
+
+Consider IP restrictions through the network or operating system to ensure only trusted IPs can connect to Redis.
+
+Consider using client side encryption to encrypt sensitive data.
+
+Consider if TLS is right for your use case.
+
+Consider changing the default Redis port
+
+Consider backing up RDB and AOF files to a remote external location.
+
+Ensure you select the right persistence method for your use case.
+
+Consider sending Redis log files to syslog.
+
+Cluster Mode Only
+Ensure that an odd number of at least 3 nodes are deployed in the cluster
+
+Ensure any reboot schedules do not reboot enough nodes at the same time to lose quorum.
+
+
+Account Management
+Standalone and Cluster Mode
+Ensure AUTH or ACLs are enabled.
+
+Ensure all users have a strong password.
+
+Ensure the default user is disabled, unless required for backwards compatibility.
+
+Ensure the @dangerous command category is excluded from all users and dangerous commands are given on a case by case basis.
+
+Ensure that an external ACL file is used to configure ACLs.
+
+Ensure that users configured in an external ACL file or the redis.conf file store passwords in hashed format.
+
+Ensure that the requirepass is only set if backwards compatibility is required.
+
+Consider if all ACL users are configured to least privilege.
+
+Consider renaming commands to disable them entirely
+
+Cluster Mode Only
+Ensure that masteruser is used for authentication to masters.
+
+Ensure that sentinel auth-user is used if you are using sentinel.
+
+
+Transport layer Security
+Standalone & Cluster Mode
+Ensure non-TLS ports are disabled.
+
+Ensure strong cipher suites are used with Redis.
+
+Ensure appropriate modern TLS protocols are used.
+
+Ensure client authentication is used.
+
+Ensure server ciphers are prefered.
+
+Ensure TLS is configured for replication
+
+Ensure key files are given 400 permissions.
+
+Ensure key files are owned by the Redis user.
+
+Cluster Mode Only
+Ensure TLS is enabled on the cluster bus
+
+
+### IX. Security Maintenance and Advanced Hardening
 Security Maintenance
 The code we base modern applications on is always changing, and this introduces new problems frequently. In the case of open-source projects like Redis, this code may be reviewed at any time, by anyone in the world. Security researchers frequently find new ways to attack old code.
 
@@ -692,7 +781,7 @@ Changing the Redis port is as simple as modifying the port or tls-port directive
 Changing the default port is not supported at runtime using the CONFIG command.
 
 
-### IX. Biblipgraphy 
+### X. Biblipgraphy 
 1. [WinShark](https://www.wireshark.org/#homeMemberLink)
 2. [Npcap](https://npcap.com/)
 3. [Hexdump for Windows](https://www.di-mgt.com.au/hexdump-for-windows.html#downloads)
