@@ -547,17 +547,17 @@ Now, we have Redis binaries with TLS enabled. To establish encryption, we need t
 
 For example, it's common in many enterprises to operate an internal certificate authority to issue certificates. But for the purpose of this demo, we'll create our own issuing certificate. So we'll effectively be acting like our own certificate authority. Let's use the `openssl` utility to create these files. `openssl` is pretty complex. So I'm just going to give a high-level description of the commands you need to run here. For all the details, check out the handout and the `openssl` [docs](https://wiki.openssl.org/index.php/Command_Line_Utilities).
 
-First, we'll create the issuing certificate's private key. 
+First, we'll create the issuing certificate's *private key*. 
 ```
 openssl genrsa -out ca.key 4096
 ```
 
-If you run this `openssl` command, you'll get a file called ca.key, which contains the private key. Then we'll use that private key to create the issuing certificate itself. 
+If you run this `openssl` command, you'll get a file called **ca.key**, which contains the private key. Then we'll use that private key to create the issuing certificate itself. 
 ```
 openssl req -x509 -new -nodes -sha256 -key ca.key -days 3650 -subj /O=Redislabs/CN=Redis-Prod-CA -out ca.crt 
 ```
 
-So when we run this command, we provide the ca.key file to create the issuing certificate, which is stored in the ca.crt file. Now that we have the issuing certificate, we'll create our server certificate. The first step is creating a private key for the server. That's stored in the file redis.key. 
+So when we run this command, we provide the ca.key file to create the issuing certificate, which is stored in the **ca.crt** file. Now that we have the issuing certificate, we'll create our server certificate. The first step is creating a *private key* for the server. That's stored in the file redis.key. 
 ```
 openssl genrsa -out redis.key 2048 
 ```
@@ -569,20 +569,24 @@ Certificate request self-signature ok
 subject=O=Redis, CN=Production-Redis
 ```
 
-So the server certificate is now in the file redis.crt. Let's move these files to some standard directories. We'll store our issuing certificate in /usr/local/share/ca-certificates. We'll store our private keys in /etc/ssl/private. And finally, we'll store the server certificate in /etc/ssl. 
+So the server certificate is now in the file **redis.crt**. Let's move these files to some standard directories. We'll store our issuing certificate in `/usr/local/share/ca-certificates`. We'll store our private keys in `/etc/ssl/private`. And finally, we'll store the server certificate in `/etc/ssl`. 
 ```
 mv ca.crt /usr/local/share/ca-certificates
+
 mv ca.key /etc/ssl/private 
-mv redis.key /etc/ssl/private 
+mv redis.key /etc/ssl/private
+ 
 mv redis.crt /etc/ssl
 ```
 
-On Ubuntu, you can tell the system about new certificates by running update-ca-certificates, which I'm doing here.
+On Ubuntu, you can tell the system about new certificates by running `update-ca-certificates`, which I'm doing here.
 ```
 update-ca-certificates 
 ```
 
-We'll also need to set the correct permissions on these files. Private keys should be restricted to the owner with permissions 400. The public keys ending in .crt should have permissions 644. 
+We'll also need to set the correct permissions on these files. 
+- *Private keys should be restricted to the owner with permissions 400*. 
+- *The public keys ending in .crt should have permissions 644*. 
 ```
 chown redis:redis /etc/ssl/private/*.key 
 chown 400 /etc/ssl/private/*.key 
@@ -595,17 +599,88 @@ chmod 644 /etc/ssl/redis.crt
 ```
 
 Now we have the files we need to set up Redis with TLS. So to begin, let's open up our `redis.conf` configuration file. First, we set the port value to 0. This is how we disable unencrypted clear text connections to Redis. This is an important step. Next, we set the TLS port to 6379.
-
-This means that Redis will require TLS when clients connect to it on the standard port. Now, we'll specify the server certificate file, which is redis.crt. And we also specify the server's private key file, which is redis.key. We also need to provide the issuing certificate authority files that this Redis server will trust. This is important for client authentication later on. We'll provide the file ca.crt from
 ```
-/usr/local/share/ca-certificates.
+# By default, TLS/SSL is disabled. To enable it, the "tls-port" configuration
+# directive can be used to define TLS-listening ports. To enable TLS on the
+# default port, use:
+#
+port 0
+tls-port 6379
 ```
 
-It's also possible to specify a directory of trusted issuing certificates, or root certificates. And you can see an example of that in the GitHub repo for this course. Now we're also going to disable client authentication for now. We'll see how to use client authentication in the next unit. Let's also specify a few reasonable TLS defaults.
+This means that Redis will require TLS when clients connect to it on the standard port. Now, we'll specify the server certificate file, which is **redis.crt**. And we also specify the server's private key file, which is **redis.key**. We also need to provide the issuing certificate authority files that this Redis server will trust. 
+```
+# Configure a X.509 certificate and private key to use for authenticating the
+# server to connected clients, masters or cluster peers.  These files should be
+# PEM formatted.
+#
+tls-cert-file /etc/ssl/redis.crt
+tls-key-file /etc/ssl/private/redis.key
+```
 
-First, we'll specify that we only support TLS versions 1.2 and 1.3. We'll also specify some allowed cipher suites. The tls-ciphers directive determines which cipher suites can be used when a client requests a TLS v1.2 connection. Similarly, the tls-ciphersuites directive determines which cipher suites are allowed for v1.3 connections. And finally, we;ll set tls-prefer-server-ciphers to no to indicate that the server should allow clients to choose the cipher suite for TLS connections. We can now start Redis so that it uses TLS. So first, we'll start a Redis server process and point it to the redis.conf we were just editing.
+This is important for client authentication later on. We'll provide the file **ca.crt** from `/usr/local/share/ca-certificates`.
 
-Next, let's try connecting to the server using Redis CLI. And notice that the connection gets closed right away. If we look at the Redis log file, we'll see an SSL error. We actually need to tell the client that we're connecting over TLS. So here I am providing the --tls option. And I'm also providing a certificate authority file. 
+It's also possible to specify a directory of trusted issuing certificates, or root certificates. And you can see an example of that in the GitHub repo for this course. 
+```
+# Configure a CA certificate(s) bundle or directory to authenticate TLS/SSL
+# clients and peers.  Redis requires an explicit configuration of at least one
+# of these, and will not implicitly use the system wide configuration.
+#
+tls-ca-cert-file /usr/local/share/ca-certificates/ca.crt
+# tls-ca-cert-dir /etc/ssl/certs
+```
+
+Now we're also going to disable client authentication for now. We'll see how to use client authentication in the next unit. Let's also specify a few reasonable TLS defaults.
+```
+# By default, clients (including replica servers) on a TLS port are required
+# to authenticate using valid client side certificates.
+#
+# It is possible to disable authentication using this directive.
+#
+tls-auth-clients no
+```
+
+First, we'll specify that we only support TLS versions 1.2 and 1.3. We'll also specify some allowed cipher suites. The tls-ciphers directive determines which cipher suites can be used when a client requests a TLS v1.2 connection. 
+```
+# Explicitly specify TLS versions to support. Allowed values are case insensitive
+# and include "TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3" (OpenSSL >= 1.1.1) or
+# any combination. To enable only TLSv1.2 and TLSv1.3, use:
+#
+tls-protocols "TLSv1.2 TLSv1.3"
+
+# Configure allowed ciphers.  See the ciphers(1ssl) manpage for more information
+# about the syntax of this string.
+#
+# Note: this configuration applies only to <= TLSv1.2.
+#
+# tls-ciphers DEFAULT:!MEDIUM
+tls-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+```
+
+Similarly, the tls-ciphersuites directive determines which cipher suites are allowed for v1.3 connections. 
+```
+# Configure allowed TLSv1.3 ciphersuites.  See the ciphers(1ssl) manpage for more
+# information about the syntax of this string, and specifically for TLSv1.3
+# ciphersuites.
+#
+# tls-ciphersuites TLS_CHACHA20_POLY1305_SHA256
+
+tls-ciphersuites TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+```
+
+And finally, we;ll set tls-prefer-server-ciphers to no to indicate that the server should allow clients to choose the cipher suite for TLS connections. 
+```
+# When choosing a cipher, use the server's preference instead of the client
+# preference. By default, the server follows the client's preference.
+#
+tls-prefer-server-ciphers no
+```
+
+We can now start Redis so that it uses TLS. So first, we'll start a Redis server process and point it to the `redis.conf` we were just editing.
+
+Next, let's try connecting to the server using Redis CLI. And notice that the connection gets closed right away. If we look at the Redis log file, we'll see an SSL error. 
+
+We actually need to tell the client that we're connecting over TLS. So here I am providing the `--tls` option. And I'm also providing a certificate authority file. 
 ```
 redis-cli --tls --cacert /usr/local/share/ca-certificates/ca.crt 
 ```
