@@ -602,7 +602,7 @@ chmod 644 /etc/ssl/redis.crt
 
 To summarize: 
 
-| Filename | Description | Location | mode | 
+| File used | Description | Location | mode | 
 | ----------- | ----------- | ----------- | ----------- | 
 | ca.key | certificate's private key | /etc/ssl/private | 400 |
 | ca.crt | issuing certificate | /usr/local/share/ca-certificates | 644 |
@@ -762,7 +762,7 @@ tHLznWm8WlnYYx0JF7f1vfqahoMjw3ch8qlen+Gn/0MHTABxJ7OSJCFBj41nz1if
 
 Next, we use this key with some openssl commands to generate a client certificate. To do this, we need the issuing certificate, which is ca.crt. And we need the issuing certificate's private key, which is ca.key. Running these commands gives us client.crt, which is a certificate that's been signed by the issuing certificate that's trusted by our Redis server. 
 ```
-openssl req -new -sha256 -key client.key -subj /O=Redis/CN=Production-Redis | openssl x509 -req -sha256 -CA ca.crt -CAkey ca.key -CAserial private/ca.txt -CAcreateserial -days 365 -out client.crt
+openssl req -new -sha256 -key client.key -subj '/O=Redislabs/CN=Redis Client' | openssl x509 -req -sha256 -CA ca.crt -CAkey ca.key -CAserial private/ca.txt -CAcreateserial -days 365 -out client.crt
 Certificate request self-signature ok
 subject=O=Redis, CN=Production-Redis
 
@@ -794,6 +794,17 @@ Since our app will be the main user of this public and private key pair, we'll m
 chown app:app /etc/ssl/clients/* 
 chmod 400 /etc/ssl/clients/*
 ```
+
+**Addendum**
+
+To summarize: 
+
+| File used | Description | Location | mode | 
+| ----------- | ----------- | ----------- | ----------- | 
+| ca.key | certificate's private key | /etc/ssl/private | 400 |
+| ca.crt | issuing certificate | /usr/local/share/ca-certificates | 644 |
+| client.key | client's private key  | /etc/ssl/clients | 400 | 
+| client.crt | client certificate, **signed by `ca.crt`**  | /etc/ssl/clients | 400 | 
 
 So let's now enable client authentication. We'll open up the `redis.conf` file, and set the tls-auth-clients directive to yes. 
 ```
