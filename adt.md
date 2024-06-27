@@ -1,7 +1,7 @@
 ### ADT
 Unfortunately, it is very difficult for a designer to select in advance all the abstractions which the users of his language might need. If a language is to be used at all, it is likely to be used to solve problems which its designer did not envision, and for which the abstractions embedded in the language are not sufficient. 
 
-#### The Meaning of Abstraction
+#### I. [The Meaning of Abstraction](https://dl.acm.org/doi/pdf/10.1145/800233.807045), TL;DR 
 What we desire from an abstraction is a mechanism which permits the expression of relevant details and the suppression of irrelevant details. In the case of programming, the use which my be made of an abstraction is relevant; the way in which the abstraction is implemented is irrelevant. If we consider conventional programming languages, we discover that they offer a powerful aid to abstraction: the function or procedure. 
 
 When a programmer makes use of a procedure, he is (or should be) concerned
@@ -19,6 +19,10 @@ Abstract types are intended to be very much like the built-ln types provided by 
 In the case of a built-in data type, the programmer is making use of a concept or abstraction which is realized at a lower level of detail -- the prograrmning language itself and its compiler. Similarly, an abstract data type is used at one level and realized at a lower level, but the lower level does not come into existence automatically by being part of the language, instead, an abstract data type is realized by writing a special kind of program, called an *operation cluster*, or cluster for short, which defines the type in terms of the operations which can be performed on it. The language facilitates this activity by allowing the use of an abstract data type without requiring its on-the-spot definition. The language processor supports abstract data types by building links between the use of a type and its definition (which may be provided either earlier or later),and by enforcing the view of a data type as equivalent to a set of operations by a very strong form of data typing. 
 
 We observe that a consequence of the concept of abstract data types is that most of the abstract operations in a program will belong to the sets of operations characterizing abstract types. We will use the term *functional abstraction* to denote those abstract operations which do not belong to any characterizing set. A functional abstraction will be implemented as a composition of the characterizing operations of one or more data types, and will be supported in the usual way by a procedure. A sine routine might be an example of such a functional abstraction. The implementation of the sine routine could be a Taylor series expansion expressed in terms of characterizing operations of the type *real*.
+
+
+#### II. 
+
 
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
 
