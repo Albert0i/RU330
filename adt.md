@@ -31,7 +31,7 @@ See! Efficient and simple random access are obtained... Array, per se, has it do
 
 > Manipulation shapes the data structure. 
 
-List, Stack, Queue, Set, Collection and Hash are common abstract data types. Each of them bears peculiar properties and thus has pros and cons. When talking about ADT we care more about properties and methods available rather than implementation details. 
+List, Stack, Queue, Set, Collection and Hash are common abstract data types. Each of them bears peculiar properties and thus has pros and cons. When talking about ADT, we care more about properties rather than implementation details. 
 
 In a similar way, if it is told to process a number of records? The most obvious choice is table in relational database, because we can not forsee future requirement. Storing everything in tables seems the most flexible solution. 
 
