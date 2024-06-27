@@ -37,7 +37,7 @@ In a similar way, if it is told to process a number of records? The most obvious
 
 > Any solution not necessarily be right solution. 
 
-Requirement evolves and so does data structure. It's impossible to predict accurately future needs. 
+Requirement evolves and so does data structure. It's impossible to predict accurately future needs. Database schemas undergo constant change is evidence of system evolution. [KPI](https://en.wikipedia.org/wiki/Performance_indicator). 
 
 
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
