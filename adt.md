@@ -37,7 +37,7 @@ In a similar way, if it is told to process a number of records? The most obvious
 
 > Any solution not necessarily be right solution. 
 
-Requirements evolves and so do we. It's impossible to predict accurately future needs. 
+Requirements evolves and so do data structure. It's impossible to predict accurately future needs. 
 
 
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
