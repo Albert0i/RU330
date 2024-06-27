@@ -33,7 +33,7 @@ See! Efficient and simple random access is obtained... Array, per se, has it dow
 
 List, Stack, Queue, Set, Collection are common abstract data types. Each of them bear peculiar properties, have their pros and cons. 
 
-Similarly, if it is required to process a number of records? The most obvious choice is table in relational database, because we can not forsee the future requirement. Storing everything in tables are most flexible. 
+Similarly, if it is required to process a number of records? The most obvious choice is table in relational database, because we can not forsee the future requirement. Storing everything in tables is the most flexible solution. 
 
 
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
