@@ -1,6 +1,6 @@
 ### ADT
 
-**The Meaning of Abstraction**
+#### The Meaning of Abstraction
 What we desire from an abstraction is a mechanism which permits the expression of relevant details and the suppression of irrelevant details. In the case of programming, the use which my be made of an abstraction is relevant; the way in which the abstraction is implemented is irrelevant. If we consider conventional programming languages, we discover that they offer a powerful aid to abstraction: the function or procedure. 
 
 When a programmer makes use of a procedure, he is (or should be) concerned
