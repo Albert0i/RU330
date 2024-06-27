@@ -21,7 +21,17 @@ In the case of a built-in data type, the programmer is making use of a concept o
 We observe that a consequence of the concept of abstract data types is that most of the abstract operations in a program will belong to the sets of operations characterizing abstract types. We will use the term *functional abstraction* to denote those abstract operations which do not belong to any characterizing set. A functional abstraction will be implemented as a composition of the characterizing operations of one or more data types, and will be supported in the usual way by a procedure. A sine routine might be an example of such a functional abstraction. The implementation of the sine routine could be a Taylor series expansion expressed in terms of characterizing operations of the type *real*.
 
 
-#### II. 
+#### II. Self-talk 
+If it is required to process a sequence of numbers without further ado? The most secure option is to choose *array* as data structure, because it's efficient and simple to use. With more details exposed. we bend and twist the data structure so as to fit and solve the problem. Typically, the *nth*-element of an zero-based array is calculated according to the formula: 
+```
+base_address + (index + element_size) 
+```
+
+See! Efficient and simple random access is obtained... Array, per se, has it downside, ie. memory chunk has to be allocated consecutively and may incur wastage of space. In addition, every element is bounded to a specific index (position in memory) which makes it non-trivial task to move or insert element in between, searching and sorting are also time-consuming. Array is the most widely used data structure in modern programming languages (I think). If more details is deduced in the first place... may be we could opt a better data structure, ie: 
+
+> Manipulation shapes the data structure. 
+
+List, Stack, Queue, Set, Collection are common abstract data types. Each of them bear with peculiar properties. 
 
 
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
