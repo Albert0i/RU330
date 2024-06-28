@@ -27,19 +27,63 @@ If it is required to process a sequence of numbers without further ado? The most
 base_address + (index + element_size) 
 ```
 
-See! Efficient and simple random access are obtained... Array, per se, has it downside, ie. memory chunk has to be allocated consecutively and may incur wastage of space. In addition, every element is bounded to a specific index (position in memory) which makes it non-trivial task to move or insert element in between, searching and sorting are also time-consuming. Array is the most widely used data structure in modern programming languages (I think). If more details is deduced in the first place... may be we could opt a better data structure, ie: 
+See! Efficient and simple random access are obtained... Array, per se, has it downside, ie. memory chunk has to be allocated consecutively and may incur wastage of space. In addition, every element is bounded to a specific index (position in memory) which makes it non-trivial task to move or insert element in between, searching and sorting are also time-consuming, let alone removing duplicated elements and finding the same elements among arrays. Array is the most widely used data structure in modern programming languages. If more details is deduced in the first place... may be we could opt a better data structure, ie: 
 
-> Manipulation shapes the data structure. 
+> Operations shape the data structure. 
 
 List, Stack, Queue, Set, Collection and Hash are common abstract data types. Each of them bears peculiar properties and thus has pros and cons. When talking about ADT, we care more about properties rather than implementation details. 
 
 In a similar way, if it is told to process a number of records? The most obvious choice is table in relational database, because we can not forsee future requirement. Storing everything in tables seems the most flexible solution. 
 
-> Any solution not necessarily be right solution. 
+> A solution not necessarily be a right solution. 
 
-Requirement evolves and so does data structure. It's impossible to predict accurately future needs. Database schemas undergo constant change is evidence of system evolution. [KPI](https://en.wikipedia.org/wiki/Performance_indicator). 
+Requirement evolves and so does data structure and yet it's difficult and impossible to foretell the future. Database schemas undergo constant changes are evidence of system evolution. 
+
+Customers are treated in *first come, first serve* manner, the straightforward data structure is queue. A seasoned would quickly setup a schema in MYSQL: 
+```
+CREATE TABLE queue (
+     id MEDIUMINT NOT NULL AUTO_INCREMENT,
+     name CHAR(30) NOT NULL,
+     PRIMARY KEY (id)
+);
+
+INSERT INTO queue (name) VALUES
+    ('John'),('Peter'),('David'), ('Mary'),('Lancy'),('Joan');
+
+SELECT * FROM queue; 
+```
+
+By employing `AUTO_INCREMENT` and `PRIMARY KEY`, one can effectively turn a table into a queue. New comers are inserted at the bottom. To serve a customer, one needs to retrieve and remove topmost record. 
+```
+SELECT id, name FROM queue LIMIT 1 OFFSET 0;
+DELETE FROM queue where id=:id
+```
+
+A *dead easy* solution... But there is a catch! Mutual exclusive has to be ensured so that a single customer may not be served by two clerks, or some error handling mechanism has to be devised. 
+
+A natural solution is to use LIST in Redis:
+```
+RPUSH queue 'John' 'Peter' 'David' 'Mary' 'Lancy' 'Joan'
+
+LRANGE queue 0 -1
+```
+
+New comers are `RPUSH` to the right. To serve a customer, one need `LPOP`.
+```
+LPOP queue
+```
+
+The objective of this simple example is not to compare pros and cons between SQL and NoSQL but to emphasize *semantics* difference between the two. 
+
+> The higher abstraction level, the more precise semantics of domain. 
+
+Later on, you become furious upon receiving order to refine the queue into [priority queue](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/). That means you have to design and implement from ground up... behold! Redis has a dedicated data structure call Sorted Set designed specifically for this purpose. 
+
+> RDBMS is a good thing but is not good enough for everything. 
 
 
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
+2. [Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html)
+
 
 ### EOF (2024/06/28)
