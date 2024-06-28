@@ -61,7 +61,7 @@ DELETE FROM queue where id=:id
 
 A *dead easy* solution... But there is a catch! Mutual exclusive has to be ensured so that a single customer may not be served by two clerks, or some error handling mechanism has to be devised. 
 
-A natural solution is to use LIST in Redis:
+In Redis, a natural solution is to use LIST:
 ```
 RPUSH queue 'John' 'Peter' 'David' 'Mary' 'Lancy' 'Joan'
 
@@ -73,11 +73,11 @@ New comers are `RPUSH` to the right. To serve a customer, one need `LPOP`.
 LPOP queue
 ```
 
-The objective of this simple example is not to compare pros and cons between SQL and NoSQL but to emphasize *semantics* difference between the two. 
+The objective of this example is not to compare pros and cons between SQL and NoSQL but to emphasize *semantics* difference between the two. 
 
 > The higher abstraction level, the more precise semantics of domain. 
 
-Later on, you become furious upon hearing order to refine the queue into [priority queue](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/). That means you have to design and implement from ground up... behold! Redis has a dedicated data structure called `Sorted Set` designed specifically for this purpose. 
+Later on, you get furious upon hearing order to refine the queue into [priority queue](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/). That means you have to design and implement everything from ground up... Behold! Redis has a dedicated data structure called `Sorted Set` designed specifically for this purpose. 
 
 > RDBMS is a good thing but is not good enough for everything. 
 
