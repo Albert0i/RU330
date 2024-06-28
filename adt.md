@@ -81,6 +81,30 @@ Later on, you become furious upon receiving order to refine the queue into [prio
 
 > RDBMS is a good thing but is not good enough for everything. 
 
+On resource distribution system, each applicant is associated with a *score* calculated by a formula, resource are then distributed from the highest score down till all resource consumed. 
+```
+ZADD resource_queue 33.5 'John' 47.8 'Peter' 22.3 'David' 50.1 'Mary' 18.2 'Lancy' 42 'Joan'
+
+ZREVRANGE resource_queue 0 -1 WITHSCORES
+1) "Mary"
+2) "50.1"
+3) "Peter"
+4) "47.8"
+5) "Joan"
+6) "42"
+7) "John"
+8) "33.5"
+9) "David"
+10) "22.3"
+11) "Lancy"
+12) "18.2"
+```
+
+Data can be added in any order at any time. The order will be updated automatically. 
+
+> A hybrid system of relational and non-relational components can compensate intrinsic shortcoming of the other. 
+
+
 #### III. Bibliography
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
 2. [Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html)
