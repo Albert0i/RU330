@@ -102,7 +102,7 @@ ZREVRANGE resource_queue 0 -1 WITHSCORES
 
 Data can be added in any order at any time. The order will be updated automatically. 
 
-> A hybrid system of relational and non-relational components can compensate intrinsic shortcoming of the other. 
+> A hybrid system of relational and non-relational components compensates intrinsic shortcoming of the other. 
 
 
 #### III. Bibliography
