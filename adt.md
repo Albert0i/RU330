@@ -81,7 +81,7 @@ Later on, you become furious upon receiving order to refine the queue into [prio
 
 > RDBMS is a good thing but is not good enough for everything. 
 
-#### Bibliography
+#### III. Bibliography
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
 2. [Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html)
 3. [Redis sorted sets](https://redis.io/docs/latest/develop/data-types/sorted-sets/)
