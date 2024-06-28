@@ -77,7 +77,7 @@ The objective of this simple example is not to compare pros and cons between SQL
 
 > The higher abstraction level, the more precise semantics of domain. 
 
-Later on, you become furious upon receiving order to refine the queue into [priority queue](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/). That means you have to design and implement from ground up... behold! Redis has a dedicated data structure called `Sorted Set` designed specifically for this purpose. 
+Later on, you become furious upon hearing order to refine the queue into [priority queue](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/). That means you have to design and implement from ground up... behold! Redis has a dedicated data structure called `Sorted Set` designed specifically for this purpose. 
 
 > RDBMS is a good thing but is not good enough for everything. 
 
