@@ -53,7 +53,7 @@ INSERT INTO queue (name) VALUES
 SELECT * FROM queue; 
 ```
 
-By employing `AUTO_INCREMENT` and `PRIMARY KEY`, one can effectively turn a table into a queue. New comers are inserted at the bottom. To serve a customer, one needs to retrieve and remove topmost record. 
+By employing `AUTO_INCREMENT` and `PRIMARY KEY`, one can effectively turn a table into a queue. New comers are inserted at the bottom. To serve a customer, one needs to retrieve and remove the topmost record. 
 ```
 SELECT id, name FROM queue LIMIT 1 OFFSET 0;
 DELETE FROM queue where id=:id
