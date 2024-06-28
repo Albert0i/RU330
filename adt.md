@@ -27,7 +27,7 @@ If it is required to process a sequence of numbers without further ado? The most
 base_address + (index + element_size) 
 ```
 
-See! Efficient and simple random access are obtained... Array, per se, has it downside, ie. memory chunk has to be allocated consecutively and may incur wastage of space. In addition, every element is bounded to a specific index (position in memory) which makes it non-trivial task to move or insert element in between, searching and sorting are also time-consuming, let alone removing duplicated elements and finding the same elements among arrays. Array is the most widely used data structure in modern programming languages. If more details is deduced in the first place... may be we could opt a better data structure, ie: 
+See! Efficient and simple random access are obtained... Array, per se, has its downside, ie. memory chunk has to be allocated consecutively and may incur wastage of space. In addition, every element is bounded to a specific index (position in memory) which makes it non-trivial task to move or insert element in between, searching and sorting are also time-consuming, let alone removing duplicated elements and finding the same elements among arrays. Array is the most widely used data structure in modern programming languages. If more details is deduced in the first place... may be we could opt a better data structure, ie: 
 
 > Operations shape the data structure. 
 
