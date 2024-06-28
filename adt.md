@@ -84,6 +84,7 @@ Later on, you become furious upon receiving order to refine the queue into [prio
 
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
 2. [Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html)
+3. [Top 5 Redis Use Cases](https://www.youtube.com/watch?v=a4yX7RUgTxI)
 
 
 ### EOF (2024/06/28)
