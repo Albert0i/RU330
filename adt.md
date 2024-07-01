@@ -39,6 +39,8 @@ In a similar way, if it is told to process a number of records? The most obvious
 
 Requirement evolves and so does data structure, database schemas undergo constant changes are evidence of system evolution. 
 
+---
+
 Customers are treated in *first come, first serve* manner, the straightforward data structure is queue. A seasoned developer would quickly setup a schema in MYSQL: 
 ```
 CREATE TABLE queue (
