@@ -197,7 +197,7 @@ O(log(N)+M) with N being the number of elements in the sorted set and M the numb
 
 ![alt Redis Time](img/RedisTime.JPG)
 
-Which is 0.000045 seconds, which is 0.045 ms, which is 45 µs.
+Which is 0.000085 seconds, which is 0.085 ms, which is 85 µs.
 
 
 #### III. Bibliography
