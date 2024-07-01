@@ -174,9 +174,12 @@ for i = 1, #members, 2 do
     sum = sum + tonumber(members[i + 1])
 end
 return tostring(sum) "
+
+"7455ba57f7e440afd66f256a44f07871aaade661"
 ```
 ```
 EVALSHA "7455ba57f7e440afd66f256a44f07871aaade661" 1 "diving"
+
 "33.8"
 ```
 
