@@ -104,6 +104,84 @@ Data can be added in any order at any time. The order will be updated automatica
 
 > A hybrid system of relational and non-relational components compensates intrinsic shortcoming of the other. 
 
+---
+
+> In Olympic water diving competitions, there are typically seven judges who give scores for each dive. These judges assess the execution and quality of the dive based on various criteria, such as takeoff, flight, and entry into the water. Each judge assigns a score to the dive independently, usually ranging from 0 to 10 or in half-point increments.
+
+> To calculate the final score for a dive, the highest and lowest scores given by the judges are discarded, and the remaining scores are summed. The sum is then multiplied by the degree of difficulty multiplier to determine the total score for the dive.
+
+To set up a table and populate with seven records. 
+```
+CREATE TABLE diving (
+     id MEDIUMINT NOT NULL AUTO_INCREMENT,     
+     judge CHAR(30) NOT NULL,
+     score FLOAT NOT NULL, 
+     PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX idx_diving_score ON diving (score DESC, judge, id);
+
+INSERT INTO diving (judge, score) VALUES
+    ('John', 7.5),('Peter', 6.7),('David', 5.5), ('Mary', 8.9),('Lancy', 7.8),('Joan', 6.3),('Dave', 5.5);
+
+SELECT * FROM diving ORDER BY score DESC, judge, id; 
+```
+
+A twist in SQL would yield the result: 
+```
+SELECT ROUND(SUM(score),1) FROM diving
+WHERE id <> (SELECT id FROM diving 
+             WHERE score = (SELECT MAX(score) FROM diving)
+             LIMIT 1 OFFSET 0 ) AND 
+      id <> (SELECT id FROM diving 
+             WHERE score = (SELECT MIN(score) FROM diving)
+             LIMIT 1 OFFSET 0 ); 
+
+33.8
+```
+
+Easy-peasy, right? Well, in Redis: 
+```
+ZADD diving 7.5 'John' 6.7 'Peter' 5.5 'David' 8.9 'Mary' 7.8 'Lancy' 6.3 'Joan' 5.5 'Dave'
+
+ZREVRANGE diving 0 -1 WITHSCORES
+1) "Mary"
+2) "8.9"
+3) "Lancy"
+4) "7.8"
+5) "John"
+6) "7.5"
+7) "Peter"
+8) "6.7"
+9) "Joan"
+10) "6.3"
+11) "David"
+12) "5.5"
+13) "Dave"
+14) "5.5"
+```
+
+But there's no direct way to aggregate the score of a sorted set. This is where [Lua](https://www.lua.org/manual/5.4/) script comes into play: 
+```
+SCRIPT LOAD "
+local key = KEYS[1]
+local sum = 0
+local members = redis.call('ZREVRANGE', key,  1, -2, 'WITHSCORES')
+
+for i = 1, #members, 2 do
+    sum = sum + tonumber(members[i + 1])
+end
+return tostring(sum) "
+```
+```
+EVALSHA "7455ba57f7e440afd66f256a44f07871aaade661" 1 "diving"
+"33.8"
+```
+
+As you can see: What appears difficult in SQL is easy in Redis; What appears difficult in Redis is easy in SQL. 
+
+> Implementation differs, way of thinking remains... 
+
 
 #### III. Bibliography
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
