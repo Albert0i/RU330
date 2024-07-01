@@ -22,6 +22,7 @@ help:
 	@echo "	ps 		show running containers"
 	@echo "	logs		replication logs"
 	@echo 
+	@echo "	bash 		docker-compose exec primary bash"
 	@echo "	cli 		docker-compose exec primary redis-cli"
 	@echo "	sentinel	docker-compose exec sentinel1 redis-cli"
 	@echo "	info		docker-compose exec primary redis-cli info replication"
@@ -52,6 +53,12 @@ ps:
 #
 logs:
 	docker-compose logs 
+
+#
+# start bash on primary
+#
+bash:
+	docker-compose exec primary bash
 
 #
 # start redis-cli on primary
