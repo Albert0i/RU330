@@ -187,7 +187,7 @@ As you can see: What appears difficult in SQL is easy in Redis; What appears dif
 
 > Implementation differs, way of thinking remains... 
 
-As for the Time complexity: if to search a node in b-tree is O(N Log(N)), then search  for MAX and MIN plus a full table scan to sum up all scores is the total time in SQL. 
+As for Time complexity: if to search a node in b-tree is O(N Log(N)), then search  for MAX and MIN plus a full table scan to sum up all scores is the total time in SQL. 
 
 O(log(N)+M) with N being the number of elements in the sorted set and M the number of elements returned. Plus a traverse of M elements to sum up all scores is the total time in Redis. 
 
