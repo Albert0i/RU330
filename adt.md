@@ -195,9 +195,10 @@ Which is 0.0008 seconds, which is 0.8 ms.
 
 O(log(N)+M) with N being the number of elements in the sorted set and M the number of elements returned. Plus a traverse of M elements to sum up all scores is the total time in Redis. 
 
+![alt Redis Time](img/RedisTime.JPG)
+
 Which is 0.000045 seconds, which is 0.045 ms, which is 45 µs.
 
-![alt Redis Time](img/RedisTime.JPG)
 
 #### III. Bibliography
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
