@@ -39,8 +39,8 @@ In a similar way, if it is told to process a number of records? The most obvious
 
 Requirement evolves and so does data structure, database schemas undergo constant changes are evidence of system evolution. 
 
----
 
+#### III. Example 1
 Customers are treated in *first come, first serve* manner, the straightforward data structure is queue. A seasoned developer would quickly setup a schema in MYSQL: 
 ```
 CREATE TABLE queue (
@@ -106,7 +106,7 @@ Data can be added in any order at any time. The order will be updated automatica
 
 > A hybrid system of relational and non-relational components compensates intrinsic shortcoming of the other. 
 
----
+#### IV. Example 2
 
 > In Olympic water diving competitions, there are typically seven judges who give scores for each dive. These judges assess the execution and quality of the dive based on various criteria, such as takeoff, flight, and entry into the water. Each judge assigns a score to the dive independently, usually ranging from 0 to 10 or in half-point increments.
 
@@ -229,7 +229,7 @@ RDBMS is a *generic* storage which can process hundreds and thousands of records
 
 
 
-#### III. Bibliography
+#### V. Bibliography
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
 2. [Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html)
 3. [Redis sorted sets](https://redis.io/docs/latest/develop/data-types/sorted-sets/)
