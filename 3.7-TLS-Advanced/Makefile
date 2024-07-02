@@ -72,7 +72,7 @@ bash:
 # start redis-cli on primary
 #
 cli:
-	docker-compose exec primary redis-cli --pass ${STRONG_PASSWORD}
+	docker-compose exec primary redis-cli --pass ${STRONG_PASSWORD} --tls --cacert /usr/local/share/ca-certificates/ca.crt 
 
 #
 # start redis-cli on sentinel1
@@ -84,7 +84,7 @@ sentinel:
 # replication info
 #
 info:	
-	docker-compose exec primary redis-cli --pass ${STRONG_PASSWORD} info replication
+	docker-compose exec primary redis-cli --pass ${STRONG_PASSWORD} --tls --cacert /usr/local/share/ca-certificates/ca.crt info replication
 
 #
 # replication info

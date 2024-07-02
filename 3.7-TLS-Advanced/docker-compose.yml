@@ -76,41 +76,41 @@ services:
         - replica1
         - replica2
 
-# # Sentinel 2
-#   sentinel2:
-#     image: ${IMAGE_NAME}
-#     ports:
-#       - 5001:6379
-#     container_name: sentinel2
-#     restart: unless-stopped    
-#     volumes:
-#       - ./5001:/usr/local/etc/redis:rw
-#     command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--sentinel"]
-#     networks:
-#       re_replication:
-#         ipv4_address: 192.168.1.182
-#     depends_on:
-#         - primary
-#         - replica1
-#         - replica2
+# Sentinel 2
+  sentinel2:
+    image: ${IMAGE_NAME}
+    ports:
+      - 5001:6379
+    container_name: sentinel2
+    restart: unless-stopped    
+    volumes:
+      - ./5001:/usr/local/etc/redis:rw
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--sentinel"]
+    networks:
+      re_replication:
+        ipv4_address: 192.168.1.182
+    depends_on:
+        - primary
+        - replica1
+        - replica2
 
-# # Sentinel 3
-#   sentinel3:
-#     image: ${IMAGE_NAME}
-#     ports:
-#       - 5002:6379
-#     container_name: sentinel3
-#     restart: unless-stopped    
-#     volumes:
-#       - ./5002:/usr/local/etc/redis:rw
-#     command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--sentinel"]
-#     networks:
-#       re_replication:
-#         ipv4_address: 192.168.1.183
-#     depends_on:
-#         - primary
-#         - replica1
-#         - replica2
+# Sentinel 3
+  sentinel3:
+    image: ${IMAGE_NAME}
+    ports:
+      - 5002:6379
+    container_name: sentinel3
+    restart: unless-stopped    
+    volumes:
+      - ./5002:/usr/local/etc/redis:rw
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--sentinel"]
+    networks:
+      re_replication:
+        ipv4_address: 192.168.1.183
+    depends_on:
+        - primary
+        - replica1
+        - replica2
 
 # Redis Insight
   redisinsight:
