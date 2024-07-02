@@ -225,8 +225,15 @@ CALL sum_diving();
 
 Execution time is the same 0.0008 second! 
 
-> RDBMS is a *generic* storage system which can process hundreds and thousands of records. Whereas, in some scenarios would render awkwardness and incapacity. 
+> RDBMS is a *generic* storage system which can process hundreds and thousands of records. Whereas, in some scenarios would render awkwardness and incapacity. If you treat Redis as in-memory storage, typical use case are: 
 
+- Cache Layer 
+- Session Store 
+- Rate Limiter 
+- Message Broker 
+- Game Leaderboards 
+
+With persistent options, Redis can be used as multi-model database. 
 
 
 #### V. Bibliography
