@@ -225,7 +225,7 @@ CALL sum_diving();
 
 Execution time is the same 0.0008 second! 
 
-RDBMS is a *generic* storage which can process hundreds and thousands of records. Whereas, in some scenarios would render awkwardness and incapacity.  
+> RDBMS is a *generic* storage system which can process hundreds and thousands of records. Whereas, in some scenarios would render awkwardness and incapacity. 
 
 
 
