@@ -58,23 +58,23 @@ services:
     depends_on:
         - primary
 
-# # Sentinel 1
-#   sentinel1:
-#     image: ${IMAGE_NAME}
-#     ports:
-#       - 5000:6379
-#     container_name: sentinel1
-#     restart: unless-stopped    
-#     volumes:
-#       - ./5000:/usr/local/etc/redis:rw
-#     command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--sentinel"]
-#     networks:
-#       re_replication:
-#         ipv4_address: 192.168.1.181
-#     depends_on:
-#         - primary
-#         - replica1
-#         - replica2
+# Sentinel 1
+  sentinel1:
+    image: ${IMAGE_NAME}
+    ports:
+      - 5000:6379
+    container_name: sentinel1
+    restart: unless-stopped    
+    volumes:
+      - ./5000:/usr/local/etc/redis:rw
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--sentinel"]
+    networks:
+      re_replication:
+        ipv4_address: 192.168.1.181
+    depends_on:
+        - primary
+        - replica1
+        - replica2
 
 # # Sentinel 2
 #   sentinel2:
