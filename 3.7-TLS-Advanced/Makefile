@@ -17,10 +17,12 @@ help:
 	@echo "Redis Replication Dockerize project automation helper for Linux version 1.0 (RU330)"
 	@echo
 	@echo "Targets:"
+	@echo "	build		build custom image"
 	@echo "	up  		start the replication"
 	@echo "	down 		stop the replication"
 	@echo "	ps 		show running containers"
 	@echo "	logs		replication logs"
+
 	@echo 
 	@echo "	bash 		docker-compose exec primary bash"
 	@echo "	cli 		docker-compose exec primary redis-cli"
@@ -28,6 +30,12 @@ help:
 	@echo "	info		docker-compose exec primary redis-cli info replication"
 	@echo "	infos		docker-compose exec sentinel1 redis-cli SENTINEL get-master-addr-by-name"
 	@echo "	config		edit configuration"
+
+#
+# build custom image
+#
+build:
+	docker-compose build
 
 #
 # start the replication
