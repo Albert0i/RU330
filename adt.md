@@ -199,6 +199,35 @@ O(log(N)+M) with N being the number of elements in the sorted set and M the numb
 
 Which is 0.000037 seconds, which is 0.037 ms, which is 37 µs. 37 µs for EVALSHA within which 9 µs for ZREVRANGE. A one-time charge 39 µs for SCRIPT LOAD. 
 
+To be fair, using Stored Procedure: 
+```
+DELIMITER //
+CREATE PROCEDURE sum_diving()
+BEGIN
+    SELECT ROUND(SUM(score),1) FROM diving
+    WHERE id <> (SELECT id FROM diving 
+                 WHERE score = (SELECT MAX(score) FROM diving)
+                 LIMIT 1 OFFSET 0 ) AND 
+          id <> (SELECT id FROM diving 
+                 WHERE score = (SELECT MIN(score) FROM diving)
+                 LIMIT 1 OFFSET 0 );      
+END // 
+DELIMITER ;
+```
+
+![alt MySQL8 Time 1](img/MySQL8Time-1.JPG)
+
+```
+CALL sum_diving();
+```
+
+![alt MySQL8 Time 2](img/MySQL8Time-2.JPG)
+
+Execution time is the same 0.0008 second! 
+
+RDBMS is a *generic* storage which can process hundreds and thousands of records. Whereas, in some scenarios would render awkwardness and incapacity.  
+
+
 
 #### III. Bibliography
 1. [Programming with abstract data types, Barbara Liskov and Stephen Zilles, 1974](https://dl.acm.org/doi/pdf/10.1145/800233.807045)
